@@ -20,14 +20,14 @@ public class CSVDataReceiver extends DataReceiver {
 
 
     @Override
-    public void run() throws FileNotFoundException {
+    public void run() {
         //start a thread
-        new Thread(() -> performDataReceiving()).start();
+        new Thread(this::performDataReceiving).start();
     }
 
     private void performDataReceiving(){
         File file = new File(absoluteFilePath);
-        FileReader fileReader = null;
+        FileReader fileReader;
         try {
             fileReader = new FileReader(file);
             BufferedReader bufferedReader = new BufferedReader(fileReader);
@@ -38,7 +38,7 @@ public class CSVDataReceiver extends DataReceiver {
     }
 
     private void readFile(BufferedReader bufferedReader) throws IOException {
-        String line = "";
+        String line;
         while ((line = bufferedReader.readLine()) != null) {
             TimeSeriesReading timeSeriesReading = parseLine(line);
             sendTimeSeriesReadingToBuffer(timeSeriesReading);

@@ -1,21 +1,21 @@
-import records.DataPoint;
 import records.TimeSeriesReading;
+import sources.CSVDataReceiver;
+
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class Main {
 
     public static void main(String[] args) {
-        System.out.println("Hello World!");
-        DataPoint dataPoint = new DataPoint(5, 5.5);
-        DataPoint dataPoint1 = new DataPoint(5, 5.5);
+        initializeMainBuffer();
+        initializeDataReceivers();
 
-        TimeSeriesReading tsr = new TimeSeriesReading("TS1", dataPoint1);
-
-        System.out.println(tsr);
-
-        System.out.println(dataPoint.equals(dataPoint1));
-
-        System.out.println(dataPoint.timestamp());
-        System.out.println(dataPoint.value());
+        try {
+            Thread.sleep(3000);
+            System.out.println(MAIN_TIMESERIES_RECORDING_BUFFER.poll());
+            System.out.println(MAIN_TIMESERIES_RECORDING_BUFFER.poll());
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
 }

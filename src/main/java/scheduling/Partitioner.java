@@ -23,9 +23,8 @@ public abstract class Partitioner {
         for (int i = 0; i < numberOfWorkingSets; i++) {
             WorkingSet workingSet = workingSetFactory.generateWorkingSet();
             workingSets.add(workingSet);
-            workingSet.run();
+            new Thread(workingSet::run).start();
         }
-
     }
 
     public abstract void performPartitioning();

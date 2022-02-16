@@ -5,7 +5,7 @@ import records.TimeSeriesReading;
 import java.util.*;
 
 public abstract class Partitioner {
-    protected List<WorkingSet> workingSets;
+    protected List<WorkingSet> workingSets = new ArrayList<>();
     protected final int numberOfWorkingSets;
     private final WorkingSetFactory workingSetFactory;
     protected final Queue<TimeSeriesReading> threadSafeBuffer;

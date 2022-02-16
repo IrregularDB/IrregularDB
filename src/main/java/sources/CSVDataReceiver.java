@@ -18,7 +18,6 @@ public class CSVDataReceiver extends DataReceiver {
         this.absoluteFilePath = absoluteFilePath;
     }
 
-
     @Override
     public void run() {
         //start a thread

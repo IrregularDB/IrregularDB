@@ -66,15 +66,25 @@ class PMCMeanCompressionModelTest {
 
 
     @Test
-    void resetAndAppendAllModelWithData() {
+    void resetAndAppendAllNonEmptyModel() {
         // Here we expect it to be able to append 3 data points even though they are very
         // different compared to the old ones as it should be reset
-
         List<Double> values = Arrays.asList(1.0, 1.0, 1.0);
         pmcMeanModel.resetAndAppendAll(values);
         values = Arrays.asList(99.0, 99.0, 99.9);
         Assertions.assertTrue(pmcMeanModel.resetAndAppendAll(values));
     }
+
+    @Test
+    void resetAndAppendAllWhereSomePointCannotBeRepresented() {
+        // Here we expect it to be able to append 3 data points even though they are very
+        // different compared to the old ones as it should be reset
+
+        List<Double> values = Arrays.asList(1.0, 1.0, 1.0, 99.0, 99.0);
+        Assertions.assertFalse(pmcMeanModel.resetAndAppendAll(values));
+        Assertions.assertEquals(3, pmcMeanModel.getLength());
+    }
+
 
     @Test
     void getValueBlobEmptyModel() {

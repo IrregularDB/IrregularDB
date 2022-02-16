@@ -1,5 +1,4 @@
 package compression.value;
-import records.DataPoint;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -17,28 +16,30 @@ public abstract class ValueCompressionModel {
     protected List<Double> values;
 
     public ValueCompressionModel(double errorBound) {
-        this.resetModel();
+        this.resetEntireModel();
         this.errorBound = errorBound;
     }
 
-    // Remember to override this method with an extension where you reset the model state
-    protected void resetModel() {
-        this.values = new ArrayList<>();
-    }
-
-    public int getLength() {
+    public final int getLength() {
         return values.size();
     }
 
     public abstract boolean appendValue(double value);
+
+    protected abstract void resetModelParameters();
+
+    protected final void resetEntireModel() {
+        this.values = new ArrayList<>();
+        this.resetModelParameters();
+    }
 
     /**
      * Is used to reset the model and append a series of data points to it
      * often used right after emitting a segment to fill it with the buffer again
      * @return returns true if the entire value list could be appended
      */
-    public boolean resetAndAppendAll(List<Double> values) {
-        this.resetModel();
+    public final boolean resetAndAppendAll(List<Double> values) {
+        this.resetEntireModel();
 
         boolean appendSucceeded = false;
         for (double value : values) {
@@ -62,7 +63,7 @@ public abstract class ValueCompressionModel {
      */
     public abstract ValueCompressionModelType getValueCompressionModelType();
 
-    public double getCompressionRatio() {
+    public final double getCompressionRatio() {
         throw new RuntimeException("Not tested but idea for implementation in abstract class");
         // THE BYTE BUFFER HAS NOT SIZE SO WE NEED TO DO SOMETHING ELSE
         //return (double)this.getLength() / (double)(this.getValueBlob().position());

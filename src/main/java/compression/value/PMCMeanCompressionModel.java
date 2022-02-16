@@ -7,7 +7,6 @@ package compression.value;
 import compression.utility.PercentageError;
 
 import java.nio.ByteBuffer;
-import java.util.List;
 
 
 public class PMCMeanCompressionModel extends ValueCompressionModel {
@@ -28,8 +27,7 @@ public class PMCMeanCompressionModel extends ValueCompressionModel {
     }
 
     @Override
-    protected void resetModel() {
-        super.resetModel();
+    protected void resetModelParameters() {
         this.min = Double.POSITIVE_INFINITY;
         this.max = Double.NEGATIVE_INFINITY;
         this.sum = 0;

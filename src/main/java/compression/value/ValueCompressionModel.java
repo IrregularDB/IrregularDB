@@ -14,25 +14,41 @@ enum ValueCompressionModelType {
 
 public abstract class ValueCompressionModel {
     protected double errorBound;
-    protected List<DataPoint> dataPoints;
+    protected List<Double> values;
 
     public ValueCompressionModel(double errorBound) {
+        this.resetModel();
         this.errorBound = errorBound;
-        this.dataPoints = new ArrayList<>();
+    }
+
+    // Remember to override this method with an extension where you reset the model state
+    protected void resetModel() {
+        this.values = new ArrayList<>();
     }
 
     public int getLength() {
-        return dataPoints.size();
+        return values.size();
     }
 
-    public double getCompressionRatio() {
-        throw new RuntimeException("Not tested but idea for implementation in abstract class");
-        // THE BYTE BUFFER HAS NOT SIZE SO WE NEED TO DO SOMETHING ELSE
-        //return (double)this.getLength() / (double)(this.getValueBlob().position());
-    }
+    public abstract boolean appendValue(double value);
 
-    public abstract boolean appendDatapoint(DataPoint dataPoint);
-    public abstract boolean appendBuffer(List<DataPoint> dataPointBuffer);
+    /**
+     * Is used to reset the model and append a series of data points to it
+     * often used right after emitting a segment to fill it with the buffer again
+     * @return returns true if the entire value list could be appended
+     */
+    public boolean resetAndAppendAll(List<Double> values) {
+        this.resetModel();
+
+        boolean appendSucceeded = false;
+        for (double value : values) {
+            appendSucceeded = this.appendValue(value);
+            if (!appendSucceeded) {
+                break;
+            }
+        }
+        return appendSucceeded;
+    }
 
     /**
      * Byte list representation of the model that should be saved to the database
@@ -45,6 +61,12 @@ public abstract class ValueCompressionModel {
      * @return enum for the value compression model types
      */
     public abstract ValueCompressionModelType getValueCompressionModelType();
+
+    public double getCompressionRatio() {
+        throw new RuntimeException("Not tested but idea for implementation in abstract class");
+        // THE BYTE BUFFER HAS NOT SIZE SO WE NEED TO DO SOMETHING ELSE
+        //return (double)this.getLength() / (double)(this.getValueBlob().position());
+    }
 
     /**
      * This method is used when joining time stamp and value compression models

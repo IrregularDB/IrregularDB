@@ -20,18 +20,6 @@ class PMCMeanValueCompressionModelTest {
     }
 
     @Test
-    void getLength() {
-        List<Double> values = Arrays.asList(1.00, 1.02, 1.04);
-
-        Assertions.assertEquals(0, pmcMeanModel.getLength());
-        pmcMeanModel.appendValue(values.get(0));
-        Assertions.assertEquals(1, pmcMeanModel.getLength());
-        pmcMeanModel.appendValue(values.get(1));
-        pmcMeanModel.appendValue(values.get(2));
-        Assertions.assertEquals(3, pmcMeanModel.getLength());
-    }
-
-    @Test
     void appendOneValue() {
         Assertions.assertTrue(pmcMeanModel.appendValue(1.0));
     }
@@ -54,6 +42,16 @@ class PMCMeanValueCompressionModelTest {
         pmcMeanModel.appendValue(9.00);
 
         Assertions.assertThrows(IllegalArgumentException.class, () -> pmcMeanModel.appendValue(1.00));
+    }
+
+    @Test
+    void getLength() {
+        Assertions.assertEquals(0, pmcMeanModel.getLength());
+        pmcMeanModel.appendValue(1.00);
+        Assertions.assertEquals(1, pmcMeanModel.getLength());
+        pmcMeanModel.appendValue(1.00);
+        pmcMeanModel.appendValue(1.00);
+        Assertions.assertEquals(3, pmcMeanModel.getLength());
     }
 
     @Test
@@ -103,7 +101,7 @@ class PMCMeanValueCompressionModelTest {
 
     @Test
     void getCompressionRatio2DataPoints() {
-        // We expect that we have used 4 bytes to represent 4 data points so we get 2/4 = 0.5
+        // We expect that we have used 4 bytes to represent 2 data points so we get 2/4 = 0.5
         List<Double> values = Arrays.asList(1.00, 1.00);
         pmcMeanModel.resetAndAppendAll(values);
 
@@ -130,6 +128,6 @@ class PMCMeanValueCompressionModelTest {
 
     @Test
     void reduceToSizeN() {
-        // TODO: implement this
+        // TODO: implement reduce to N test
     }
 }

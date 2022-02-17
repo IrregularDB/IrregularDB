@@ -64,9 +64,9 @@ public abstract class TimeStampCompressionModel {
     public abstract TimeStampCompressionModelType getTimeStampCompressionModelType();
 
     public final double getCompressionRatio() {
-        throw new RuntimeException("Not tested but idea for implementation in abstract class");
-        // THE BYTE BUFFER HAS NOT SIZE SO WE NEED TO DO SOMETHING ELSE
-        //return (double)this.getLength() / (double)(this.getValueBlob().position());
+        // We get the size of the BLOB by reading its position, which indicates how many bytes we have used
+        int valueBlobPosition = this.getTimeStampBlob().position();
+        return (double)this.getLength() / (double)(valueBlobPosition);
     }
 
     /**

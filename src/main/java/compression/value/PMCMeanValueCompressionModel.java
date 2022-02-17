@@ -9,13 +9,13 @@ import compression.utility.PercentageError;
 import java.nio.ByteBuffer;
 
 
-public class PMCMeanCompressionModel extends ValueCompressionModel {
+public class PMCMeanValueCompressionModel extends ValueCompressionModel {
     private double min;
     private double max;
     private double sum;
     private boolean earlierAppendFailed;
 
-    public PMCMeanCompressionModel(double errorBound) {
+    public PMCMeanValueCompressionModel(double errorBound) {
         super(errorBound);
     }
 
@@ -61,7 +61,7 @@ public class PMCMeanCompressionModel extends ValueCompressionModel {
     @Override
     public ByteBuffer getValueBlob() {
         if (this.getLength() == 0) {
-            throw new UnsupportedOperationException("No data points where added to the model before trying to get the value blob");
+            throw new UnsupportedOperationException("No data points where added to the PMC-mean value model before trying to get the value blob");
         }
 
         // We convert to float as this is what we store

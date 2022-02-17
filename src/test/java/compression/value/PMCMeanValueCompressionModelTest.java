@@ -5,24 +5,23 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class PMCMeanCompressionModelTest {
-    PMCMeanCompressionModel pmcMeanModel;
+class PMCMeanValueCompressionModelTest {
+    PMCMeanValueCompressionModel pmcMeanModel;
 
     @BeforeEach
     void init() {
         double errorBound = 10;
-        pmcMeanModel = new PMCMeanCompressionModel(errorBound);
+        pmcMeanModel = new PMCMeanValueCompressionModel(errorBound);
     }
 
     @Test
     void getLength() {
-        List<Double> values = Arrays.asList(1.0, 1.0, 1.0);
+        List<Double> values = Arrays.asList(1.00, 1.02, 1.04);
 
         Assertions.assertEquals(0, pmcMeanModel.getLength());
         pmcMeanModel.appendValue(values.get(0));
@@ -102,10 +101,31 @@ class PMCMeanCompressionModelTest {
         assertEquals(1.05F, meanValue);
     }
 
+    @Test
+    void getCompressionRatio2DataPoints() {
+        // We expect that we have used 4 bytes to represent 4 data points so we get 2/4 = 0.5
+        List<Double> values = Arrays.asList(1.00, 1.00);
+        pmcMeanModel.resetAndAppendAll(values);
+
+        assertEquals(0.5, pmcMeanModel.getCompressionRatio());
+    }
 
     @Test
-    void getCompressionRatio() {
-        // TODO: implement this
+    void getCompressionRatio4DataPoints() {
+        // We expect that we have used 4 bytes to represent 4 data points so we get 4/4 = 1
+        List<Double> values = Arrays.asList(1.00, 1.00, 1.00, 1.00);
+        pmcMeanModel.resetAndAppendAll(values);
+
+        assertEquals(1.0, pmcMeanModel.getCompressionRatio());
+    }
+
+    @Test
+    void getCompressionRatio8DataPoints() {
+        // We expect that we have used 4 bytes to represent 8 data points so we get 8/4 = 2.0
+        List<Double> values = Arrays.asList(1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00);
+        pmcMeanModel.resetAndAppendAll(values);
+
+        assertEquals(2, pmcMeanModel.getCompressionRatio());
     }
 
     @Test

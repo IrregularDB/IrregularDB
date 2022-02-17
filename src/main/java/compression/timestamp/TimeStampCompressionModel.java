@@ -4,13 +4,6 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
-enum TimeStampCompressionModelType {
-    REGULAR,
-    BASEDELTA,
-    DELTAPAIRS,
-    RECOMPUTESI
-}
-
 public abstract class TimeStampCompressionModel {
     protected double errorBound;
     protected List<Long> timeStamps;

@@ -2,6 +2,7 @@ package sources;
 
 import records.DataPoint;
 import records.TimeSeriesReading;
+import scheduling.WorkingSet;
 
 import java.io.*;
 import java.util.Queue;
@@ -12,19 +13,14 @@ public class CSVDataReceiver extends DataReceiver {
     private final String absoluteFilePath;
 
 
-    public CSVDataReceiver(String absoluteFilePath, Queue<TimeSeriesReading> systemTimeSeriesBuffer, String elementDelimiter) {
-        super(systemTimeSeriesBuffer);
+    public CSVDataReceiver(String absoluteFilePath, WorkingSet systemTimeSeries, String elementDelimiter) {
+        super(systemTimeSeries);
         this.elementDelimiter = elementDelimiter;
         this.absoluteFilePath = absoluteFilePath;
     }
 
     @Override
-    public void run() {
-        //start a thread
-        new Thread(this::performDataReceiving).start();
-    }
-
-    private void performDataReceiving(){
+    public void receiveData() {
         File file = new File(absoluteFilePath);
         FileReader fileReader;
         try {

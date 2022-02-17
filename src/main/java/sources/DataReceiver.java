@@ -1,20 +1,21 @@
 package sources;
 import records.TimeSeriesReading;
+import scheduling.WorkingSet;
 
 import java.io.FileNotFoundException;
 import java.util.Queue;
 
 public abstract class DataReceiver {
 
-    private Queue<TimeSeriesReading> systemTimeSeriesBuffer;
+    private WorkingSet workingSet;
 
-    public DataReceiver(Queue<TimeSeriesReading> systemTimeSeriesBuffer) {
-        this.systemTimeSeriesBuffer = systemTimeSeriesBuffer;
+    public DataReceiver(WorkingSet workingSet) {
+        this.workingSet = workingSet;
     }
 
     public void sendTimeSeriesReadingToBuffer(TimeSeriesReading timeSeriesReading){
-        this.systemTimeSeriesBuffer.add(timeSeriesReading);
+        this.workingSet.accept(timeSeriesReading);
     }
 
-    public abstract void run() throws FileNotFoundException;
+    public abstract void receiveData() throws FileNotFoundException;
 }

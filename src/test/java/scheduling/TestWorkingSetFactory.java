@@ -4,10 +4,12 @@ import records.TimeSeriesReading;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class TestWorkingSetFactory extends WorkingSetFactory{
 
-    private List<TestWorkingSet> generatedWorkingSets = new ArrayList<>();
+    private final Queue<TestWorkingSet> generatedWorkingSets = new ConcurrentLinkedQueue<>();
 
     @Override
     public WorkingSet generateWorkingSet() {
@@ -16,25 +18,9 @@ public class TestWorkingSetFactory extends WorkingSetFactory{
         return testWorkingSet;
     }
 
-    public List<TestWorkingSet> getGeneratedWorkingSets() {
+    public Queue<TestWorkingSet> getGeneratedWorkingSets() {
         return generatedWorkingSets;
     }
 
-    public static class TestWorkingSet implements WorkingSet{
-        private List<TimeSeriesReading> acceptedRecordings = new ArrayList<>();
-
-        @Override
-        public void accept(TimeSeriesReading timeSeriesReading) {
-            acceptedRecordings.add(timeSeriesReading);
-        }
-
-        public List<TimeSeriesReading> getAcceptedRecordings() {
-            return acceptedRecordings;
-        }
-
-        @Override
-        public void run() {
-
-        }
-    }
 }
+

@@ -5,16 +5,15 @@ import records.TimeSeriesReading;
 import java.util.*;
 
 public abstract class Partitioner {
+
     protected List<WorkingSet> workingSets = new ArrayList<>();
     protected final int numberOfWorkingSets;
     private final WorkingSetFactory workingSetFactory;
-    protected final Queue<TimeSeriesReading> threadSafeBuffer;
 
-    public Partitioner(WorkingSetFactory workingSetFactory, Queue<TimeSeriesReading> threadSafeBuffer){
+    public Partitioner(WorkingSetFactory workingSetFactory, int numberOfWorkingSets){
         this.workingSetFactory = workingSetFactory;
-        this.threadSafeBuffer = threadSafeBuffer;
 
-        numberOfWorkingSets = 6;
+        this.numberOfWorkingSets = numberOfWorkingSets;
 
         initializeWorkingSets();
     }
@@ -27,6 +26,5 @@ public abstract class Partitioner {
         }
     }
 
-    public abstract void performPartitioning();
-
+    public abstract WorkingSet workingSetToSpawnReceiverFor();
 }

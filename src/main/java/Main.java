@@ -1,38 +1,21 @@
-import records.TimeSeriesReading;
 import scheduling.MapPartitioner;
 import scheduling.Partitioner;
 import scheduling.WorkingSetFactory;
-import sources.CSVDataReceiver;
+import sources.CSVDataReceiverSpawner;
+import sources.DataReceiverSpawner;
 
-import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class Main {
 
-    private static ConcurrentLinkedQueue<TimeSeriesReading> MAIN_TIMESERIES_RECORDING_BUFFER;
-
-
     public static void main(String[] args) {
-        initializeMainBuffer();
-        initializeDataReceivers();
-
         // TODO: Should be configurable which partitioner should be used
-        Partitioner mapPartitioner = new MapPartitioner(new WorkingSetFactory(), MAIN_TIMESERIES_RECORDING_BUFFER);
-        mapPartitioner.performPartitioning();
+        Partitioner partitioner = new MapPartitioner(new WorkingSetFactory(), 2);
+
+        initializeDataReceiverSpawners(partitioner);
     }
 
-
-    private static void initializeMainBuffer(){
-        MAIN_TIMESERIES_RECORDING_BUFFER = new ConcurrentLinkedQueue<>();
-    }
-
-
-    private static void initializeDataReceivers() {
-        if (MAIN_TIMESERIES_RECORDING_BUFFER == null) {
-            throw new IllegalStateException("buffer must be initialized before initializing data receivers");
-        }
-
-        CSVDataReceiver csvDataReceiver = new CSVDataReceiver("src/main/resources/test.csv", MAIN_TIMESERIES_RECORDING_BUFFER, ",");
-
-        csvDataReceiver.run();
+    private static void initializeDataReceiverSpawners(Partitioner partitioner) {
+        DataReceiverSpawner dataReceiverSpawner = new CSVDataReceiverSpawner(partitioner, "src/main/resources/test.csv" );
+        dataReceiverSpawner.spawn();
     }
 }

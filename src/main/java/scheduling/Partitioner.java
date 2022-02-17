@@ -1,5 +1,6 @@
 package scheduling;
 
+import config.ConfigProperties;
 import records.TimeSeriesReading;
 
 import java.util.*;
@@ -10,10 +11,9 @@ public abstract class Partitioner {
     protected final int numberOfWorkingSets;
     private final WorkingSetFactory workingSetFactory;
 
-    public Partitioner(WorkingSetFactory workingSetFactory, int numberOfWorkingSets){
+    public Partitioner(WorkingSetFactory workingSetFactory){
         this.workingSetFactory = workingSetFactory;
-
-        this.numberOfWorkingSets = numberOfWorkingSets;
+        this.numberOfWorkingSets = ConfigProperties.INSTANCE.getConfiguredNumberOfWorkingSets();
 
         initializeWorkingSets();
     }

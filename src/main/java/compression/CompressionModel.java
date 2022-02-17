@@ -24,19 +24,19 @@ public class CompressionModel {
         return valueAppendSucceeded && timeStampAppendSuceeded;
     }
 
-    ByteBuffer getValueBlob() {
+    public ByteBuffer getValueBlob() {
         return valueCompressionModel.getValueBlob();
     }
 
-    ByteBuffer getTimeStampBlob() {
+    public ByteBuffer getTimeStampBlob() {
         return timeStampCompressionModel.getTimeStampBlob();
     }
 
-    ValueCompressionModelType getValueCompressionModelType() {
+    public ValueCompressionModelType getValueCompressionModelType() {
         return valueCompressionModel.getValueCompressionModelType();
     }
 
-    TimeStampCompressionModelType getTimeStampCompressionModelType() {
+    public TimeStampCompressionModelType getTimeStampCompressionModelType() {
         return timeStampCompressionModel.getTimeStampCompressionModelType();
     }
 }

@@ -34,7 +34,7 @@ public abstract class TimeStampCompressionModel {
     public final boolean resetAndAppendAll(List<Long> timeStamps) {
         this.resetEntireModel();
 
-        boolean appendSucceeded = false;
+        boolean appendSucceeded = true;
         for (Long timeStamp : timeStamps) {
             appendSucceeded = this.appendTimeStamp(timeStamp);
             if (!appendSucceeded) {
@@ -58,8 +58,10 @@ public abstract class TimeStampCompressionModel {
 
     public final double getCompressionRatio() {
         // We get the size of the BLOB by reading its position, which indicates how many bytes we have used
-        int valueBlobPosition = this.getTimeStampBlob().position();
-        return (double)this.getLength() / (double)(valueBlobPosition);
+        int amtDataPoints = this.getLength();
+        int amtBytesUsed = this.getTimeStampBlob().position();
+
+        return (double)amtDataPoints/ (double)(amtBytesUsed);
     }
 
     /**

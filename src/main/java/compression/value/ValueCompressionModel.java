@@ -34,7 +34,7 @@ public abstract class ValueCompressionModel {
     public final boolean resetAndAppendAll(List<Double> values) {
         this.resetEntireModel();
 
-        boolean appendSucceeded = false;
+        boolean appendSucceeded = true;
         for (double value : values) {
             appendSucceeded = this.appendValue(value);
             if (!appendSucceeded) {
@@ -58,8 +58,10 @@ public abstract class ValueCompressionModel {
 
     public final double getCompressionRatio() {
         // We get the size of the BLOB by reading its position, which indicates how many bytes we have used
-        int valueBlobPosition = this.getValueBlob().position();
-        return (double)this.getLength() / (double)(valueBlobPosition);
+        int amtDataPoints = this.getLength();
+        int amtBytesUsed = this.getValueBlob().position();
+
+        return (double)amtDataPoints / (double)(amtBytesUsed);
     }
 
     /**

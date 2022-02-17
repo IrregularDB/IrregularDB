@@ -19,13 +19,6 @@ public class PMCMeanValueCompressionModel extends ValueCompressionModel {
         super(errorBound);
     }
 
-    private void updateModelState(double min, double max, double sum, double value) {
-        this.min = min;
-        this.max = max;
-        this.sum = sum;
-        this.values.add(value);
-    }
-
     @Override
     protected void resetModelParameters() {
         this.min = Double.POSITIVE_INFINITY;
@@ -56,6 +49,13 @@ public class PMCMeanValueCompressionModel extends ValueCompressionModel {
             this.earlierAppendFailed = true;
         }
         return appendSucceeded;
+    }
+
+    private void updateModelState(double min, double max, double sum, double value) {
+        this.min = min;
+        this.max = max;
+        this.sum = sum;
+        this.values.add(value);
     }
 
     @Override

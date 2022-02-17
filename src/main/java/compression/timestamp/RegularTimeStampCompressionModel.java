@@ -19,45 +19,62 @@ public class RegularTimeStampCompressionModel extends TimeStampCompressionModel 
 
     @Override
     public boolean appendTimeStamp(long timeStamp) {
-        if (earlierAppendFailed) { // Security added so that if you try to append after an earlier append failed
-            throw new IllegalArgumentException("You tried to append to a model that had failed an earlier append");
-        }
-
-        boolean withinErrorBound;
-        // Special handling for first two time stamps:
-        if (this.si == -1) {
-            if (this.getLength() == 0) {
-                withinErrorBound = true;
-            } else {
-                this.si = calculateSI(timeStamp);
-                withinErrorBound = true;
+        try {
+            if (earlierAppendFailed) { // Security added so that if you try to append after an earlier append failed
+                throw new IllegalArgumentException("You tried to append to a model that had failed an earlier append");
             }
-        } else {
-            withinErrorBound = checkIfWithinErrorBound(timeStamp);
-        }
 
-        if (withinErrorBound) {
-            this.timeStamps.add(timeStamp);
-        } else {
+            boolean withinErrorBound;
+            // Special handling for first two time stamps:
+            withinErrorBound = isWithinErrorBound(timeStamp);
+
+            if (withinErrorBound) {
+                this.timeStamps.add(timeStamp);
+            } else {
+                earlierAppendFailed = true;
+            }
+            return withinErrorBound;
+        } catch (SiConversionException e) {
             earlierAppendFailed = true;
+            return false;
+        }
+    }
+
+    private boolean isWithinErrorBound(long timeStamp) {
+        boolean withinErrorBound;
+        if (this.si == -1) {
+            withinErrorBound = handleFirstTwoDataPoints(timeStamp);
+        } else {
+            withinErrorBound = isTimeStampWithinErrorBound(timeStamp);
+        }
+        return withinErrorBound;
+    }
+
+    private boolean handleFirstTwoDataPoints(long timeStamp) {
+        boolean withinErrorBound;
+        if (this.getLength() == 0) {
+            withinErrorBound = true;
+        } else {
+            this.si = calculateSI(timeStamp);
+            withinErrorBound = true;
         }
         return withinErrorBound;
     }
 
 
-    private boolean checkIfWithinErrorBound(long timeStamp) {
+    private boolean isTimeStampWithinErrorBound(long timeStamp) {
         int actualSi = calculateSI(timeStamp);
         // TODO: add something where you use the actual error-bound for now we enforce error-bound = 0;
         return this.si == actualSi;
     }
 
     private int calculateSI(long timeStamp) {
-        long previousTimeStamp = this.timeStamps.get(this.getLength() - 1);
+        long previousTimeStamp = timeStamps.get(this.getLength() - 1);
 
         long difference = timeStamp - previousTimeStamp;
 
         if (difference < Integer.MIN_VALUE || difference > Integer.MAX_VALUE) {
-            throw new IllegalArgumentException (difference  + " the difference in timestamps cannot be cast to int without changing its value.");
+            throw new SiConversionException(difference  + " the difference in timestamps cannot be cast to int without changing its value.");
         }
         return (int) difference;
     }

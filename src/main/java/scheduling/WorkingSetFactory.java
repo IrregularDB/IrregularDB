@@ -8,7 +8,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 public class WorkingSetFactory {
 
     public WorkingSet generateWorkingSet(){
-        return new WorkingSet(new ConcurrentLinkedQueue<>());
+        return new WorkingSet(new ConcurrentLinkedQueue<>(), new TimeSeriesFactory());
     }
 
 }

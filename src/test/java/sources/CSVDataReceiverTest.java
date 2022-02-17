@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import records.DataPoint;
 import records.TimeSeriesReading;
 import scheduling.WorkingSet;
+import segmentgenerator.TestTimeSeriesFactory;
 import segmentgenerator.TimeSeriesFactory;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -19,7 +20,7 @@ class CSVDataReceiverTest {
 
         ConcurrentLinkedQueue<TimeSeriesReading> buffer = new ConcurrentLinkedQueue<>();
 
-        WorkingSet workingSet = new WorkingSet(buffer);
+        WorkingSet workingSet = new WorkingSet(buffer, new TimeSeriesFactory());
 
         CSVDataReceiver csvDataReceiver = new CSVDataReceiver("src/test/resources/test.csv", workingSet, ",");
 

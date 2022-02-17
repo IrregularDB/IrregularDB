@@ -5,7 +5,6 @@ import records.TimeSeriesReading;
 import scheduling.WorkingSet;
 
 import java.io.*;
-import java.util.Queue;
 
 public class CSVDataReceiver extends DataReceiver {
 
@@ -13,18 +12,18 @@ public class CSVDataReceiver extends DataReceiver {
     private final String absoluteFilePath;
 
 
-    public CSVDataReceiver(String absoluteFilePath, WorkingSet systemTimeSeries, String elementDelimiter) {
-        super(systemTimeSeries);
+    // TODO: Esben tag en beslutning
+    public CSVDataReceiver(String absoluteFilePath, WorkingSet workingSet, String elementDelimiter) {
+        super(workingSet);
         this.elementDelimiter = elementDelimiter;
         this.absoluteFilePath = absoluteFilePath;
     }
 
     @Override
     public void receiveData() {
-        File file = new File(absoluteFilePath);
-        FileReader fileReader;
         try {
-            fileReader = new FileReader(file);
+            File file = new File(absoluteFilePath);
+            FileReader fileReader = new FileReader(file);
             BufferedReader bufferedReader = new BufferedReader(fileReader);
             readFile(bufferedReader);
         } catch (IOException e) {

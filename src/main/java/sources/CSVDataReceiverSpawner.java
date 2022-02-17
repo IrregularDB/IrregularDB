@@ -1,12 +1,10 @@
 package sources;
 
-import records.TimeSeriesReading;
 import scheduling.Partitioner;
 import scheduling.WorkingSet;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Queue;
 
 public class CSVDataReceiverSpawner extends DataReceiverSpawner{
 
@@ -30,7 +28,7 @@ public class CSVDataReceiverSpawner extends DataReceiverSpawner{
             WorkingSet workingSet = super.partitioner.workingSetToSpawnReceiverFor();
 
             CSVDataReceiver csvDataReceiver = new CSVDataReceiver(csvPath, workingSet, CSV_DELIMITER);
-            super.runInThread(csvDataReceiver::receiveData);
+            runReceiverInThread(csvDataReceiver);
         }
     }
 }

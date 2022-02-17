@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class TestTimeSeries extends TimeSeries{
-    private List<DataPoint> receivedDataPoints;
+    private final List<DataPoint> receivedDataPoints;
 
     public TestTimeSeries(String timeSeriesKey) {
         super(timeSeriesKey);

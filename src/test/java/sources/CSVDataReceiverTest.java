@@ -4,7 +4,9 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import records.DataPoint;
 import records.TimeSeriesReading;
-import scheduling.TestWorkingSet;
+import scheduling.WorkingSet;
+import segmentgenerator.TestTimeSeriesFactory;
+import segmentgenerator.TimeSeriesFactory;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -16,9 +18,11 @@ class CSVDataReceiverTest {
         TimeSeriesReading timeSeriesReadingExpected1 = new TimeSeriesReading("key1", new DataPoint(123456789, 42.69));
         TimeSeriesReading timeSeriesReadingExpected2 = new TimeSeriesReading("key2", new DataPoint(987654321, 69.42));
 
-        TestWorkingSet testWorkingSet = new TestWorkingSet();
+        ConcurrentLinkedQueue<TimeSeriesReading> buffer = new ConcurrentLinkedQueue<>();
 
-        CSVDataReceiver csvDataReceiver = new CSVDataReceiver("src/test/resources/test.csv", testWorkingSet, ",");
+        WorkingSet workingSet = new WorkingSet(buffer, new TimeSeriesFactory());
+
+        CSVDataReceiver csvDataReceiver = new CSVDataReceiver("src/test/resources/test.csv", workingSet, ",");
 
         csvDataReceiver.receiveData();
 
@@ -28,8 +32,10 @@ class CSVDataReceiverTest {
             e.printStackTrace();
         }
 
-        Assertions.assertEquals(timeSeriesReadingExpected1, testWorkingSet.getBuffer().poll());
-        Assertions.assertEquals(timeSeriesReadingExpected2, testWorkingSet.getBuffer().poll());
+        Assertions.assertEquals(timeSeriesReadingExpected1, buffer.poll());
+        Assertions.assertEquals(timeSeriesReadingExpected2, buffer.poll());
+        // Hehe
+        Assertions.assertNull(buffer.poll());
     }
 
 }

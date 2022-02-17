@@ -2,8 +2,6 @@ package sources;
 
 import scheduling.Partitioner;
 
-import java.util.function.Function;
-
 public abstract class DataReceiverSpawner {
 
     protected final Partitioner partitioner;
@@ -17,8 +15,8 @@ public abstract class DataReceiverSpawner {
      */
     public abstract void spawn();
 
-    protected void runInThread(Runnable functionToExecute){
-        Thread thread = new Thread(functionToExecute);
+    protected static void runReceiverInThread(DataReceiver receiver){
+        Thread thread = new Thread(receiver::receiveData);
         thread.start();
     }
 }

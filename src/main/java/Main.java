@@ -1,5 +1,5 @@
 import config.ConfigProperties;
-import scheduling.MapPartitioner;
+import scheduling.IncrementPartitioner;
 import scheduling.Partitioner;
 import scheduling.WorkingSetFactory;
 import sources.CSVDataReceiverSpawner;
@@ -9,7 +9,7 @@ public class Main {
 
     public static void main(String[] args) {
         // TODO: Should be configurable which partitioner should be used
-        Partitioner partitioner = new MapPartitioner(new WorkingSetFactory());
+        Partitioner partitioner = new IncrementPartitioner(new WorkingSetFactory());
 
         initializeDataReceiverSpawners(partitioner);
     }

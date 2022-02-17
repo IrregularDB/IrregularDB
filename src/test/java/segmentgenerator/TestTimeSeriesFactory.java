@@ -5,7 +5,7 @@ import java.util.List;
 
 public class TestTimeSeriesFactory extends TimeSeriesFactory {
 
-    private List<TimeSeries> generatedTimeSeries;
+    private final List<TimeSeries> generatedTimeSeries;
 
     public TestTimeSeriesFactory() {
         this.generatedTimeSeries = new ArrayList<>();

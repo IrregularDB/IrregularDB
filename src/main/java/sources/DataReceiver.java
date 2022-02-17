@@ -7,7 +7,7 @@ import java.util.Queue;
 
 public abstract class DataReceiver {
 
-    private WorkingSet workingSet;
+    private final WorkingSet workingSet;
 
     public DataReceiver(WorkingSet workingSet) {
         this.workingSet = workingSet;
@@ -17,5 +17,5 @@ public abstract class DataReceiver {
         this.workingSet.accept(timeSeriesReading);
     }
 
-    public abstract void receiveData() throws FileNotFoundException;
+    public abstract void receiveData();
 }

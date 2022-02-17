@@ -11,14 +11,12 @@ import java.util.Queue;
 
 public class WorkingSet {
 
-    private final Queue<TimeSeriesReading> buffer;
+    protected final Queue<TimeSeriesReading> buffer;
     private final Map<String, TimeSeries> timeSeriesKeyToTimeSeries;
-    private final TimeSeriesFactory timeSeriesFactory;
 
-    public WorkingSet(Queue<TimeSeriesReading> buffer, TimeSeriesFactory timeSeriesFactory) {
+    public WorkingSet(Queue<TimeSeriesReading> buffer) {
         this.buffer = buffer;
         this.timeSeriesKeyToTimeSeries = new HashMap<>();
-        this.timeSeriesFactory = timeSeriesFactory;
     }
 
     public void accept(TimeSeriesReading timeSeriesReading){
@@ -54,10 +52,6 @@ public class WorkingSet {
     }
 
     private TimeSeries createTimeSeriesForNewKey(String recordKey){
-        return this.timeSeriesFactory.createTimeSeries(recordKey);
-    }
-
-    public Queue<TimeSeriesReading> getBuffer(){
-        return this.buffer;
+        return new TimeSeries(recordKey);
     }
 }

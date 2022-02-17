@@ -26,7 +26,7 @@ class WorkingSetTest {
 
         TestTimeSeriesFactory testTimeSeriesFactory = new TestTimeSeriesFactory();
 
-        WorkingSet workingSet = new WorkingSet(buffer, testTimeSeriesFactory);
+        WorkingSet workingSet = new WorkingSet(buffer);
 
         workingSet.accept(timeSeriesReading1);
         workingSet.accept(timeSeriesReading2);

@@ -79,7 +79,7 @@ public class PMCMeanValueCompressionModel extends ValueCompressionModel {
             throw new UnsupportedOperationException("No data points where added to the PMC-mean value model before trying to get the value blob");
         }
 
-        // We convert to float as this is what we store
+        // We convert to float as this is what we store (i.e. we support floating point precision)
         float mean = (float) (this.sum / this.getLength());
         return ByteBuffer.allocate(4).putFloat(mean);
     }

@@ -98,6 +98,14 @@ class RegularTimeStampCompressionModelTest {
     }
 
     @Test
+    void resetAndAppendAllWhereSomePointCannotBeRepresented() {
+        List<Long> timeStamps = Arrays.asList(0L, 100L, 200L, 300L, 999L, 999L);
+        Assertions.assertFalse(regularModel.resetAndAppendAll(createDataPointsFromTimeStamps(timeStamps)));
+        Assertions.assertEquals(4, regularModel.getLength());
+    }
+
+
+    @Test
     void getTimeStampBlobEmptyModel() {
         Assertions.assertThrows(UnsupportedOperationException.class, () -> regularModel.getBlobRepresentation());
     }

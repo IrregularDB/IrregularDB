@@ -42,12 +42,17 @@ public class RegularTimeStampCompressionModel extends TimeStampCompressionModel 
             }
             boolean withinErrorBound;
             // Special handling for first two time stamps:
-            withinErrorBound = isWithinErrorBound(timeStamp);
 
-            if (withinErrorBound) {
-                timeStamps.add(timeStamp);
+            if (this.getLength() < 2) {
+                handleFirstTwoDataPoints(timeStamp);
+                withinErrorBound = true;
             } else {
-                earlierAppendFailed = true;
+                withinErrorBound = isTimeStampWithinErrorBound(timeStamp);
+                if (withinErrorBound) {
+                    timeStamps.add(timeStamp);
+                } else {
+                    earlierAppendFailed = true;
+                }
             }
             return withinErrorBound;
         } catch (SiConversionException e) {
@@ -56,35 +61,23 @@ public class RegularTimeStampCompressionModel extends TimeStampCompressionModel 
         }
     }
 
-    private boolean isWithinErrorBound(long timeStamp) {
-        boolean withinErrorBound;
-        if (this.si == -1) {
-            withinErrorBound = handleFirstTwoDataPoints(timeStamp);
-        } else {
-            withinErrorBound = isTimeStampWithinErrorBound(timeStamp);
-        }
-        return withinErrorBound;
-    }
-
-    private boolean handleFirstTwoDataPoints(long timeStamp) {
+    private void handleFirstTwoDataPoints(long timeStamp) {
         if (timeStamps.size() == 0) {
-            // Ignore first point
+            timeStamps.add(timeStamp);
         } else {
-            si = calculateSI(timeStamp);
+            si = calculateSI(timeStamps.get(timeStamps.size() - 1), timeStamp);
+            timeStamps.add(timeStamp);
         }
-        return true;
     }
 
 
     private boolean isTimeStampWithinErrorBound(long timeStamp) {
-        int actualSi = calculateSI(timeStamp);
+        int actualSi = calculateSI(timeStamps.get(timeStamps.size() - 1), timeStamp);
         // TODO: add something where you use the actual error-bound for now we enforce error-bound = 0;
         return si == actualSi;
     }
 
-    private int calculateSI(long timeStamp) {
-        long previousTimeStamp = timeStamps.get(timeStamps.size() - 1);
-
+    private int calculateSI(long previousTimeStamp, long timeStamp) {
         long si = timeStamp - previousTimeStamp;
 
         if (si < Integer.MIN_VALUE || si > Integer.MAX_VALUE) {

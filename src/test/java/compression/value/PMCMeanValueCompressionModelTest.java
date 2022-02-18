@@ -85,7 +85,7 @@ class PMCMeanValueCompressionModelTest {
 
     @Test
     void getValueBlobEmptyModel() {
-        Assertions.assertThrows(UnsupportedOperationException.class, () -> pmcMeanModel.getValueBlob());
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> pmcMeanModel.getBlobRepresentation());
     }
 
     @Test
@@ -94,7 +94,7 @@ class PMCMeanValueCompressionModelTest {
         pmcMeanModel.appendValue(1.00);
         pmcMeanModel.appendValue(1.10);
 
-        ByteBuffer valueBlob = pmcMeanModel.getValueBlob();
+        ByteBuffer valueBlob = pmcMeanModel.getBlobRepresentation();
         float meanValue = valueBlob.getFloat(0);
         assertEquals(1.05F, meanValue);
     }

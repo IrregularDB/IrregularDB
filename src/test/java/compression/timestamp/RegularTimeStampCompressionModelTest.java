@@ -1,6 +1,5 @@
 package compression.timestamp;
 
-import compression.value.PMCMeanValueCompressionModel;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,40 +24,40 @@ class RegularTimeStampCompressionModelTest {
     // We expect to be able to append any two data points no matter how different as then we have not SI
     @Test
     void appendTwoTimeStamps() {
-        Assertions.assertTrue(regularModel.appendTimeStamp(0));
-        Assertions.assertTrue(regularModel.appendTimeStamp(1000000));
+        Assertions.assertTrue(regularModel.append(0L));
+        Assertions.assertTrue(regularModel.append(1000000L));
     }
 
     @Test
     void appendThreeTimeStampsWithSameSI() {
-        Assertions.assertTrue(regularModel.appendTimeStamp(0));
-        Assertions.assertTrue(regularModel.appendTimeStamp(100));
-        Assertions.assertTrue(regularModel.appendTimeStamp(200));
+        Assertions.assertTrue(regularModel.append(0L));
+        Assertions.assertTrue(regularModel.append(100L));
+        Assertions.assertTrue(regularModel.append(200L));
     }
 
     @Test
     void appendThreeTimeStampsDifferentSI() {
-        Assertions.assertTrue(regularModel.appendTimeStamp(0));
-        Assertions.assertTrue(regularModel.appendTimeStamp(100));
-        Assertions.assertFalse(regularModel.appendTimeStamp(999));
+        Assertions.assertTrue(regularModel.append(0L));
+        Assertions.assertTrue(regularModel.append(100L));
+        Assertions.assertFalse(regularModel.append(999L));
     }
 
     @Test
     void appendAfterFailedAppendNotAllowed() {
-        Assertions.assertTrue(regularModel.appendTimeStamp(0));
-        Assertions.assertTrue(regularModel.appendTimeStamp(100));
-        Assertions.assertFalse(regularModel.appendTimeStamp(999));
+        Assertions.assertTrue(regularModel.append(0L));
+        Assertions.assertTrue(regularModel.append(100L));
+        Assertions.assertFalse(regularModel.append(999L));
 
-        Assertions.assertThrows(IllegalArgumentException.class, () -> regularModel.appendTimeStamp(200));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> regularModel.append(200L));
     }
 
     @Test
     void getLength() {
         assertEquals(0, regularModel.getLength());
-        regularModel.appendTimeStamp(0);
+        regularModel.append(0L);
         assertEquals(1, regularModel.getLength());
-        regularModel.appendTimeStamp(100);
-        regularModel.appendTimeStamp(200);
+        regularModel.append(100L);
+        regularModel.append(200L);
         assertEquals(3, regularModel.getLength());
     }
 
@@ -83,7 +82,7 @@ class RegularTimeStampCompressionModelTest {
 
     @Test
     void getTimeStampBlobEmptyModel() {
-        Assertions.assertThrows(UnsupportedOperationException.class, () -> regularModel.getTimeStampBlob());
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> regularModel.getBlobRepresentation());
     }
 
     @Test
@@ -91,7 +90,7 @@ class RegularTimeStampCompressionModelTest {
         List<Long> timeStamps = Arrays.asList(0L, 100L, 200L, 300L);
         regularModel.resetAndAppendAll(timeStamps);
 
-        ByteBuffer timeStampBlob = regularModel.getTimeStampBlob();
+        ByteBuffer timeStampBlob = regularModel.getBlobRepresentation();
         int si = timeStampBlob.getInt(0);
         assertEquals(100, si);
     }

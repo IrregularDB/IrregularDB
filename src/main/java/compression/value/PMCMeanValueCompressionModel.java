@@ -7,9 +7,12 @@ package compression.value;
 import compression.utility.PercentageError;
 
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class PMCMeanValueCompressionModel extends ValueCompressionModel {
+    private List<Double> values;
     private double min;
     private double max;
     private double sum;
@@ -17,18 +20,25 @@ public class PMCMeanValueCompressionModel extends ValueCompressionModel {
 
     public PMCMeanValueCompressionModel(double errorBound) {
         super(errorBound);
+        this.resetModel();
     }
 
     @Override
-    protected void resetModelParameters() {
+    protected void resetModel() {
         this.min = Double.POSITIVE_INFINITY;
         this.max = Double.NEGATIVE_INFINITY;
         this.sum = 0;
         this.earlierAppendFailed = false;
+        this.values = new ArrayList<>();
     }
 
     @Override
-    public boolean appendValue(double value) {
+    public int getLength() {
+        return values.size();
+    }
+
+    @Override
+    protected boolean appendValue(double value) {
         if (earlierAppendFailed) { // Security added so that if you try to append after an earlier append failed
             throw new IllegalArgumentException("You tried to append to a model that had failed an earlier append");
         }
@@ -41,8 +51,8 @@ public class PMCMeanValueCompressionModel extends ValueCompressionModel {
         // Calculate average
         double mean = nextSum / (this.getLength() + 1);
 
-        boolean appendSucceeded = PercentageError.isWithinErrorBound(mean, nextMin, errorBound) &&
-                          PercentageError.isWithinErrorBound(mean, nextMax, errorBound);
+        boolean appendSucceeded = PercentageError.isWithinErrorBound(mean, nextMin, super.getErrorBound()) &&
+                          PercentageError.isWithinErrorBound(mean, nextMax, super.getErrorBound());
         if (appendSucceeded) {
             updateModelState(nextMin, nextMax, nextSum, value);
         } else {
@@ -59,7 +69,7 @@ public class PMCMeanValueCompressionModel extends ValueCompressionModel {
     }
 
     @Override
-    public ByteBuffer getValueBlob() {
+    public ByteBuffer getBlobRepresentation() {
         if (this.getLength() == 0) {
             throw new UnsupportedOperationException("No data points where added to the PMC-mean value model before trying to get the value blob");
         }

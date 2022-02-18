@@ -1,35 +1,44 @@
 package compression.timestamp;
 
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.List;
 
 public class RegularTimeStampCompressionModel extends TimeStampCompressionModel {
     private int si;
     private boolean earlierAppendFailed;
+    private List<Long> timeStamps;
 
     // TODO: update this constructor when adding error-bound
     public RegularTimeStampCompressionModel() {
         super(0);
+        this.resetModel();
     }
 
     @Override
-    protected void resetModelParameters() {
+    protected void resetModel() {
         this.si = -1; // We use -1 to represent that no SI has been calculated yet.
         this.earlierAppendFailed = false;
+        this.timeStamps = new ArrayList<>();
     }
 
     @Override
-    public boolean appendTimeStamp(long timeStamp) {
+    public int getLength() {
+        return timeStamps.size();
+    }
+
+    @Override
+    protected boolean appendTimeStamp(long timeStamp) {
         try {
             if (earlierAppendFailed) { // Security added so that if you try to append after an earlier append failed
                 throw new IllegalArgumentException("You tried to append to a model that had failed an earlier append");
             }
-
             boolean withinErrorBound;
             // Special handling for first two time stamps:
             withinErrorBound = isWithinErrorBound(timeStamp);
 
             if (withinErrorBound) {
-                this.timeStamps.add(timeStamp);
+                timeStamps.add(timeStamp);
             } else {
                 earlierAppendFailed = true;
             }
@@ -51,37 +60,34 @@ public class RegularTimeStampCompressionModel extends TimeStampCompressionModel 
     }
 
     private boolean handleFirstTwoDataPoints(long timeStamp) {
-        boolean withinErrorBound;
-        if (this.getLength() == 0) {
-            withinErrorBound = true;
+        if (timeStamps.size() == 0) {
+            // Ignore first point
         } else {
-            this.si = calculateSI(timeStamp);
-            withinErrorBound = true;
+            si = calculateSI(timeStamp);
         }
-        return withinErrorBound;
+        return true;
     }
 
 
     private boolean isTimeStampWithinErrorBound(long timeStamp) {
         int actualSi = calculateSI(timeStamp);
         // TODO: add something where you use the actual error-bound for now we enforce error-bound = 0;
-        return this.si == actualSi;
+        return si == actualSi;
     }
 
     private int calculateSI(long timeStamp) {
-        long previousTimeStamp = timeStamps.get(this.getLength() - 1);
+        long previousTimeStamp = timeStamps.get(timeStamps.size() - 1);
 
-        long difference = timeStamp - previousTimeStamp;
+        long si = timeStamp - previousTimeStamp;
 
-        if (difference < Integer.MIN_VALUE || difference > Integer.MAX_VALUE) {
-            throw new SiConversionException(difference  + " the difference in timestamps cannot be cast to int without changing its value.");
+        if (si < Integer.MIN_VALUE || si > Integer.MAX_VALUE) {
+            throw new SiConversionException(si  + " the difference in timestamps cannot be cast to int without changing its value.");
         }
-        return (int) difference;
+        return (int) si;
     }
 
-
     @Override
-    public ByteBuffer getTimeStampBlob() {
+    public ByteBuffer getBlobRepresentation() {
         if (this.getLength() < 2) {
             throw new UnsupportedOperationException("Regular time stamp model needs at least two data points before you are able to get the time stamp blob");
         }

@@ -18,18 +18,18 @@ public class CompressionModel {
     }
 
     public boolean appendDataPoint(DataPoint dataPoint) {
-        boolean valueAppendSucceeded = this.valueCompressionModel.appendValue(dataPoint.value());
-        boolean timeStampAppendSuceeded = this.timeStampCompressionModel.appendTimeStamp(dataPoint.timestamp());
+        boolean valueAppendSucceeded = this.valueCompressionModel.append(dataPoint.value());
+        boolean timeStampAppendSuceeded = this.timeStampCompressionModel.append(dataPoint.timestamp());
 
         return valueAppendSucceeded && timeStampAppendSuceeded;
     }
 
     public ByteBuffer getValueBlob() {
-        return valueCompressionModel.getValueBlob();
+        return valueCompressionModel.getBlobRepresentation();
     }
 
     public ByteBuffer getTimeStampBlob() {
-        return timeStampCompressionModel.getTimeStampBlob();
+        return timeStampCompressionModel.getBlobRepresentation();
     }
 
     public ValueCompressionModelType getValueCompressionModelType() {

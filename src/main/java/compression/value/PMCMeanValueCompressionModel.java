@@ -81,7 +81,7 @@ public class PMCMeanValueCompressionModel extends ValueCompressionModel {
 
     @Override
     public ValueCompressionModelType getValueCompressionModelType() {
-        return ValueCompressionModelType.PMCMEAN;
+        return ValueCompressionModelType.PMC_MEAN;
     }
 
     @Override

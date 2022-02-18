@@ -11,10 +11,15 @@ public class TimeSeries {
     }
 
     public void processDataPoint(DataPoint dataPoint) {
-
+        Optional<Segment> segment = segmentGenerator.acceptDataPoint(dataPoint);
+        segment.ifPresent(this::sendToDb);
     }
 
     public String getTimeSeriesKey() {
         return timeSeriesKey;
+    }
+
+    void sendToDb(Segment segment){
+        throw new RuntimeException();
     }
 }

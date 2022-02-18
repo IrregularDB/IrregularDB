@@ -1,5 +1,8 @@
 package config;
 
+import compression.timestamp.TimeStampCompressionModelType;
+import compression.value.ValueCompressionModelType;
+
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
@@ -40,6 +43,30 @@ public class ConfigProperties extends Properties{
         return Arrays.stream(csvSource.trim().split(","))
                 .map(String::trim)
                 .collect(Collectors.toList());
+    }
+
+    public List<ValueCompressionModelType> getValueModels(){
+        return Arrays.stream(getProperty("model.value.types").split(","))
+                .map(String::trim)
+                .filter(Predicate.not(String::isEmpty))
+                .map(ValueCompressionModelType::valueOf)
+                .collect(Collectors.toList());
+    }
+
+    public List<TimeStampCompressionModelType> getTimeStampModels(){
+        return Arrays.stream(getProperty("model.timestamp.types").split(","))
+                .map(String::trim)
+                .filter(Predicate.not(String::isEmpty))
+                .map(TimeStampCompressionModelType::valueOf)
+                .collect(Collectors.toList());
+    }
+
+    public double getTimeStampModelErrorBound(){
+        return Double.parseDouble(getProperty("model.timestamp.errorbound"));
+    }
+
+    public double getValueModelErrorBound(){
+        return Double.parseDouble(getProperty("model.value.errorbound"));
     }
 
     public String test(){

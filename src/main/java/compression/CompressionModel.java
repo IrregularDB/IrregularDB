@@ -7,6 +7,7 @@ import compression.value.ValueCompressionModelType;
 import records.DataPoint;
 
 import java.nio.ByteBuffer;
+import java.util.List;
 
 public class CompressionModel {
     private final ValueCompressionModel valueCompressionModel;

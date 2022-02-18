@@ -1,4 +1,4 @@
-package compression;
+package records;
 
 public abstract class Segment {
 

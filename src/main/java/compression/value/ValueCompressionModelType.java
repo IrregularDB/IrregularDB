@@ -1,7 +1,7 @@
 package compression.value;
 
 public enum ValueCompressionModelType {
-    PMCMEAN,
+    PMC_MEAN,
     SWING,
     GORILLA
 }

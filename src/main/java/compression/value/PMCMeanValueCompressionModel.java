@@ -5,6 +5,7 @@
 package compression.value;
 
 import compression.utility.PercentageError;
+import records.DataPoint;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -38,7 +39,11 @@ public class PMCMeanValueCompressionModel extends ValueCompressionModel {
     }
 
     @Override
-    protected boolean appendValue(double value) {
+    public boolean append(DataPoint dataPoint) {
+        return appendValue(dataPoint.value());
+    }
+
+    private boolean appendValue(double value) {
         if (earlierAppendFailed) { // Security added so that if you try to append after an earlier append failed
             throw new IllegalArgumentException("You tried to append to a model that had failed an earlier append");
         }

@@ -1,5 +1,7 @@
 package compression;
 
+import records.DataPoint;
+
 import java.nio.ByteBuffer;
 import java.util.List;
 
@@ -23,12 +25,12 @@ public abstract class BaseModel<E> {
      * often used right after emitting a segment to fill it with the buffer again
      * @return returns true if the entire time stamp list could be appended
      */
-    public final boolean resetAndAppendAll(List<E> input) {
+    public final boolean resetAndAppendAll(List<DataPoint> input) {
         this.resetModel();
 
         boolean appendSucceeded = true;
-        for (E reading : input) {
-            appendSucceeded = this.append(reading);
+        for (DataPoint dataPoint : input) {
+            appendSucceeded = this.append(dataPoint);
             if (!appendSucceeded) {
                 break;
             }
@@ -36,11 +38,11 @@ public abstract class BaseModel<E> {
         return appendSucceeded;
     }
 
-    public abstract boolean append(E reading);
+    public abstract boolean append(DataPoint dataPoint);
 
     public final double getCompressionRatio() {
-        // We get the size of the BLOB by reading its position, which indicates how many bytes we have used
         int amtDataPoints = this.getLength();
+        // We get the size of the BLOB by reading its position, which indicates how many bytes we have used
         int amtBytesUsed = this.getBlobRepresentation().position();
 
         return (double)amtDataPoints/ (double)(amtBytesUsed);

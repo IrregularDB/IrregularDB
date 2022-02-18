@@ -18,8 +18,8 @@ public class CompressionModel {
     }
 
     public boolean appendDataPoint(DataPoint dataPoint) {
-        boolean valueAppendSucceeded = this.valueCompressionModel.append(dataPoint.value());
-        boolean timeStampAppendSuceeded = this.timeStampCompressionModel.append(dataPoint.timestamp());
+        boolean valueAppendSucceeded = this.valueCompressionModel.append(dataPoint);
+        boolean timeStampAppendSuceeded = this.timeStampCompressionModel.append(dataPoint);
 
         return valueAppendSucceeded && timeStampAppendSuceeded;
     }

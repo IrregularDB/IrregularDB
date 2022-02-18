@@ -1,5 +1,7 @@
 package compression.timestamp;
 
+import records.DataPoint;
+
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,8 +29,13 @@ public class RegularTimeStampCompressionModel extends TimeStampCompressionModel 
         return timeStamps.size();
     }
 
+
     @Override
-    protected boolean appendTimeStamp(long timeStamp) {
+    public boolean append(DataPoint dataPoint) {
+        return appendTimeStamp(dataPoint.timestamp());
+    }
+
+    private boolean appendTimeStamp(long timeStamp) {
         try {
             if (earlierAppendFailed) { // Security added so that if you try to append after an earlier append failed
                 throw new IllegalArgumentException("You tried to append to a model that had failed an earlier append");

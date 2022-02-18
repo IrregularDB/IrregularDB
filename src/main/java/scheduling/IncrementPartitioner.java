@@ -4,8 +4,8 @@ public class IncrementPartitioner extends Partitioner{
 
     private int nextWorkingSetIndex;
 
-    public IncrementPartitioner(WorkingSetFactory workingSetFactory) {
-        super(workingSetFactory);
+    public IncrementPartitioner(WorkingSetFactory workingSetFactory, int numberOfWorkingSets) {
+        super(workingSetFactory, numberOfWorkingSets);
         this.nextWorkingSetIndex = 0;
     }
 

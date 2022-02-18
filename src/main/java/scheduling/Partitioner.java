@@ -1,18 +1,15 @@
 package scheduling;
 
-import config.ConfigProperties;
-
 import java.util.*;
 
 public abstract class Partitioner {
-
     protected List<WorkingSet> workingSets;
     protected final int numberOfWorkingSets;
     private final WorkingSetFactory workingSetFactory;
 
-    public Partitioner(WorkingSetFactory workingSetFactory) {
+    public Partitioner(WorkingSetFactory workingSetFactory, int numberOfWorkingSets) {
         this.workingSetFactory = workingSetFactory;
-        this.numberOfWorkingSets = ConfigProperties.INSTANCE.getConfiguredNumberOfWorkingSets();
+        this.numberOfWorkingSets = numberOfWorkingSets;
         this.workingSets = new ArrayList<>();
         runWorkingSets();
     }

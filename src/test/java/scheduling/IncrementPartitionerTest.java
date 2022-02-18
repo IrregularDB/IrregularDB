@@ -11,10 +11,7 @@ class IncrementPartitionerTest {
     void testIncrementPartitioningReturnsWorkingSetsCorrectly() {
         WorkingSetFactory workingSetFactory = new WorkingSetFactory();
 
-        ConfigProperties testProperties = ConfigProperties.INSTANCE;
-        testProperties.setProperty("workingsets", "2");
-
-        IncrementPartitioner incrementPartitioner = new IncrementPartitioner(workingSetFactory);
+        IncrementPartitioner incrementPartitioner = new IncrementPartitioner(workingSetFactory, 2);
 
         WorkingSet testWorkingSet1 = incrementPartitioner.workingSetToSpawnReceiverFor();
         WorkingSet testWorkingSet2 = incrementPartitioner.workingSetToSpawnReceiverFor();

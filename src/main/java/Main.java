@@ -9,7 +9,7 @@ public class Main {
 
     public static void main(String[] args) {
         // TODO: Should be configurable which partitioner should be used
-        Partitioner partitioner = new IncrementPartitioner(new WorkingSetFactory());
+        Partitioner partitioner = new IncrementPartitioner(new WorkingSetFactory(), ConfigProperties.INSTANCE.getConfiguredNumberOfWorkingSets());
 
         initializeDataReceiverSpawners(partitioner);
     }

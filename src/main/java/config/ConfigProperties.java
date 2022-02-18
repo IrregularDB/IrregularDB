@@ -23,11 +23,21 @@ public class ConfigProperties extends Properties{
     }
 
     public int getConfiguredNumberOfWorkingSets(){
-        return Integer.parseInt(getProperty("workingsets"));
+        String workingsets = getProperty("workingsets");
+        if (workingsets == null) {
+            throw new MissingConfigPropertyException("workingsets");
+        }
+
+        return Integer.parseInt(workingsets);
     }
 
     public List<String> getCsvSources(){
-        return Arrays.stream(getProperty("source.csv").trim().split(","))
+        String csvSource = getProperty("source.csv");
+        if (csvSource == null) {
+            throw new MissingConfigPropertyException("source.csv");
+        }
+
+        return Arrays.stream(csvSource.trim().split(","))
                 .map(String::trim)
                 .collect(Collectors.toList());
     }

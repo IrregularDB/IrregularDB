@@ -3,8 +3,10 @@ package compression.timestamp;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import records.DataPoint;
 
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -14,6 +16,16 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class RegularTimeStampCompressionModelTest {
     RegularTimeStampCompressionModel regularModel;
+
+    // Helper method needed to be able to use reset and append all as it now takes data points
+    private List<DataPoint> createDataPointsFromTimeStamps(List<Long> timeStamps) {
+        List<DataPoint> dataPoints = new ArrayList<>();
+        for (Long timeStamp : timeStamps) {
+            // We use -1 as value does not matter.
+            dataPoints.add(new DataPoint(timeStamp, -1));
+        }
+        return dataPoints;
+    }
 
     @BeforeEach
     void init() {
@@ -66,7 +78,7 @@ class RegularTimeStampCompressionModelTest {
     void resetAndAppendAllEmptyModel() {
         // We test that we can insert three legal points at once on an empty model
         List<Long> timeStamps = Arrays.asList(0L, 100L, 200L, 300L);
-        Assertions.assertTrue(regularModel.resetAndAppendAll(timeStamps));
+        Assertions.assertTrue(regularModel.resetAndAppendAll(createDataPointsFromTimeStamps(timeStamps)));
     }
 
     @Test
@@ -74,10 +86,10 @@ class RegularTimeStampCompressionModelTest {
         // We test that we can insert three legal points at once even though we inserted something different earlier
         // as this call should also reset the model
         List<Long> timeStamps = Arrays.asList(0L, 100L, 200L, 300L);
-        regularModel.resetAndAppendAll(timeStamps);
+        regularModel.resetAndAppendAll(createDataPointsFromTimeStamps(timeStamps));
 
         timeStamps = Arrays.asList(0L, 200L, 400L, 600L);
-        Assertions.assertTrue(regularModel.resetAndAppendAll(timeStamps));
+        Assertions.assertTrue(regularModel.resetAndAppendAll(createDataPointsFromTimeStamps(timeStamps)));
     }
 
     @Test
@@ -87,8 +99,10 @@ class RegularTimeStampCompressionModelTest {
 
     @Test
     void getTimeStampBlob() {
-        List<Long> timeStamps = Arrays.asList(0L, 100L, 200L, 300L);
-        regularModel.resetAndAppendAll(timeStamps);
+        regularModel.append(0L);
+        regularModel.append(100L);
+        regularModel.append(200L);
+        regularModel.append(300L);
 
         ByteBuffer timeStampBlob = regularModel.getBlobRepresentation();
         int si = timeStampBlob.getInt(0);
@@ -104,7 +118,7 @@ class RegularTimeStampCompressionModelTest {
     void getCompressionRatio2DataPoints() {
         // We expect that we have used 4 bytes to represent 2 data points so we get 2/4 = 0.5
         List<Long> timeStamps = Arrays.asList(0L, 100L);
-        regularModel.resetAndAppendAll(timeStamps);
+        regularModel.resetAndAppendAll(createDataPointsFromTimeStamps(timeStamps));
         assertEquals(0.5, regularModel.getCompressionRatio());
     }
 
@@ -112,7 +126,7 @@ class RegularTimeStampCompressionModelTest {
     void getCompressionRatio4DataPoints() {
         // We expect that we have used 4 bytes to represent 4 data points so we get 4/4 = 1
         List<Long> timeStamps = Arrays.asList(0L, 100L, 200L, 300L);
-        regularModel.resetAndAppendAll(timeStamps);
+        regularModel.resetAndAppendAll(createDataPointsFromTimeStamps(timeStamps));
         assertEquals(1, regularModel.getCompressionRatio());
     }
 
@@ -120,7 +134,7 @@ class RegularTimeStampCompressionModelTest {
     void getCompressionRatio8DataPoints() {
         // We expect that we have used 4 bytes to represent 8 data points so we get 8/4 = 1
         List<Long> timeStamps = Arrays.asList(0L, 100L, 200L, 300L, 400L, 500L, 600L, 700L);
-        regularModel.resetAndAppendAll(timeStamps);
+        regularModel.resetAndAppendAll(createDataPointsFromTimeStamps(timeStamps));
         assertEquals(2, regularModel.getCompressionRatio());
     }
 

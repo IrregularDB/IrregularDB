@@ -1,7 +1,11 @@
 package compression;
 
+import records.DataPoint;
+
+import javax.xml.crypto.Data;
 import java.nio.ByteBuffer;
 import java.util.List;
+import java.util.function.Function;
 
 public abstract class BaseModel<E> {
     private final double errorBound;
@@ -18,17 +22,18 @@ public abstract class BaseModel<E> {
 
     public abstract int getLength();
 
+    public abstract boolean resetAndAppendAll(List<DataPoint> input);
     /**
      * Is used to reset the model and append a series of data points to it
      * often used right after emitting a segment to fill it with the buffer again
      * @return returns true if the entire time stamp list could be appended
      */
-    public final boolean resetAndAppendAll(List<E> input) {
+    protected final boolean resetAndAppendAll(List<DataPoint> input, Function<DataPoint, E> dataExtractor) {
         this.resetModel();
 
         boolean appendSucceeded = true;
-        for (E reading : input) {
-            appendSucceeded = this.append(reading);
+        for (DataPoint dataPoint : input) {
+            appendSucceeded = this.append(dataExtractor.apply(dataPoint));
             if (!appendSucceeded) {
                 break;
             }

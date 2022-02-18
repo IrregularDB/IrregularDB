@@ -40,4 +40,9 @@ public class CompressionModel {
     public TimeStampCompressionModelType getTimeStampCompressionModelType() {
         return timeStampCompressionModel.getTimeStampCompressionModelType();
     }
+
+    public boolean resetModel(List<DataPoint> dataPoints){
+        return this.valueCompressionModel.resetAndAppendAll(dataPoints) &&
+                this.timeStampCompressionModel.resetAndAppendAll(dataPoints);
+    }
 }

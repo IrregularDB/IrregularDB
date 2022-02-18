@@ -1,8 +1,10 @@
 package compression.timestamp;
 
 import compression.BaseModel;
+import records.DataPoint;
 
 import java.util.List;
+import java.util.function.Function;
 
 public abstract class TimeStampCompressionModel extends BaseModel<Long> {
     public TimeStampCompressionModel(double errorBound) {
@@ -20,6 +22,11 @@ public abstract class TimeStampCompressionModel extends BaseModel<Long> {
         // Done in order to ensure that we don't get any reference problems by appending simple types instead
         return appendTimeStamp(timeStamp);
     }
+
+    public boolean resetAndAppendAll(List<DataPoint> input){
+        return resetAndAppendAll(input, DataPoint::timestamp);
+    }
+
 
     protected abstract boolean appendTimeStamp(long timeStamp);
 }

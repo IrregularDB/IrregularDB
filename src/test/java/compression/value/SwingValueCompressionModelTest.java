@@ -56,6 +56,7 @@ class SwingValueCompressionModelTest {
         Assertions.assertTrue(swingModel.append(dataPoints.get(0)));
         Assertions.assertTrue(swingModel.append(dataPoints.get(1)));
         Assertions.assertFalse(swingModel.append(dataPoints.get(2)));
+        Assertions.assertEquals(2, swingModel.getLength());
     }
 
     @Test
@@ -101,6 +102,12 @@ class SwingValueCompressionModelTest {
     }
 
     @Test
+    void resetAndAppendNegativeSlope() {
+        List<DataPoint> dataPoints = createDataPointsFromValues(Arrays.asList(10.00, 9.00, 8.00, 7.00, 6.00, 5.00));
+        Assertions.assertTrue(swingModel.resetAndAppendAll(dataPoints));
+    }
+
+    @Test
     void resetAndAppendAllNonEmptyModel() {
         // Here we expect it to be able to append 3 data points even though they are very
         // different compared to the old ones as it should be reset
@@ -114,6 +121,24 @@ class SwingValueCompressionModelTest {
     @Test
     void resetAndAppendAllWhereSomePointCannotBeRepresented() {
         List<DataPoint> dataPoints = createDataPointsFromValues(Arrays.asList(1.00, 1.05, 1.10, 1.15, 1.20, 99.9, 99.9));
+        Assertions.assertFalse(swingModel.resetAndAppendAll(dataPoints));
+        Assertions.assertEquals(5, swingModel.getLength());
+    }
+
+    @Test
+    void noErrorBoundAppendAllTest() {
+        double errorBound = 0;
+        swingModel = new SwingValueCompressionModel(errorBound);
+        List<DataPoint> dataPoints = createDataPointsFromValues(Arrays.asList(1.00, 1.05, 1.10, 1.15, 1.20));
+        Assertions.assertTrue(swingModel.resetAndAppendAll(dataPoints));
+    }
+
+    @Test
+    void noErrorBoundAppendAllSmallErrorNotAllowedTest() {
+        double errorBound = 0;
+        swingModel = new SwingValueCompressionModel(errorBound);
+        // 1.26 is slightly off from 1.25 thereby not allowed.
+        List<DataPoint> dataPoints = createDataPointsFromValues(Arrays.asList(1.00, 1.05, 1.10, 1.15, 1.20, 1.26));
         Assertions.assertFalse(swingModel.resetAndAppendAll(dataPoints));
         Assertions.assertEquals(5, swingModel.getLength());
     }

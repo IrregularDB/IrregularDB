@@ -111,8 +111,6 @@ class SwingValueCompressionModelTest {
         Assertions.assertTrue(swingModel.resetAndAppendAll(dataPoints));
     }
 
-
-
     @Test
     void resetAndAppendAllWhereSomePointCannotBeRepresented() {
         List<DataPoint> dataPoints = createDataPointsFromValues(Arrays.asList(1.00, 1.05, 1.10, 1.15, 1.20, 99.9, 99.9));
@@ -140,7 +138,6 @@ class SwingValueCompressionModelTest {
         assertFalse(swingModel.append(new DataPoint(20, 4)));
 
     }
-
 
 
     @Test

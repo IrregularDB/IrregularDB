@@ -48,7 +48,7 @@ public class SwingValueCompressionModel extends ValueCompressionModel {
         boolean withinErrorBound;
         double allowedDerivation = Math.abs(dataPoint.value() * errorBoundAsDecimal);
 
-        if (this.getLength() < 2){
+        if (this.getLength() < 2) {
             handleFirstTwoDataPoints(dataPoint, allowedDerivation);  // LINE 2-4: makes a recording and upper+lower bound
             withinErrorBound = true;
         } else {

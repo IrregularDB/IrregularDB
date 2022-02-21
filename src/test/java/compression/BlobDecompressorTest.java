@@ -2,7 +2,6 @@ package compression;
 
 import compression.timestamp.TimeStampCompressionModelType;
 import compression.value.ValueCompressionModelType;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import records.DataPoint;
@@ -43,19 +42,27 @@ class BlobDecompressorTest {
         return BlobDecompressor.decompressValuesAndCreateDataPoints(valueModelType, valueBlob, timeStamps);
     }
 
-    void setupRegularTimeStamp(int si) {
+    void setupRegularTimeStampModel(int si) {
         timeStampModelType = TimeStampCompressionModelType.REGULAR;
         timeStampBlob = ByteBuffer.allocate(4).putInt(si);
     }
 
-    void setupPMCMeanValue(float mean) {
+    void setupPMCMeanValueModel(float mean) {
         valueModelType = ValueCompressionModelType.PMCMEAN;
         valueBlob = ByteBuffer.allocate(4).putFloat(mean);
     }
 
+    void setupSwingValueModel(float slope, float intercept) {
+        valueModelType = ValueCompressionModelType.SWING;
+        valueBlob = ByteBuffer.allocate(8).putFloat(slope).putFloat(intercept);
+    }
+
+    /***
+     * REGULAR MODEL TESTS:
+     */
     @Test
     void decompressRegularSI100() {
-        setupRegularTimeStamp(100);
+        setupRegularTimeStampModel(100);
 
         long startTime = 0;
         long endTime = 500;
@@ -68,7 +75,7 @@ class BlobDecompressorTest {
 
     @Test
     void decompressRegularWeirdSI() {
-        setupRegularTimeStamp(55);
+        setupRegularTimeStampModel(55);
         long startTime = 110;
         long endTime = 275;
         List<Long> timeStamps = callTimeStampDecompressor(startTime, endTime);
@@ -81,7 +88,7 @@ class BlobDecompressorTest {
     void decompressRegularEndTimeDoesNotAlign() {
         // We here expect it the last time stamp to be the last time the time stamp aligned with SI before the end time
         // i.e. we don't expect it to add 400
-        setupRegularTimeStamp(100);
+        setupRegularTimeStampModel(100);
 
         long startTime = 0;
         long endTime = 301;
@@ -92,10 +99,13 @@ class BlobDecompressorTest {
         assertEquals(expectedTimeStamps, timeStamps);
     }
 
+    /***
+     * PMC-MEAN MODEL TESTS:
+     */
     @Test
-    void decompressPMCMeanRegularTimeStamps() {
+    void decompressPMCMean() {
         float meanValue = 2.5F;
-        setupPMCMeanValue(meanValue);
+        setupPMCMeanValueModel(meanValue);
         List<Long> timeStamps = List.of(0L, 100L, 200L, 300L, 400L, 500L);
         List<DataPoint> dataPoints = callValueDecompressor(timeStamps);
         List<DataPoint> expectedDataPoints = new ArrayList<>();
@@ -109,8 +119,8 @@ class BlobDecompressorTest {
     }
 
     @Test
-    void decompressPMCMeanIrregularTimeStamps() {
-        setupPMCMeanValue(5.0F);
+    void decompressPMCMeanIrregular() {
+        setupPMCMeanValueModel(5.0F);
 
         List<Long> timeStamps = List.of(0L, 75L, 200L, 300L, 500L);
         List<DataPoint> dataPoints = callValueDecompressor(timeStamps);
@@ -123,13 +133,64 @@ class BlobDecompressorTest {
         assertEquals(expectedDataPoints, dataPoints);
     }
 
-    /**
-     * From here we add a few tests, where we combined the two methods to ensure they also work together
+    /***
+     * SWING MODEL TESTS:
+     */
+    @Test
+    void decompressSwing() {
+        setupSwingValueModel(0.05F, 0.00F);
+
+        List<Long> timeStamps = List.of(0L, 1L, 2L, 3L, 4L, 5L);
+        List<DataPoint> dataPoints = callValueDecompressor(timeStamps);
+        List<DataPoint> expectedDataPoints = new ArrayList<>();
+        expectedDataPoints.add(new DataPoint(0, 0));
+        expectedDataPoints.add(new DataPoint(1, 0.05));
+        expectedDataPoints.add(new DataPoint(2, 0.1));
+        expectedDataPoints.add(new DataPoint(3, 0.15));
+        expectedDataPoints.add(new DataPoint(4, 0.20));
+        expectedDataPoints.add(new DataPoint(5, 0.25));
+
+        var allowedDifference = 0.000001;
+        for (int i = 0; i < dataPoints.size(); i++) {
+            DataPoint actualDataPoint = dataPoints.get(i);
+            DataPoint expectedDataPoint = expectedDataPoints.get(i);
+            double difference = actualDataPoint.value() - expectedDataPoint.value();
+            assertTrue(difference < allowedDifference);
+            assertEquals(expectedDataPoint.timestamp(), actualDataPoint.timestamp());
+        }
+    }
+
+    @Test
+    void decompressSwingNegativeSlope() {
+        setupSwingValueModel(-0.05F, 10.00F);
+
+        List<Long> timeStamps = List.of(0L, 1L, 2L, 3L, 4L, 5L);
+        List<DataPoint> dataPoints = callValueDecompressor(timeStamps);
+        List<DataPoint> expectedDataPoints = new ArrayList<>();
+        expectedDataPoints.add(new DataPoint(0, 10.00));
+        expectedDataPoints.add(new DataPoint(1, 9.95));
+        expectedDataPoints.add(new DataPoint(2, 9.90));
+        expectedDataPoints.add(new DataPoint(3, 9.85));
+        expectedDataPoints.add(new DataPoint(4, 9.80));
+        expectedDataPoints.add(new DataPoint(5, 9.75));
+
+        var allowedDifference = 0.000001;
+        for (int i = 0; i < dataPoints.size(); i++) {
+            DataPoint actualDataPoint = dataPoints.get(i);
+            DataPoint expectedDataPoint = expectedDataPoints.get(i);
+            double difference = actualDataPoint.value() - expectedDataPoint.value();
+            assertTrue(difference < allowedDifference);
+            assertEquals(expectedDataPoint.timestamp(), actualDataPoint.timestamp());
+        }
+    }
+
+    /***
+     * From here we add a few tests, where we combine the two methods to ensure they also work together
      */
     @Test
     void decompressRegularAndPMCMean() {
-        setupRegularTimeStamp(100);
-        setupPMCMeanValue(5.0F);
+        setupRegularTimeStampModel(100);
+        setupPMCMeanValueModel(5.0F);
 
         long startTime = 0;
         long endTime = 500;

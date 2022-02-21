@@ -88,6 +88,17 @@ class SwingValueCompressionModelTest {
         Assertions.assertTrue(swingModel.resetAndAppendAll(dataPoints));
     }
 
+    @Test
+    void resetAndAppendAllNonRegularTimeStamps() {
+        List<DataPoint> dataPoints = new ArrayList<>();
+        dataPoints.add(new DataPoint(0, 1.00));
+        dataPoints.add(new DataPoint(3, 1.03));
+        dataPoints.add(new DataPoint(7, 1.07));
+        dataPoints.add(new DataPoint(17, 1.20));
+        dataPoints.add(new DataPoint(35, 1.40));
+
+        Assertions.assertTrue(swingModel.resetAndAppendAll(dataPoints));
+    }
 
     @Test
     void resetAndAppendAllNonEmptyModel() {
@@ -99,6 +110,8 @@ class SwingValueCompressionModelTest {
         dataPoints = createDataPointsFromValues(Arrays.asList(99.9, 99.9, 99.9));
         Assertions.assertTrue(swingModel.resetAndAppendAll(dataPoints));
     }
+
+
 
     @Test
     void resetAndAppendAllWhereSomePointCannotBeRepresented() {
@@ -125,6 +138,7 @@ class SwingValueCompressionModelTest {
         // The initial upper bound is: 0.15x + 1.
         // So if we did not swing the lower bound up we would be allowed to do the following
         assertFalse(swingModel.append(new DataPoint(20, 4)));
+
     }
 
 

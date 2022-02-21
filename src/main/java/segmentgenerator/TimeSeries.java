@@ -13,12 +13,14 @@ public class TimeSeries {
 
     public TimeSeries(String timeSeriesKey) {
         this.timeSeriesKey = timeSeriesKey;
-        this.segmentGenerator = new SegmentGenerator(CompressionModelFactory.getValueCompressionModels(), CompressionModelFactory.getTimestampCompressionModels(), timeSeriesKey);
+        this.segmentGenerator = new SegmentGenerator(new CompressionModelManager(CompressionModelFactory.getValueCompressionModels(), CompressionModelFactory.getTimestampCompressionModels()), timeSeriesKey);
     }
 
     public void processDataPoint(DataPoint dataPoint) {
-        Optional<Segment> segment = segmentGenerator.acceptDataPoint(dataPoint);
-        segment.ifPresent(this::sendToDb);
+        if (!segmentGenerator.acceptDataPoint(dataPoint)) {
+            Segment segment = segmentGenerator.constructSegmentFromBuffer();
+            sendToDb(segment);
+        }
     }
 
     public String getTimeSeriesKey() {
@@ -26,6 +28,6 @@ public class TimeSeries {
     }
 
     void sendToDb(Segment segment){
-        throw new RuntimeException();
+        System.out.println(segment + "sent to db");
     }
 }

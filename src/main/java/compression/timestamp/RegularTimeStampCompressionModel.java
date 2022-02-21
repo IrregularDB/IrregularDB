@@ -50,9 +50,9 @@ public class RegularTimeStampCompressionModel extends TimeStampCompressionModel 
     }
 
     private boolean isWithinErrorBound(long timeStamp) {
-        boolean withinErrorBound;
+        boolean withinErrorBound = true;
         if (this.si == -1) {
-            withinErrorBound = handleFirstTwoDataPoints(timeStamp);
+            handleFirstTwoDataPoints(timeStamp);
         } else {
             withinErrorBound = isTimeStampWithinErrorBound(timeStamp);
         }
@@ -97,6 +97,6 @@ public class RegularTimeStampCompressionModel extends TimeStampCompressionModel 
 
     @Override
     public void reduceToSizeN(int n) {
-        throw new RuntimeException("Not implemented");
+        //no implementation necessary
     }
 }

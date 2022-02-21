@@ -72,6 +72,7 @@ public class BlobDecompressor {
         final float slope = valueBlob.getFloat(0);
         final float intercept = valueBlob.getFloat(4);
 
+        // TODO: consider just using a linear function object
         Function<Long, Float> linearFunction = (Long time) -> time * slope + intercept;
 
         return timeStamps.stream().map(timeStamp -> new DataPoint(timeStamp, linearFunction.apply(timeStamp))).toList();

@@ -9,7 +9,13 @@ public abstract class BaseModel<E> {
     private final double errorBound;
 
     public BaseModel(double errorBound) {
-        this.errorBound = errorBound;
+        // This small hack is added because floating point imprecision can lead to error-bound
+        // of zero not really working.
+        if (errorBound == 0) {
+            this.errorBound = 0.00000000000001;
+        } else {
+            this.errorBound = errorBound;
+        }
     }
 
     public double getErrorBound() {

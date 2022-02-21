@@ -1,5 +1,6 @@
 package segmentgenerator;
 
+import compression.CompressionModel;
 import records.Segment;
 import compression.timestamp.TimeStampCompressionModel;
 import compression.value.ValueCompressionModel;
@@ -7,49 +8,73 @@ import records.DataPoint;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
-import java.util.Queue;
 
 public class SegmentGenerator {
 
-    private CompressionModelManager compressionModelManager;
-    private String timeSeriesKey;
+    private final CompressionModelManager compressionModelManager;
+    private final String timeSeriesKey;
     private List<DataPoint> notYetEmitted;
 
-    public SegmentGenerator(List<ValueCompressionModel> valueCompressionModels, List<TimeStampCompressionModel> timeStampCompressionModels, String timeSeriesKey) {
-        this.compressionModelManager = new CompressionModelManager(valueCompressionModels, timeStampCompressionModels);
+    public SegmentGenerator(CompressionModelManager compressionModelManager, String timeSeriesKey) {
+        this.compressionModelManager = compressionModelManager;
         this.timeSeriesKey = timeSeriesKey;
         this.notYetEmitted = new ArrayList<>();
     }
 
-    // TODO: Test this method
-    public Optional<Segment> acceptDataPoint(DataPoint dataPoint) {
-        boolean appendSuccess = compressionModelManager.tryAppendDataPointToAllModels(dataPoint);
+    public boolean acceptDataPoint(DataPoint dataPoint) {
+        notYetEmitted.add(dataPoint);
+        return compressionModelManager.tryAppendDataPointToAllModels(dataPoint);
+    }
 
-        this.notYetEmitted.add(dataPoint);
+    public Segment constructSegmentFromBuffer() {
+        CompressionModel bestCompressionModel = this.compressionModelManager.getBestCompressionModel();
+        //find size of each model and reduce the largest down to the size of the smallest
 
-        if (appendSuccess) {
-            return Optional.empty();
-        } else {
-            Segment segment = generateSegment();
+        int amountOfDataPoints = syncValueAndTimeStampModelLength(bestCompressionModel);
+        if (amountOfDataPoints == 0) {
+            throw new RuntimeException("This is weird");
+        }
 
-            //REMOVE EMITTED POINT FROM NOT_YET_EMITTED
-            // segment.numberOfDataPoints()
+        Segment segment = generateSegment(bestCompressionModel, amountOfDataPoints, notYetEmitted.get(0).timestamp(), notYetEmitted.get(amountOfDataPoints - 1).timestamp());
 
-            boolean success = compressionModelManager.resetAndTryAppendBuffer(notYetEmitted);
-            if (!success) {
-                throw new RuntimeException("We have hit an edge case where more than one segment must be generated to accomedate the new data point");
-            }
+        prepareForNextSegment(amountOfDataPoints);
 
-            return Optional.of(segment);
+        return segment;
+    }
+
+    private void prepareForNextSegment(int dataPointsUsedForPrevSegment) {
+        popNFromBuffer(dataPointsUsedForPrevSegment);
+
+        boolean success = compressionModelManager.resetAndTryAppendBuffer(notYetEmitted);
+        if (!success) {
+            throw new RuntimeException("We have hit an edge case where more than one segment must be generated to accommodate the new data point");
         }
     }
 
-    private Segment generateSegment() {
-        long startTime = notYetEmitted.get(0).timestamp();
-        return new Segment(null, 0, 0, 1, null, 1, null);
+    private void popNFromBuffer(int n) {
+        this.notYetEmitted = notYetEmitted.subList(n, notYetEmitted.size());
     }
 
+    private int syncValueAndTimeStampModelLength(CompressionModel bestCompressionModel) {
+        TimeStampCompressionModel timeStampCompressionModel = bestCompressionModel.getTimeStampCompressionModel();
+        int timestampCompressionModelLength = timeStampCompressionModel.getLength();
 
+        ValueCompressionModel valueCompressionModel = bestCompressionModel.getValueCompressionModel();
+        int valueCompressionModelLength = valueCompressionModel.getLength();
+
+        if (timestampCompressionModelLength > valueCompressionModelLength) {
+            timeStampCompressionModel.reduceToSizeN(valueCompressionModelLength);
+        } else {
+            valueCompressionModel.reduceToSizeN(timestampCompressionModelLength);
+        }
+        return Integer.min(timestampCompressionModelLength, valueCompressionModelLength);
+    }
+
+    private Segment generateSegment(CompressionModel compressionModel, int size, long startTime, long endTime) {
+        ValueCompressionModel valueModel = compressionModel.getValueCompressionModel();
+        TimeStampCompressionModel timeStampModel = compressionModel.getTimeStampCompressionModel();
+
+        return new Segment(this.timeSeriesKey, startTime, endTime, valueModel.getValueCompressionModelType().ordinal(), valueModel.getBlobRepresentation(), timeStampModel.getTimeStampCompressionModelType().ordinal(), timeStampModel.getBlobRepresentation());
+    }
 
 }

@@ -59,15 +59,11 @@ public class RegularTimeStampCompressionModel extends TimeStampCompressionModel 
         return withinErrorBound;
     }
 
-    private boolean handleFirstTwoDataPoints(long timeStamp) {
-        if (timeStamps.size() == 0) {
-            // Ignore first point
-        } else {
+    private void handleFirstTwoDataPoints(long timeStamp) {
+        if (!timeStamps.isEmpty()) {
             si = calculateSI(timeStamp);
         }
-        return true;
     }
-
 
     private boolean isTimeStampWithinErrorBound(long timeStamp) {
         int actualSi = calculateSI(timeStamp);

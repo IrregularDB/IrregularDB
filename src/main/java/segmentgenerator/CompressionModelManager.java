@@ -15,10 +15,10 @@ public class CompressionModelManager {
     private List<ValueCompressionModel> activeValueModels;
     private List<TimeStampCompressionModel> activeTimeStampModels;
 
-    private List<ValueCompressionModel> inactiveValueModels;
-    private List<TimeStampCompressionModel> inactiveTimestampModels;
+    private final List<ValueCompressionModel> inactiveValueModels;
+    private final List<TimeStampCompressionModel> inactiveTimestampModels;
 
-    private ModelPicker modelPicker;
+    private final ModelPicker modelPicker;
 
     public CompressionModelManager(List<ValueCompressionModel> valueCompressionModels, List<TimeStampCompressionModel> timeStampCompressionModels) {
         this.activeValueModels = new ArrayList<>(valueCompressionModels);
@@ -29,7 +29,6 @@ public class CompressionModelManager {
 
         this.modelPicker = new ModelPicker(valueCompressionModels, timeStampCompressionModels);
     }
-
 
     public boolean tryAppendDataPointToAllModels(DataPoint dataPoint) {
 
@@ -50,7 +49,6 @@ public class CompressionModelManager {
 
         return (!this.activeValueModels.isEmpty()) && (!this.activeTimeStampModels.isEmpty());
     }
-
 
     public boolean resetAndTryAppendBuffer(List<DataPoint> notYetEmitted) {
         this.activeValueModels.addAll(inactiveValueModels);

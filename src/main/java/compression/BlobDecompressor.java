@@ -8,6 +8,7 @@ import records.DataPoint;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 
 public class BlobDecompressor {
 
@@ -68,14 +69,12 @@ public class BlobDecompressor {
     }
 
     private static List<DataPoint> decompressSwing(ByteBuffer valueBlob, List<Long> timeStamps) {
-        float slope = valueBlob.getFloat(0);
-        float intercept = valueBlob.getFloat(4);
+        final float slope = valueBlob.getFloat(0);
+        final float intercept = valueBlob.getFloat(4);
 
-        return timeStamps.stream().map(timeStamp -> new DataPoint(timeStamp, getValue(slope, intercept, timeStamp))).toList();
-    }
+        Function<Long, Float> linearFunction = (Long time) -> time * slope + intercept;
 
-    private static double getValue(float slope, float intercept, Long timeStamp) {
-        return slope * timeStamp + intercept;
+        return timeStamps.stream().map(timeStamp -> new DataPoint(timeStamp, linearFunction.apply(timeStamp))).toList();
     }
 
     private static List<DataPoint> decompressGorilla(ByteBuffer valueBlob, List<Long> timeStamps) {

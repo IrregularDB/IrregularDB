@@ -35,11 +35,11 @@ class SegmentGeneratorTest {
 
         List<DataPoint> allDataPoints = new ArrayList<>(dataPoints);
         allDataPoints.add(lastDataPoint);
-        Segment expectedSegment = new Segment("key1", 1, 6, ValueCompressionModelType.PMC_MEAN.ordinal(), constructValueDataBlob(allDataPoints), TimeStampCompressionModelType.REGULAR.ordinal(), constructTimestampDataBlob(allDataPoints));
+        Segment expectedSegment = new Segment(1, 1, 6, ValueCompressionModelType.PMC_MEAN.ordinal(), constructValueDataBlob(allDataPoints), TimeStampCompressionModelType.REGULAR.ordinal(), constructTimestampDataBlob(allDataPoints));
 
         TestCompressionModelManagerRegularPMCMean testCompressionModelManagerRegularPMCMean = new TestCompressionModelManagerRegularPMCMean(List.of(new PMCMeanValueCompressionModel(0)), List.of(new RegularTimeStampCompressionModel()));
 
-        SegmentGenerator segmentGenerator = new SegmentGenerator(testCompressionModelManagerRegularPMCMean, "key1");
+        SegmentGenerator segmentGenerator = new SegmentGenerator(testCompressionModelManagerRegularPMCMean, 1);
 
         long amountSuccess = dataPoints.stream()
                 .map(segmentGenerator::acceptDataPoint)

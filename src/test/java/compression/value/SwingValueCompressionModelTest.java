@@ -83,7 +83,7 @@ class SwingValueCompressionModelTest {
 
     @Test
     void resetAndAppendAllEmptyModel() {
-        // We test what happens when we append to an empty model
+        // We test what happens when we append to an table.sql model
         List<DataPoint> dataPoints = createDataPointsFromValues(Arrays.asList(1.00, 1.05, 1.10, 1.15, 1.14, 1.21, 1.28, 1.32));
 
         Assertions.assertTrue(swingModel.resetAndAppendAll(dataPoints));

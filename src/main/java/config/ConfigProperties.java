@@ -70,6 +70,17 @@ public class ConfigProperties extends Properties{
         return Double.parseDouble(getProperty("model.value.errorbound"));
     }
 
+    public String getJDBConnectionString(){
+        return getProperty("database.jdbc.connectionstring");
+    }
+
+    public Properties getJDBCConnectionProperties(){
+        Properties properties = new Properties();
+        properties.put("user", getProperty("database.username"));
+        properties.put("password", getProperty("database.password"));
+        return properties;
+    }
+
     public String test(){
         return getProperty("test");
     }

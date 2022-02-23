@@ -72,7 +72,7 @@ class PMCMeanValueCompressionModelTest {
 
     @Test
     void resetAndAppendAllEmptyModel() {
-        // We test what happens when we append to an empty model
+        // We test what happens when we append to an table.sql model
         List<Double> values = Arrays.asList(1.0, 1.0, 1.0);
         Assertions.assertTrue(pmcMeanModel.resetAndAppendAll(createDataPointsFromValues(values)));
     }

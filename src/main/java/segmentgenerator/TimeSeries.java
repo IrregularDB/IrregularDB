@@ -31,6 +31,6 @@ public class TimeSeries {
     }
 
     void sendToDb(Segment segment) {
-        System.out.println(segment + "sent to db");
+        this.databaseConnection.insertSegment(segment);
     }
 }

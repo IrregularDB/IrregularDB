@@ -8,11 +8,8 @@ import segmentgenerator.TestTimeSeries;
 import segmentgenerator.TestTimeSeriesFactory;
 import segmentgenerator.TimeSeries;
 
-import javax.xml.crypto.Data;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class WorkingSetTest {
 
@@ -44,8 +41,8 @@ class WorkingSetTest {
         TestTimeSeries timeSeries1 = (TestTimeSeries)generatedTimeSeries.get(0);
         TestTimeSeries timeSeries2 = (TestTimeSeries)generatedTimeSeries.get(1);
 
-        Assertions.assertEquals("key1", timeSeries1.getTimeSeriesKey());
-        Assertions.assertEquals("key2", timeSeries2.getTimeSeriesKey());
+        Assertions.assertEquals("key1", timeSeries1.getTimeSeriesTag());
+        Assertions.assertEquals("key2", timeSeries2.getTimeSeriesTag());
 
         Assertions.assertEquals(timeSeriesReading1.dataPoint(), timeSeries1.getReceivedDataPoints().get(0));
         Assertions.assertEquals(timeSeriesReading3.dataPoint(), timeSeries1.getReceivedDataPoints().get(1));

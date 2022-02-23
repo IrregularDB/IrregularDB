@@ -18,5 +18,4 @@ public class Main {
         DataReceiverSpawner dataReceiverSpawner = new CSVDataReceiverSpawner(partitioner, ConfigProperties.INSTANCE.getCsvSources());
         dataReceiverSpawner.spawn();
     }
-
 }

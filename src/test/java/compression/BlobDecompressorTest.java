@@ -39,7 +39,7 @@ class BlobDecompressorTest {
         if (valueModelType == null || valueBlob == null) {
             throw new RuntimeException("You forgot to setup value compression model. Call for example setupPMCMeanValue() before calling this method");
         }
-        return BlobDecompressor.decompressValuesAndCreateDataPoints(valueModelType, valueBlob, timeStamps);
+        return BlobDecompressor.createDataPointsByDecompressingValues(valueModelType, valueBlob, timeStamps);
     }
 
     void setupRegularTimeStampModel(int si) {

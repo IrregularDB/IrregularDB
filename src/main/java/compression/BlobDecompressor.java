@@ -1,7 +1,6 @@
 package compression;
 
 import compression.timestamp.TimeStampCompressionModelType;
-import compression.utility.LinearFunction;
 import compression.value.ValueCompressionModelType;
 import records.DataPoint;
 
@@ -16,7 +15,7 @@ public class BlobDecompressor {
                                            ValueCompressionModelType valueModelType, ByteBuffer valueBlob,
                                            Long startTime, Long endTime) {
         List<Long> timeStamps = decompressTimeStamps(timeStampModelType, timeStampBlob, startTime, endTime);
-        return decompressValuesAndCreateDataPoints(valueModelType, valueBlob, timeStamps);
+        return createDataPointsByDecompressingValues(valueModelType, valueBlob, timeStamps);
     }
 
     static List<Long> decompressTimeStamps(TimeStampCompressionModelType timeStampModelType, ByteBuffer timeStampBlob,
@@ -54,7 +53,7 @@ public class BlobDecompressor {
         throw new RuntimeException("Not implemented");
     }
 
-    static List<DataPoint> decompressValuesAndCreateDataPoints(ValueCompressionModelType valueModelType, ByteBuffer valueBlob, List<Long> timeStamps) {
+    static List<DataPoint> createDataPointsByDecompressingValues(ValueCompressionModelType valueModelType, ByteBuffer valueBlob, List<Long> timeStamps) {
         return switch (valueModelType) {
             case PMCMEAN -> decompressPMCMean(valueBlob, timeStamps);
             case SWING -> decompressSwing(valueBlob, timeStamps);

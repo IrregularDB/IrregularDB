@@ -67,7 +67,7 @@ public class SwingValueCompressionModel extends ValueCompressionModel {
 
     private void handleFirstTwoDataPoints(DataPoint dataPoint, double allowedDerivation) {
         if (initialDataPoint == null) { // First data point
-            initialDataPoint = new DataPoint(dataPoint.timestamp(), dataPoint.value());
+            initialDataPoint = dataPoint;
         } else {
             lowerBound = new LinearFunction(initialDataPoint, new DataPoint(dataPoint.timestamp(), dataPoint.value() - allowedDerivation));
             upperBound = new LinearFunction(initialDataPoint, new DataPoint(dataPoint.timestamp(), dataPoint.value() + allowedDerivation));

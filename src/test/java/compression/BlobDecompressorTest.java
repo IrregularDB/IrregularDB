@@ -48,7 +48,7 @@ class BlobDecompressorTest {
     }
 
     void setupPMCMeanValueModel(float mean) {
-        valueModelType = ValueCompressionModelType.PMCMEAN;
+        valueModelType = ValueCompressionModelType.PMC_MEAN;
         valueBlob = ByteBuffer.allocate(4).putFloat(mean);
     }
 

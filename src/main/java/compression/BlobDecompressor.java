@@ -55,7 +55,7 @@ public class BlobDecompressor {
 
     static List<DataPoint> createDataPointsByDecompressingValues(ValueCompressionModelType valueModelType, ByteBuffer valueBlob, List<Long> timeStamps) {
         return switch (valueModelType) {
-            case PMCMEAN -> decompressPMCMean(valueBlob, timeStamps);
+            case PMC_MEAN -> decompressPMCMean(valueBlob, timeStamps);
             case SWING -> decompressSwing(valueBlob, timeStamps);
             case GORILLA -> decompressGorilla(valueBlob, timeStamps);
             default -> throw new IllegalArgumentException("No decompression method has been implemented for the given Value Model Type");

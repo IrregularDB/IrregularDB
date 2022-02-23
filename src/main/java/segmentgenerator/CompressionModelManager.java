@@ -33,7 +33,7 @@ public class CompressionModelManager {
     public boolean tryAppendDataPointToAllModels(DataPoint dataPoint) {
         // Partition models by append success
         Map<Boolean, List<ValueCompressionModel>> valueModelsAppended = activeValueModels.stream()
-                .collect(Collectors.partitioningBy(valueModel -> valueModel.append(dataPoint.value())));
+                .collect(Collectors.partitioningBy(valueModel -> valueModel.append(dataPoint)));
 
         // Update local lists in active and inactive
         this.activeValueModels = valueModelsAppended.get(true);
@@ -41,7 +41,7 @@ public class CompressionModelManager {
 
         // Same for time stamp models
         Map<Boolean, List<TimeStampCompressionModel>> timeStampModelAppended = activeTimeStampModels.stream()
-                .collect(Collectors.partitioningBy(timeStampModel -> timeStampModel.append(dataPoint.timestamp())));
+                .collect(Collectors.partitioningBy(timeStampModel -> timeStampModel.append(dataPoint)));
 
         this.activeTimeStampModels = timeStampModelAppended.get(true);
         this.inactiveTimestampModels.addAll(timeStampModelAppended.get(false));

@@ -3,13 +3,13 @@ package compression.timestamp;
 import records.DataPoint;
 
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 public class BaseDeltaTimeStampCompressionModel extends TimeStampCompressionModel{
 
     private long startTime;
-    private List<Integer> deltaTimeStamps;
+    private LinkedList<Integer> deltaTimeStamps;
 
     public BaseDeltaTimeStampCompressionModel(double errorBound) {
         super(errorBound);
@@ -19,7 +19,7 @@ public class BaseDeltaTimeStampCompressionModel extends TimeStampCompressionMode
     @Override
     protected void resetModel() {
         this.startTime = -1; // -1 -> startTime not yet set
-        this.deltaTimeStamps = new ArrayList<>();
+        this.deltaTimeStamps = new LinkedList<>();
     }
 
     @Override
@@ -34,7 +34,7 @@ public class BaseDeltaTimeStampCompressionModel extends TimeStampCompressionMode
             return true;
         }
 
-        this.deltaTimeStamps.add(getDeltaFromStartTime(dataPoint.timestamp()));
+        this.deltaTimeStamps.addLast(getDeltaFromStartTime(dataPoint.timestamp()));
 
         return true;
     }
@@ -50,12 +50,14 @@ public class BaseDeltaTimeStampCompressionModel extends TimeStampCompressionMode
 
     @Override
     public void reduceToSizeN(int n) {
-
+        for(int i = 0; i < n; n++){
+            this.deltaTimeStamps.removeLast();
+        }
     }
 
     @Override
     public TimeStampCompressionModelType getTimeStampCompressionModelType() {
-        return null;
+        return TimeStampCompressionModelType.BASEDELTA;
     }
 
     private int getDeltaFromStartTime(long timestamp){

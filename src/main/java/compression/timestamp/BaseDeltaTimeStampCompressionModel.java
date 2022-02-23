@@ -3,6 +3,7 @@ package compression.timestamp;
 import records.DataPoint;
 
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -50,7 +51,7 @@ public class BaseDeltaTimeStampCompressionModel extends TimeStampCompressionMode
 
     @Override
     public void reduceToSizeN(int n) {
-        for(int i = 0; i < n; n++){
+        for (Integer i : this.deltaTimeStamps){
             this.deltaTimeStamps.removeLast();
         }
     }

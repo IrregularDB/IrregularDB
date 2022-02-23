@@ -209,9 +209,4 @@ class SwingValueCompressionModelTest {
 
         assertEquals(1, swingModel.getCompressionRatio());
     }
-
-    @Test
-    void reduceToSizeN() {
-        // TODO: implement reduce to N test
-    }
 }

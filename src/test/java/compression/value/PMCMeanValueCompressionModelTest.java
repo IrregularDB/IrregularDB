@@ -138,9 +138,4 @@ class PMCMeanValueCompressionModelTest {
 
         assertEquals(2, pmcMeanModel.getCompressionRatio());
     }
-
-    @Test
-    void reduceToSizeN() {
-        // TODO: implement reduce to N test
-    }
 }

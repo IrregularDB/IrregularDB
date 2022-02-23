@@ -148,9 +148,4 @@ class RegularTimeStampCompressionModelTest {
         regularModel.resetAndAppendAll(createDataPointsFromTimeStamps(timeStamps));
         assertEquals(2, regularModel.getCompressionRatio());
     }
-
-    @Test
-    void reduceToSizeN() {
-        // TODO: implement reduce to N test
-    }
 }

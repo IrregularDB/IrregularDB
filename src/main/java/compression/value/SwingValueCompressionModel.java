@@ -114,6 +114,6 @@ public class SwingValueCompressionModel extends ValueCompressionModel {
 
     @Override
     public void reduceToSizeN(int n) {
-        throw new RuntimeException("Not implemented");
+        // no implementation is necessary
     }
 }

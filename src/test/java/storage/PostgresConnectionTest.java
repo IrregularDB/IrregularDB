@@ -14,8 +14,7 @@ class PostgresConnectionTest {
     private final PostgresConnection postgresConnection = new PostgresConnection();
 
 
-    @Test
-    @Ignore
+    //@Test
     public void testDBInsertsTimeSeries(){
         int id1 = postgresConnection.getTimeSeriesId("key1");
         int id2 = postgresConnection.getTimeSeriesId("key2");
@@ -26,8 +25,7 @@ class PostgresConnectionTest {
         Assertions.assertEquals(1, id3);
     }
 
-    @Test
-    @Ignore
+    //@Test
     public void testDBInsertsSegment(){
         Segment segment = new Segment(1, 111L,222L,1, ByteBuffer.allocate(0), 1, ByteBuffer.allocate(0));
         this.postgresConnection.insertSegment(segment);

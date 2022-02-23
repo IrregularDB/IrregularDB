@@ -18,14 +18,4 @@ public abstract class ValueCompressionModel extends BaseModel<Double> {
      */
     public abstract ValueCompressionModelType getValueCompressionModelType();
 
-    @Override
-    public boolean append(Double value) {
-        // Done in order to ensure that we don't get any reference problems by appending simple types instead
-        return appendValue(value);
-    }
-    public boolean resetAndAppendAll(List<DataPoint> input){
-        return resetAndAppendAll(input, DataPoint::value);
-    }
-
-    protected abstract boolean appendValue(double value);
 }

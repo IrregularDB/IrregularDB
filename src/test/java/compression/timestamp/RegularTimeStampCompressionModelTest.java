@@ -21,11 +21,16 @@ class RegularTimeStampCompressionModelTest {
     private List<DataPoint> createDataPointsFromTimeStamps(List<Long> timeStamps) {
         List<DataPoint> dataPoints = new ArrayList<>();
         for (Long timeStamp : timeStamps) {
-            // We use -1 as value does not matter.
-            dataPoints.add(new DataPoint(timeStamp, -1));
+            dataPoints.add(createDataPointForTimeStamp(timeStamp));
         }
         return dataPoints;
     }
+
+    private DataPoint createDataPointForTimeStamp(long timeStamp) {
+        // We use -1 for our data points as value because this model does not care about the values of the data points
+        return new DataPoint(timeStamp, -1);
+    }
+
 
     @BeforeEach
     void init() {
@@ -36,40 +41,40 @@ class RegularTimeStampCompressionModelTest {
     // We expect to be able to append any two data points no matter how different as then we have not SI
     @Test
     void appendTwoTimeStamps() {
-        Assertions.assertTrue(regularModel.append(0L));
-        Assertions.assertTrue(regularModel.append(1000000L));
+        Assertions.assertTrue(regularModel.append(createDataPointForTimeStamp(0L)));
+        Assertions.assertTrue(regularModel.append(createDataPointForTimeStamp(1000000L)));
     }
 
     @Test
     void appendThreeTimeStampsWithSameSI() {
-        Assertions.assertTrue(regularModel.append(0L));
-        Assertions.assertTrue(regularModel.append(100L));
-        Assertions.assertTrue(regularModel.append(200L));
+        Assertions.assertTrue(regularModel.append(createDataPointForTimeStamp(0L)));
+        Assertions.assertTrue(regularModel.append(createDataPointForTimeStamp(100L)));
+        Assertions.assertTrue(regularModel.append(createDataPointForTimeStamp(200L)));
     }
 
     @Test
     void appendThreeTimeStampsDifferentSI() {
-        Assertions.assertTrue(regularModel.append(0L));
-        Assertions.assertTrue(regularModel.append(100L));
-        Assertions.assertFalse(regularModel.append(999L));
+        Assertions.assertTrue(regularModel.append(createDataPointForTimeStamp(0L)));
+        Assertions.assertTrue(regularModel.append(createDataPointForTimeStamp(100L)));
+        Assertions.assertFalse(regularModel.append(createDataPointForTimeStamp(999L)));
     }
 
     @Test
     void appendAfterFailedAppendNotAllowed() {
-        Assertions.assertTrue(regularModel.append(0L));
-        Assertions.assertTrue(regularModel.append(100L));
-        Assertions.assertFalse(regularModel.append(999L));
+        Assertions.assertTrue(regularModel.append(createDataPointForTimeStamp(0L)));
+        Assertions.assertTrue(regularModel.append(createDataPointForTimeStamp(100L)));
+        Assertions.assertFalse(regularModel.append(createDataPointForTimeStamp(999L)));
 
-        Assertions.assertThrows(IllegalArgumentException.class, () -> regularModel.append(200L));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> regularModel.append(createDataPointForTimeStamp(200L)));
     }
 
     @Test
     void getLength() {
         assertEquals(0, regularModel.getLength());
-        regularModel.append(0L);
+        regularModel.append(createDataPointForTimeStamp(0L));
         assertEquals(1, regularModel.getLength());
-        regularModel.append(100L);
-        regularModel.append(200L);
+        regularModel.append(createDataPointForTimeStamp(100L));
+        regularModel.append(createDataPointForTimeStamp(200L));
         assertEquals(3, regularModel.getLength());
     }
 
@@ -93,16 +98,22 @@ class RegularTimeStampCompressionModelTest {
     }
 
     @Test
+    void resetAndAppendAllWhereSomePointCannotBeRepresented() {
+        List<Long> timeStamps = Arrays.asList(0L, 100L, 200L, 300L, 999L, 999L);
+        Assertions.assertFalse(regularModel.resetAndAppendAll(createDataPointsFromTimeStamps(timeStamps)));
+        Assertions.assertEquals(4, regularModel.getLength());
+    }
+
+
+    @Test
     void getTimeStampBlobEmptyModel() {
         Assertions.assertThrows(UnsupportedOperationException.class, () -> regularModel.getBlobRepresentation());
     }
 
     @Test
     void getTimeStampBlob() {
-        regularModel.append(0L);
-        regularModel.append(100L);
-        regularModel.append(200L);
-        regularModel.append(300L);
+        List<Long> timeStamps = Arrays.asList(0L, 100L, 200L, 300L);
+        regularModel.resetAndAppendAll(createDataPointsFromTimeStamps(timeStamps));
 
         ByteBuffer timeStampBlob = regularModel.getBlobRepresentation();
         int si = timeStampBlob.getInt(0);

@@ -2,7 +2,6 @@ package compression;
 
 import records.DataPoint;
 
-import javax.xml.crypto.Data;
 import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.function.Function;
@@ -11,7 +10,13 @@ public abstract class BaseModel<E> {
     private final double errorBound;
 
     public BaseModel(double errorBound) {
-        this.errorBound = errorBound;
+        // This small hack is added because floating point imprecision can lead to error-bound
+        // of zero not really working.
+        if (errorBound == 0) {
+            this.errorBound = 0.00000000000001;
+        } else {
+            this.errorBound = errorBound;
+        }
     }
 
     public double getErrorBound() {
@@ -22,18 +27,17 @@ public abstract class BaseModel<E> {
 
     public abstract int getLength();
 
-    public abstract boolean resetAndAppendAll(List<DataPoint> input);
     /**
      * Is used to reset the model and append a series of data points to it
      * often used right after emitting a segment to fill it with the buffer again
      * @return returns true if the entire time stamp list could be appended
      */
-    protected final boolean resetAndAppendAll(List<DataPoint> input, Function<DataPoint, E> dataExtractor) {
+    public final boolean resetAndAppendAll(List<DataPoint> input) {
         this.resetModel();
 
         boolean appendSucceeded = true;
         for (DataPoint dataPoint : input) {
-            appendSucceeded = this.append(dataExtractor.apply(dataPoint));
+            appendSucceeded = this.append(dataPoint);
             if (!appendSucceeded) {
                 break;
             }
@@ -41,15 +45,15 @@ public abstract class BaseModel<E> {
         return appendSucceeded;
     }
 
-    public abstract boolean append(E reading);
+    public abstract boolean append(DataPoint dataPoint);
 
     /**
      *
      * @return greater value represents better compression
      */
     public final double getCompressionRatio() {
-        // We get the size of the BLOB by reading its position, which indicates how many bytes we have used
         int amtDataPoints = this.getLength();
+        // We get the size of the BLOB by reading its position, which indicates how many bytes we have used
         int amtBytesUsed = this.getBlobRepresentation().position();
 
         return (double)amtDataPoints/ (double)(amtBytesUsed);

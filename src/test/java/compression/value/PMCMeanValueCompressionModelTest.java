@@ -18,11 +18,15 @@ class PMCMeanValueCompressionModelTest {
     // Helper method needed to be able to use reset and append all as it now takes data points
     private List<DataPoint> createDataPointsFromValues(List<Double> values) {
         List<DataPoint> dataPoints = new ArrayList<>();
-        for (double value : values) {
-            // We use -1 as time stamp does not matter
-            dataPoints.add(new DataPoint(-1, value));
+        for (Double value : values) {
+            dataPoints.add(createDataPointForValue(value));
         }
         return dataPoints;
+    }
+
+    private DataPoint createDataPointForValue(double value) {
+        // We use -1 for our data points as timestamp because this model does not care about the values of the data points
+        return new DataPoint(-1, value);
     }
 
     @BeforeEach
@@ -33,36 +37,36 @@ class PMCMeanValueCompressionModelTest {
 
     @Test
     void appendOneValue() {
-        Assertions.assertTrue(pmcMeanModel.appendValue(1.0));
+        Assertions.assertTrue(pmcMeanModel.append(createDataPointForValue(1.0)));
     }
 
     @Test
     void appendTwoValues() {
-        Assertions.assertTrue(pmcMeanModel.appendValue(1.00));
-        Assertions.assertTrue(pmcMeanModel.appendValue(1.05));
+        Assertions.assertTrue(pmcMeanModel.append(createDataPointForValue(1.00)));
+        Assertions.assertTrue(pmcMeanModel.append(createDataPointForValue(1.05)));
     }
 
     @Test
     void appendVeryDifferentValue() {
-        Assertions.assertTrue(pmcMeanModel.appendValue(1.00));
-        Assertions.assertFalse(pmcMeanModel.appendValue(9.00));
+        Assertions.assertTrue(pmcMeanModel.append(createDataPointForValue(1.00)));
+        Assertions.assertFalse(pmcMeanModel.append(createDataPointForValue(9.00)));
     }
 
     @Test
     void appendAfterFailedAppendNotAllowed() {
-        pmcMeanModel.appendValue(1.00);
-        pmcMeanModel.appendValue(9.00);
+        pmcMeanModel.append(createDataPointForValue(1.00));
+        pmcMeanModel.append(createDataPointForValue(9.00));
 
-        Assertions.assertThrows(IllegalArgumentException.class, () -> pmcMeanModel.appendValue(1.00));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> pmcMeanModel.append(createDataPointForValue(1.00)));
     }
 
     @Test
     void getLength() {
         Assertions.assertEquals(0, pmcMeanModel.getLength());
-        pmcMeanModel.appendValue(1.00);
+        pmcMeanModel.append(createDataPointForValue(1.00));
         Assertions.assertEquals(1, pmcMeanModel.getLength());
-        pmcMeanModel.appendValue(1.00);
-        pmcMeanModel.appendValue(1.00);
+        pmcMeanModel.append(createDataPointForValue(1.00));
+        pmcMeanModel.append(createDataPointForValue(1.00));
         Assertions.assertEquals(3, pmcMeanModel.getLength());
     }
 
@@ -86,9 +90,6 @@ class PMCMeanValueCompressionModelTest {
 
     @Test
     void resetAndAppendAllWhereSomePointCannotBeRepresented() {
-        // Here we expect it to be able to append 3 data points even though they are very
-        // different compared to the old ones as it should be reset
-
         List<Double> values = Arrays.asList(1.0, 1.0, 1.0, 99.0, 99.0);
         Assertions.assertFalse(pmcMeanModel.resetAndAppendAll(createDataPointsFromValues(values)));
         Assertions.assertEquals(3, pmcMeanModel.getLength());
@@ -103,8 +104,8 @@ class PMCMeanValueCompressionModelTest {
     @Test
     void getValueBlobNonEmptyModel() {
         // We expect a model with 1.05 as mean value
-        pmcMeanModel.appendValue(1.00);
-        pmcMeanModel.appendValue(1.10);
+        pmcMeanModel.append(createDataPointForValue(1.00));
+        pmcMeanModel.append(createDataPointForValue(1.10));
 
         ByteBuffer valueBlob = pmcMeanModel.getBlobRepresentation();
         float meanValue = valueBlob.getFloat(0);

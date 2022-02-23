@@ -101,6 +101,6 @@ public class RegularTimeStampCompressionModel extends TimeStampCompressionModel 
 
     @Override
     public void reduceToSizeN(int n) {
-        throw new RuntimeException("Not implemented");
+        //no implementation necessary
     }
 }

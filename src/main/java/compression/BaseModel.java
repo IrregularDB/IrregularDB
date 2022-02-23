@@ -4,6 +4,7 @@ import records.DataPoint;
 
 import java.nio.ByteBuffer;
 import java.util.List;
+import java.util.function.Function;
 
 public abstract class BaseModel<E> {
     private final double errorBound;
@@ -46,6 +47,10 @@ public abstract class BaseModel<E> {
 
     public abstract boolean append(DataPoint dataPoint);
 
+    /**
+     *
+     * @return greater value represents better compression
+     */
     public final double getCompressionRatio() {
         int amtDataPoints = this.getLength();
         // We get the size of the BLOB by reading its position, which indicates how many bytes we have used

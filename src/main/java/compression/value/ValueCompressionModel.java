@@ -1,6 +1,7 @@
 package compression.value;
 
 import compression.BaseModel;
+import records.DataPoint;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;

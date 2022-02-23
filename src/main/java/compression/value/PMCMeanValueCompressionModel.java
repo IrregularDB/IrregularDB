@@ -86,11 +86,11 @@ public class PMCMeanValueCompressionModel extends ValueCompressionModel {
 
     @Override
     public ValueCompressionModelType getValueCompressionModelType() {
-        return ValueCompressionModelType.PMCMEAN;
+        return ValueCompressionModelType.PMC_MEAN;
     }
 
     @Override
     public void reduceToSizeN(int n) {
-        throw new RuntimeException("Not implemented");
+        // no implementation is necessary
     }
 }

@@ -7,6 +7,7 @@ import compression.value.ValueCompressionModelType;
 import records.DataPoint;
 
 import java.nio.ByteBuffer;
+import java.util.List;
 
 public class CompressionModel {
     private final ValueCompressionModel valueCompressionModel;
@@ -19,9 +20,9 @@ public class CompressionModel {
 
     public boolean appendDataPoint(DataPoint dataPoint) {
         boolean valueAppendSucceeded = this.valueCompressionModel.append(dataPoint);
-        boolean timeStampAppendSuceeded = this.timeStampCompressionModel.append(dataPoint);
+        boolean timeStampAppendSucceeded = this.timeStampCompressionModel.append(dataPoint);
 
-        return valueAppendSucceeded && timeStampAppendSuceeded;
+        return valueAppendSucceeded && timeStampAppendSucceeded;
     }
 
     public ByteBuffer getValueBlob() {
@@ -38,5 +39,18 @@ public class CompressionModel {
 
     public TimeStampCompressionModelType getTimeStampCompressionModelType() {
         return timeStampCompressionModel.getTimeStampCompressionModelType();
+    }
+
+    public boolean resetModel(List<DataPoint> dataPoints){
+        return this.valueCompressionModel.resetAndAppendAll(dataPoints) &&
+                this.timeStampCompressionModel.resetAndAppendAll(dataPoints);
+    }
+
+    public ValueCompressionModel getValueCompressionModel() {
+        return valueCompressionModel;
+    }
+
+    public TimeStampCompressionModel getTimeStampCompressionModel() {
+        return timeStampCompressionModel;
     }
 }

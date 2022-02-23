@@ -74,13 +74,6 @@ public class ConfigProperties extends Properties{
         return getProperty("database.jdbc.connectionstring");
     }
 
-    public Properties getJDBCConnectionProperties(){
-        Properties properties = new Properties();
-        properties.put("user", getProperty("database.username"));
-        properties.put("password", getProperty("database.password"));
-        return properties;
-    }
-
     public String test(){
         return getProperty("test");
     }

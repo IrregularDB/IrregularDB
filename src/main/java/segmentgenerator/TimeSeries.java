@@ -7,7 +7,6 @@ import storage.DatabaseConnection;
 import storage.PostgresConnection;
 
 public class TimeSeries {
-
     private final String timeSeriesTag;
     private final int timeSeriesId;
     private final DatabaseConnection databaseConnection;
@@ -27,7 +26,7 @@ public class TimeSeries {
         }
     }
 
-    public String getTimeSeriesKey() {
+    public String getTimeSeriesTag() {
         return timeSeriesTag;
     }
 

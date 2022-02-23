@@ -81,7 +81,7 @@ class RegularTimeStampCompressionModelTest {
 
     @Test
     void resetAndAppendAllEmptyModel() {
-        // We test that we can insert three legal points at once on an table.sql model
+        // We test that we can insert three legal points at once on an empty model
         List<Long> timeStamps = Arrays.asList(0L, 100L, 200L, 300L);
         Assertions.assertTrue(regularModel.resetAndAppendAll(createDataPointsFromTimeStamps(timeStamps)));
     }

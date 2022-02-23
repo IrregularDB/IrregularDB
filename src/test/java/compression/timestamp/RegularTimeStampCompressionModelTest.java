@@ -35,7 +35,7 @@ class RegularTimeStampCompressionModelTest {
     @BeforeEach
     void init() {
         double errorBound = 0;
-        regularModel = new RegularTimeStampCompressionModel();
+        regularModel = new RegularTimeStampCompressionModel(errorBound);
     }
 
     // We expect to be able to append any two data points no matter how different as then we have not SI

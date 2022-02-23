@@ -59,7 +59,7 @@ public class CompressionModelFactory {
     private static TimeStampCompressionModel getTimestampCompressionModelByType(TimeStampCompressionModelType timeStampCompressionModelType, double errorBound) {
         switch (timeStampCompressionModelType){
             case REGULAR:
-                return new RegularTimeStampCompressionModel();
+                return new RegularTimeStampCompressionModel(errorBound);
             case BASEDELTA:
                 //TODO
             case DELTAPAIRS:

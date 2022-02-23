@@ -20,7 +20,7 @@ public class PMCMeanValueCompressionModel extends ValueCompressionModel {
     private boolean earlierAppendFailed;
 
     public PMCMeanValueCompressionModel(double errorBound) {
-        super(errorBound);
+        super(errorBound, null);
         this.resetModel();
     }
 

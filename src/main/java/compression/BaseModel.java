@@ -43,6 +43,10 @@ public abstract class BaseModel<E> {
 
     public abstract boolean append(E reading);
 
+    /**
+     *
+     * @return greater value represents better compression
+     */
     public final double getCompressionRatio() {
         // We get the size of the BLOB by reading its position, which indicates how many bytes we have used
         int amtDataPoints = this.getLength();

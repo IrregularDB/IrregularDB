@@ -15,8 +15,8 @@ public class CompressionModelManager {
     private List<ValueCompressionModel> activeValueModels;
     private List<TimeStampCompressionModel> activeTimeStampModels;
 
-    private final List<ValueCompressionModel> inactiveValueModels;
-    private final List<TimeStampCompressionModel> inactiveTimestampModels;
+    private List<ValueCompressionModel> inactiveValueModels;
+    private List<TimeStampCompressionModel> inactiveTimestampModels;
 
     private final ModelPicker modelPicker;
 
@@ -31,7 +31,6 @@ public class CompressionModelManager {
     }
 
     public boolean tryAppendDataPointToAllModels(DataPoint dataPoint) {
-
         // Partition models by append success
         Map<Boolean, List<ValueCompressionModel>> valueModelsAppended = activeValueModels.stream()
                 .collect(Collectors.partitioningBy(valueModel -> valueModel.append(dataPoint.value())));
@@ -54,12 +53,15 @@ public class CompressionModelManager {
         this.activeValueModels.addAll(inactiveValueModels);
         this.activeTimeStampModels.addAll(inactiveTimestampModels);
 
-        boolean anySuccessTimeStamp = this.activeTimeStampModels.stream()
-                .map((timestampModel) -> timestampModel.resetAndAppendAll(notYetEmitted))
-                .anyMatch(item -> true);
+        this.inactiveValueModels = new ArrayList<>();
+        this.inactiveTimestampModels = new ArrayList<>();
 
         boolean anySuccessValue = this.activeValueModels.stream()
                 .map((valueModel) -> valueModel.resetAndAppendAll(notYetEmitted))
+                .anyMatch(item -> true);
+
+        boolean anySuccessTimeStamp = this.activeTimeStampModels.stream()
+                .map((timestampModel) -> timestampModel.resetAndAppendAll(notYetEmitted))
                 .anyMatch(item -> true);
 
         return anySuccessValue && anySuccessTimeStamp;

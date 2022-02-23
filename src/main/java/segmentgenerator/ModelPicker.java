@@ -25,6 +25,6 @@ public record ModelPicker (List<ValueCompressionModel> valueCompressionModels, L
     private TimeStampCompressionModel getBestTimeStampModel() {
         return this.timeStampCompressionModels.stream()
                 .max(Comparator.comparing(TimeStampCompressionModel::getCompressionRatio))
-                .orElseThrow(() -> new RuntimeException("Something went wrong"));
+                .orElseThrow(() -> new RuntimeException("In ModelPicker:getBestTimeStampModel() - Should not happen"));
     }
 }

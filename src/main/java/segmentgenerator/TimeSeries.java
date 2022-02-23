@@ -1,10 +1,8 @@
 package segmentgenerator;
 
 import compression.CompressionModelFactory;
-import records.Segment;
 import records.DataPoint;
-
-import java.util.Optional;
+import records.Segment;
 
 public class TimeSeries {
 
@@ -27,7 +25,7 @@ public class TimeSeries {
         return timeSeriesKey;
     }
 
-    void sendToDb(Segment segment){
+    void sendToDb(Segment segment) {
         System.out.println(segment + "sent to db");
     }
 }

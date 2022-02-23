@@ -40,7 +40,6 @@ public class TestCompressionModelManagerRegularPMCMean extends CompressionModelM
             acceptedDataPoints.add(dataPoint);
             return true;
         }
-
         return false;
     }
 

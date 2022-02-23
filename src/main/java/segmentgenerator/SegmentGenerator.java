@@ -28,14 +28,14 @@ public class SegmentGenerator {
 
     public Segment constructSegmentFromBuffer() {
         CompressionModel bestCompressionModel = this.compressionModelManager.getBestCompressionModel();
-        //find size of each model and reduce the largest down to the size of the smallest
 
+        //find size of each model and reduce the largest down to the size of the smallest
         int amountOfDataPoints = syncValueAndTimeStampModelLength(bestCompressionModel);
         if (amountOfDataPoints == 0) {
-            throw new RuntimeException("This is weird");
+            throw new RuntimeException("Segment generated with size 0");
         }
 
-        Segment segment = generateSegment(bestCompressionModel, amountOfDataPoints, notYetEmitted.get(0).timestamp(), notYetEmitted.get(amountOfDataPoints - 1).timestamp());
+        Segment segment = generateSegment(bestCompressionModel, notYetEmitted.get(0).timestamp(), notYetEmitted.get(amountOfDataPoints - 1).timestamp());
 
         prepareForNextSegment(amountOfDataPoints);
 
@@ -56,11 +56,11 @@ public class SegmentGenerator {
     }
 
     private int syncValueAndTimeStampModelLength(CompressionModel bestCompressionModel) {
-        TimeStampCompressionModel timeStampCompressionModel = bestCompressionModel.getTimeStampCompressionModel();
-        int timestampCompressionModelLength = timeStampCompressionModel.getLength();
-
         ValueCompressionModel valueCompressionModel = bestCompressionModel.getValueCompressionModel();
         int valueCompressionModelLength = valueCompressionModel.getLength();
+
+        TimeStampCompressionModel timeStampCompressionModel = bestCompressionModel.getTimeStampCompressionModel();
+        int timestampCompressionModelLength = timeStampCompressionModel.getLength();
 
         if (timestampCompressionModelLength > valueCompressionModelLength) {
             timeStampCompressionModel.reduceToSizeN(valueCompressionModelLength);
@@ -70,7 +70,7 @@ public class SegmentGenerator {
         return Integer.min(timestampCompressionModelLength, valueCompressionModelLength);
     }
 
-    private Segment generateSegment(CompressionModel compressionModel, int size, long startTime, long endTime) {
+    private Segment generateSegment(CompressionModel compressionModel, long startTime, long endTime) {
         ValueCompressionModel valueModel = compressionModel.getValueCompressionModel();
         TimeStampCompressionModel timeStampModel = compressionModel.getTimeStampCompressionModel();
 

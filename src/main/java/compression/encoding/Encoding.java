@@ -1,4 +1,4 @@
-package compression;
+package compression.encoding;
 
 import compression.utility.BitBuffer;
 

@@ -40,7 +40,7 @@ public class WorkingSet {
     private boolean processNextDataPoint() {
         TimeSeriesReading timeSeriesReading = buffer.poll();
         if (timeSeriesReading == null) {
-            return false; //TODO this might not necessarily be optimal
+            return false;
         }
 
         String timeSeriesReadingKey = timeSeriesReading.tag();

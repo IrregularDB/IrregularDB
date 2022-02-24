@@ -31,7 +31,7 @@ class PMCMeanValueCompressionModelTest {
 
     @BeforeEach
     void init() {
-        double errorBound = 10;
+        float errorBound = 10;
         pmcMeanModel = new PMCMeanValueCompressionModel(errorBound);
     }
 

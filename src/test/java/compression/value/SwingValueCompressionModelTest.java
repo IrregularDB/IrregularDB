@@ -28,7 +28,7 @@ class SwingValueCompressionModelTest {
 
     @BeforeEach
     void init() {
-        double errorBound = 10;
+        float errorBound = 10;
         swingModel = new SwingValueCompressionModel(errorBound);
     }
 
@@ -127,7 +127,7 @@ class SwingValueCompressionModelTest {
 
     @Test
     void noErrorBoundAppendAllTest() {
-        double errorBound = 0;
+        float errorBound = 0;
         swingModel = new SwingValueCompressionModel(errorBound);
         List<DataPoint> dataPoints = createDataPointsFromValues(Arrays.asList(1.00F, 1.05F, 1.10F, 1.15F, 1.20F));
         Assertions.assertTrue(swingModel.resetAndAppendAll(dataPoints));
@@ -135,7 +135,7 @@ class SwingValueCompressionModelTest {
 
     @Test
     void noErrorBoundAppendAllSmallErrorNotAllowedTest() {
-        double errorBound = 0;
+        float errorBound = 0;
         swingModel = new SwingValueCompressionModel(errorBound);
         // 1.26 is slightly off from 1.25 thereby not allowed.
         List<DataPoint> dataPoints = createDataPointsFromValues(Arrays.asList(1.00F, 1.05F, 1.10F, 1.15F, 1.20F, 1.26F));

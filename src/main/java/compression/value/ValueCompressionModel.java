@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public abstract class ValueCompressionModel extends BaseModel<Double> {
-    public ValueCompressionModel(Double errorBound, Integer lengthBound) {
+    public ValueCompressionModel(Float errorBound, Integer lengthBound) {
         super(errorBound, lengthBound);
     }
 

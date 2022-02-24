@@ -7,15 +7,15 @@ import java.util.List;
 import java.util.function.Function;
 
 public abstract class BaseModel<E> {
-    private final Double errorBound;
+    private final Float errorBound;
     private final Integer lengthBound;
 
-    public BaseModel(Double errorBound, Integer lengthBound) {
+    public BaseModel(Float errorBound, Integer lengthBound) {
         // This small hack is added because floating point imprecision can lead to error-bound
         // of zero not really working.
         if (errorBound != null) {
             if (errorBound == 0) {
-                this.errorBound = 0.00001;
+                this.errorBound = 0.00001F;
             } else {
                 this.errorBound = errorBound;
             }
@@ -25,7 +25,7 @@ public abstract class BaseModel<E> {
         this.lengthBound = lengthBound;
     }
 
-    public double getErrorBound() {
+    public float getErrorBound() {
         if (errorBound == null) {
             throw new UnsupportedOperationException("You tried to get error bound for a model, which has no error bound defined");
         }

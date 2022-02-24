@@ -19,12 +19,12 @@ public class SwingValueCompressionModel extends ValueCompressionModel {
     private LinearFunction lowerBound;
     private final float errorBoundAsDecimal;
 
-    public SwingValueCompressionModel(double errorBound) {
+    public SwingValueCompressionModel(float errorBound) {
         super(errorBound, null);
         // The error bound provided is in percentage, so we first transform it to a decimal number
         // NOTE: due to the same reason as in ModelarDB we here choose to divide with 100.1 instead of 100
         // as we otherwise would allow data points slightly above the error bound.
-        this.errorBoundAsDecimal = (float) super.getErrorBound() / 100.1F;
+        this.errorBoundAsDecimal = super.getErrorBound() / 100.1F;
         this.resetModel();
     }
 

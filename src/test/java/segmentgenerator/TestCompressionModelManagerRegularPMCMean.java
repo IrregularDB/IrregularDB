@@ -60,7 +60,7 @@ public class TestCompressionModelManagerRegularPMCMean extends CompressionModelM
         if (timeStampCompressionModels.get(0).getTimeStampCompressionModelType() == TimeStampCompressionModelType.REGULAR &&
                 valueCompressionModels.get(0).getValueCompressionModelType() == ValueCompressionModelType.PMC_MEAN) {
 
-            double errorBound = 0;
+            float errorBound = 0;
             PMCMeanValueCompressionModel pmcMeanValueCompressionModel = new PMCMeanValueCompressionModel(errorBound);
             pmcMeanValueCompressionModel.resetAndAppendAll(acceptedDataPoints);
 

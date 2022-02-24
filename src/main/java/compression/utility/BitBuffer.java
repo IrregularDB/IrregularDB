@@ -47,13 +47,11 @@ public class BitBuffer {
         this.byteBuffer = shortenedBuffer;
     }
 
-    public void putDouble(double value){
-        if (byteBuffer.remaining() > 8) {
-            byteBuffer.putDouble(value);
-        } else {
-            extendBufferWithNMoreBytes(8);
-            byteBuffer.putDouble(value);
+    public void putFloat(float value){
+        if (byteBuffer.remaining() < 4) {
+            extendBufferWithNMoreBytes(4);
         }
+        byteBuffer.putFloat(value);
     }
 
     public void writeBit(char bit) {

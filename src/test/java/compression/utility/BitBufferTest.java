@@ -35,26 +35,26 @@ class BitBufferTest {
 
     @Test
     void putOneDoubleValue() {
-        bitBuffer.putDouble(1.0);
+        bitBuffer.putFloat(1.0F);
 
-        // We test that the buffer automatically extends to 8 bytes to store a double
+        // We test that the buffer automatically extends to 4 bytes to store a float
         ByteBuffer byteBuffer = bitBuffer.getByteBuffer();
-        Assertions.assertEquals(8, byteBuffer.capacity());
-        Assertions.assertEquals(1.0, byteBuffer.getDouble(0));
+        Assertions.assertEquals(4, byteBuffer.capacity());
+        Assertions.assertEquals(1.0F, byteBuffer.getFloat(0));
     }
 
     @Test
     void putThreeDoubleValues() {
         // We test that the buffer automatically extends with more bytes to allow us to store multiple doubles
-        bitBuffer.putDouble(1.0);
-        bitBuffer.putDouble(2.0);
-        bitBuffer.putDouble(3.0);
+        bitBuffer.putFloat(1.0F);
+        bitBuffer.putFloat(2.0F);
+        bitBuffer.putFloat(3.0F);
 
         ByteBuffer byteBuffer = bitBuffer.getByteBuffer();
-        Assertions.assertEquals(24, byteBuffer.capacity());
-        Assertions.assertEquals(1.0, byteBuffer.getDouble(0));
-        Assertions.assertEquals(2.0, byteBuffer.getDouble(8));
-        Assertions.assertEquals(3.0, byteBuffer.getDouble(16));
+        Assertions.assertEquals(12, byteBuffer.capacity());
+        Assertions.assertEquals(1.0F, byteBuffer.getFloat(0));
+        Assertions.assertEquals(2.0F, byteBuffer.getFloat(4));
+        Assertions.assertEquals(3.0F, byteBuffer.getFloat(8));
     }
 
     @Test

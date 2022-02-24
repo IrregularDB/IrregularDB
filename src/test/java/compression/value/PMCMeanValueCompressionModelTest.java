@@ -113,29 +113,16 @@ class PMCMeanValueCompressionModelTest {
     }
 
     @Test
-    void getCompressionRatio2DataPoints() {
-        // We expect that we have used 4 bytes to represent 2 data points so we get 2/4 = 0.5
+    void getAmountOfBytesUsed0DataPoints() {
+        // We expect this to throw and exception as no model has been made yet.
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> pmcMeanModel.getAmountBytesUsed());
+    }
+
+    @Test
+    void getAmountOfBytesUsed() {
         var values = Arrays.asList(1.00F, 1.00F);
         pmcMeanModel.resetAndAppendAll(createDataPointsFromValues(values));
-
-        assertEquals(0.5, pmcMeanModel.getCompressionRatio());
-    }
-
-    @Test
-    void getCompressionRatio4DataPoints() {
-        // We expect that we have used 4 bytes to represent 4 data points so we get 4/4 = 1
-        var values = Arrays.asList(1.00F, 1.00F, 1.00F, 1.00F);
-        pmcMeanModel.resetAndAppendAll(createDataPointsFromValues(values));
-
-        assertEquals(1.0, pmcMeanModel.getCompressionRatio());
-    }
-
-    @Test
-    void getCompressionRatio8DataPoints() {
-        // We expect that we have used 4 bytes to represent 8 data points so we get 8/4 = 2.0
-        var values = Arrays.asList(1.00F, 1.00F, 1.00F, 1.00F, 1.00F, 1.00F, 1.00F, 1.00F);
-        pmcMeanModel.resetAndAppendAll(createDataPointsFromValues(values));
-
-        assertEquals(2, pmcMeanModel.getCompressionRatio());
+        // We expect that we use 4 bytes
+        Assertions.assertEquals(4, pmcMeanModel.getAmountBytesUsed());
     }
 }

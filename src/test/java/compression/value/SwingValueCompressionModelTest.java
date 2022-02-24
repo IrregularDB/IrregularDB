@@ -184,29 +184,16 @@ class SwingValueCompressionModelTest {
     }
 
     @Test
-    void getCompressionRatio2DataPoints() {
-        // We use 8 bytes to represent 2 data points so 2/8 = 0.25
-        List<DataPoint> dataPoints = createDataPointsFromValues(Arrays.asList(1.00F, 1.05F));
-        swingModel.resetAndAppendAll(dataPoints);
-
-        assertEquals(0.25, swingModel.getCompressionRatio());
+    void getAmountOfBytesUsed0DataPoints() {
+        // We expect this to throw and exception as no model has been made yet.
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> swingModel.getAmountBytesUsed());
     }
 
     @Test
-    void getCompressionRatio4DataPoints() {
-        // We use 8 bytes to represent 4 data points so 4/8 = 0.5
-        List<DataPoint> dataPoints = createDataPointsFromValues(Arrays.asList(1.00F, 1.05F, 1.10F, 1.15F));
-        swingModel.resetAndAppendAll(dataPoints);
-
-        assertEquals(0.5, swingModel.getCompressionRatio());
-    }
-
-    @Test
-    void getCompressionRatio8DataPoints() {
-        // We use 8 bytes to represent 8 data points so 8/8 = 0.5
-        List<DataPoint> dataPoints = createDataPointsFromValues(Arrays.asList(1.00F, 1.05F, 1.10F, 1.15F, 1.14F, 1.21F, 1.28F, 1.32F));
-        swingModel.resetAndAppendAll(dataPoints);
-
-        assertEquals(1, swingModel.getCompressionRatio());
+    void getAmountOfBytesUsed() {
+        var values = Arrays.asList(1.00F, 1.00F);
+        swingModel.resetAndAppendAll(createDataPointsFromValues(values));
+        // We expect that we use 8 bytes (i.e. 2 floats)
+        Assertions.assertEquals(8, swingModel.getAmountBytesUsed());
     }
 }

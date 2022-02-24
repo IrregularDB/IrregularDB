@@ -1,13 +1,9 @@
 package storage;
 
-import org.junit.Ignore;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
 import records.Segment;
-
 import java.nio.ByteBuffer;
 
-import static org.junit.jupiter.api.Assertions.*;
 
 class PostgresConnectionTest {
 

@@ -1,5 +1,4 @@
 import config.ConfigProperties;
-import org.postgresql.util.PGJDBCMain;
 import scheduling.IncrementPartitioner;
 import scheduling.Partitioner;
 import scheduling.WorkingSetFactory;

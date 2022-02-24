@@ -125,11 +125,11 @@ class BlobDecompressorTest {
         List<Long> timeStamps = List.of(0L, 75L, 200L, 300L, 500L);
         List<DataPoint> dataPoints = callValueDecompressor(timeStamps);
         List<DataPoint> expectedDataPoints = new ArrayList<>();
-        expectedDataPoints.add(new DataPoint(0, 5.0));
-        expectedDataPoints.add(new DataPoint(75, 5.0));
-        expectedDataPoints.add(new DataPoint(200, 5.0));
-        expectedDataPoints.add(new DataPoint(300, 5.0));
-        expectedDataPoints.add(new DataPoint(500, 5.0));
+        expectedDataPoints.add(new DataPoint(0, 5.0F));
+        expectedDataPoints.add(new DataPoint(75, 5.0F));
+        expectedDataPoints.add(new DataPoint(200, 5.0F));
+        expectedDataPoints.add(new DataPoint(300, 5.0F));
+        expectedDataPoints.add(new DataPoint(500, 5.0F));
         assertEquals(expectedDataPoints, dataPoints);
     }
 
@@ -144,11 +144,11 @@ class BlobDecompressorTest {
         List<DataPoint> dataPoints = callValueDecompressor(timeStamps);
         List<DataPoint> expectedDataPoints = new ArrayList<>();
         expectedDataPoints.add(new DataPoint(0, 0));
-        expectedDataPoints.add(new DataPoint(1, 0.05));
-        expectedDataPoints.add(new DataPoint(2, 0.1));
-        expectedDataPoints.add(new DataPoint(3, 0.15));
-        expectedDataPoints.add(new DataPoint(4, 0.20));
-        expectedDataPoints.add(new DataPoint(5, 0.25));
+        expectedDataPoints.add(new DataPoint(1, 0.05F));
+        expectedDataPoints.add(new DataPoint(2, 0.1F));
+        expectedDataPoints.add(new DataPoint(3, 0.15F));
+        expectedDataPoints.add(new DataPoint(4, 0.20F));
+        expectedDataPoints.add(new DataPoint(5, 0.25F));
 
         var allowedDifference = 0.000001;
         for (int i = 0; i < dataPoints.size(); i++) {
@@ -167,12 +167,12 @@ class BlobDecompressorTest {
         List<Long> timeStamps = List.of(0L, 1L, 2L, 3L, 4L, 5L);
         List<DataPoint> dataPoints = callValueDecompressor(timeStamps);
         List<DataPoint> expectedDataPoints = new ArrayList<>();
-        expectedDataPoints.add(new DataPoint(0, 10.00));
-        expectedDataPoints.add(new DataPoint(1, 9.95));
-        expectedDataPoints.add(new DataPoint(2, 9.90));
-        expectedDataPoints.add(new DataPoint(3, 9.85));
-        expectedDataPoints.add(new DataPoint(4, 9.80));
-        expectedDataPoints.add(new DataPoint(5, 9.75));
+        expectedDataPoints.add(new DataPoint(0, 10.00F));
+        expectedDataPoints.add(new DataPoint(1, 9.95F));
+        expectedDataPoints.add(new DataPoint(2, 9.90F));
+        expectedDataPoints.add(new DataPoint(3, 9.85F));
+        expectedDataPoints.add(new DataPoint(4, 9.80F));
+        expectedDataPoints.add(new DataPoint(5, 9.75F));
 
         var allowedDifference = 0.000001;
         for (int i = 0; i < dataPoints.size(); i++) {
@@ -197,12 +197,12 @@ class BlobDecompressorTest {
         List<DataPoint> dataPoints = BlobDecompressor.decompressBlobs(timeStampModelType, timeStampBlob, valueModelType, valueBlob, startTime, endTime);
 
         List<DataPoint> expectedDataPoints = new ArrayList<>();
-        expectedDataPoints.add(new DataPoint(0, 5.0));
-        expectedDataPoints.add(new DataPoint(100, 5.0));
-        expectedDataPoints.add(new DataPoint(200, 5.0));
-        expectedDataPoints.add(new DataPoint(300, 5.0));
-        expectedDataPoints.add(new DataPoint(400, 5.0));
-        expectedDataPoints.add(new DataPoint(500, 5.0));
+        expectedDataPoints.add(new DataPoint(0, 5.0F));
+        expectedDataPoints.add(new DataPoint(100, 5.0F));
+        expectedDataPoints.add(new DataPoint(200, 5.0F));
+        expectedDataPoints.add(new DataPoint(300, 5.0F));
+        expectedDataPoints.add(new DataPoint(400, 5.0F));
+        expectedDataPoints.add(new DataPoint(500, 5.0F));
 
         assertEquals(expectedDataPoints, dataPoints);
     }

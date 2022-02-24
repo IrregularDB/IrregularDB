@@ -12,8 +12,8 @@ public class RegularTimeStampCompressionModel extends TimeStampCompressionModel 
     private List<Long> timeStamps;
 
     // TODO: update this constructor when adding error-bound
-    public RegularTimeStampCompressionModel() {
-        super(0);
+    public RegularTimeStampCompressionModel(double errorBound) {
+        super(null, null);
         this.resetModel();
     }
 

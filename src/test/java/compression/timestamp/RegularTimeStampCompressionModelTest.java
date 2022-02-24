@@ -31,7 +31,6 @@ class RegularTimeStampCompressionModelTest {
         return new DataPoint(timeStamp, -1);
     }
 
-
     @BeforeEach
     void init() {
         double errorBound = 0;
@@ -78,7 +77,6 @@ class RegularTimeStampCompressionModelTest {
         assertEquals(3, regularModel.getLength());
     }
 
-
     @Test
     void resetAndAppendAllEmptyModel() {
         // We test that we can insert three legal points at once on an empty model
@@ -103,7 +101,6 @@ class RegularTimeStampCompressionModelTest {
         Assertions.assertFalse(regularModel.resetAndAppendAll(createDataPointsFromTimeStamps(timeStamps)));
         Assertions.assertEquals(4, regularModel.getLength());
     }
-
 
     @Test
     void getTimeStampBlobEmptyModel() {

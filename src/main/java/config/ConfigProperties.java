@@ -66,8 +66,12 @@ public class ConfigProperties extends Properties{
         return Double.parseDouble(getProperty("model.timestamp.errorbound"));
     }
 
-    public double getValueModelErrorBound(){
-        return Double.parseDouble(getProperty("model.value.errorbound"));
+    public float getValueModelErrorBound(){
+        return Float.parseFloat(getProperty("model.value.errorbound"));
+    }
+
+    public String getJDBConnectionString(){
+        return getProperty("database.jdbc.connectionstring");
     }
 
     public String test(){

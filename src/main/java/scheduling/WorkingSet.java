@@ -5,19 +5,18 @@ import segmentgenerator.TimeSeries;
 import segmentgenerator.TimeSeriesFactory;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 
 public class WorkingSet {
 
     private final Queue<TimeSeriesReading> buffer;
-    private final Map<String, TimeSeries> timeSeriesKeyToTimeSeries;
+    private final Map<String, TimeSeries> timeSeriesTagToTimeSeries;
     private final TimeSeriesFactory timeSeriesFactory;
 
     public WorkingSet(Queue<TimeSeriesReading> buffer, TimeSeriesFactory timeSeriesFactory) {
         this.buffer = buffer;
-        this.timeSeriesKeyToTimeSeries = new HashMap<>();
+        this.timeSeriesTagToTimeSeries = new HashMap<>();
         this.timeSeriesFactory = timeSeriesFactory;
     }
 
@@ -45,11 +44,11 @@ public class WorkingSet {
         }
 
         String timeSeriesReadingKey = timeSeriesReading.tag();
-        if (!timeSeriesKeyToTimeSeries.containsKey(timeSeriesReadingKey)) {
-            timeSeriesKeyToTimeSeries.put(timeSeriesReadingKey, createTimeSeriesForNewKey(timeSeriesReadingKey));
+        if (!timeSeriesTagToTimeSeries.containsKey(timeSeriesReadingKey)) {
+            timeSeriesTagToTimeSeries.put(timeSeriesReadingKey, createTimeSeriesForNewKey(timeSeriesReadingKey));
         }
 
-        timeSeriesKeyToTimeSeries.get(timeSeriesReadingKey).processDataPoint(timeSeriesReading.dataPoint());
+        timeSeriesTagToTimeSeries.get(timeSeriesReadingKey).processDataPoint(timeSeriesReading.dataPoint());
         return true;
     }
 

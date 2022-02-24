@@ -26,6 +26,8 @@ public class CSVDataReceiver extends DataReceiver {
             FileReader fileReader = new FileReader(file);
             BufferedReader bufferedReader = new BufferedReader(fileReader);
             readFile(bufferedReader);
+
+            System.out.println("CSVReceiver for " + absoluteFilePath + " has completed delivering its data");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -44,7 +46,7 @@ public class CSVDataReceiver extends DataReceiver {
 
         String id = split[0].trim();
         long timeStamp = Long.parseLong(split[1].trim());
-        double value = Double.parseDouble(split[2].trim());
+        float value = Float.parseFloat(split[2].trim());
 
         return new TimeSeriesReading(id, new DataPoint(timeStamp, value));
     }

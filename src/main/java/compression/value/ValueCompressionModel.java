@@ -7,9 +7,9 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class ValueCompressionModel extends BaseModel<Double> {
-    public ValueCompressionModel(double errorBound) {
-        super(errorBound);
+public abstract class ValueCompressionModel extends BaseModel {
+    public ValueCompressionModel(Float errorBound, Integer lengthBound) {
+        super(errorBound, lengthBound);
     }
 
     /**

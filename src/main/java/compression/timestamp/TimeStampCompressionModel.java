@@ -6,9 +6,9 @@ import records.DataPoint;
 import java.util.List;
 import java.util.function.Function;
 
-public abstract class TimeStampCompressionModel extends BaseModel<Long> {
-    public TimeStampCompressionModel(double errorBound) {
-        super(errorBound);
+public abstract class TimeStampCompressionModel extends BaseModel {
+    public TimeStampCompressionModel(Float errorBound, Integer lengthBound) {
+        super(errorBound, lengthBound);
     }
 
     /**

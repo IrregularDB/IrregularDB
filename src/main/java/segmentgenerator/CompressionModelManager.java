@@ -8,6 +8,7 @@ import records.DataPoint;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class CompressionModelManager {
@@ -53,18 +54,20 @@ public class CompressionModelManager {
         this.activeValueModels.addAll(inactiveValueModels);
         this.activeTimeStampModels.addAll(inactiveTimestampModels);
 
-        this.inactiveValueModels = new ArrayList<>();
-        this.inactiveTimestampModels = new ArrayList<>();
+        Map<Boolean, List<ValueCompressionModel>> valueModelsAppended = activeValueModels.stream()
+                .collect(Collectors.partitioningBy(valueModel -> valueModel.resetAndAppendAll(notYetEmitted)));
+        // Update local lists in active and inactive
+        this.activeValueModels = valueModelsAppended.get(true);
+        this.inactiveValueModels = valueModelsAppended.get(false);
 
-        boolean anySuccessValue = this.activeValueModels.stream()
-                .map((valueModel) -> valueModel.resetAndAppendAll(notYetEmitted))
-                .anyMatch(item -> true);
+        // Same for time stamp models
+        Map<Boolean, List<TimeStampCompressionModel>> timeStampModelAppended = activeTimeStampModels.stream()
+                .collect(Collectors.partitioningBy(timeStampModel -> timeStampModel.resetAndAppendAll(notYetEmitted)));
 
-        boolean anySuccessTimeStamp = this.activeTimeStampModels.stream()
-                .map((timestampModel) -> timestampModel.resetAndAppendAll(notYetEmitted))
-                .anyMatch(item -> true);
+        this.activeTimeStampModels = timeStampModelAppended.get(true);
+        this.inactiveTimestampModels = timeStampModelAppended.get(false);
 
-        return anySuccessValue && anySuccessTimeStamp;
+        return !activeValueModels.isEmpty() && !activeTimeStampModels.isEmpty();
     }
 
 

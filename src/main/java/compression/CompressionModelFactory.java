@@ -4,6 +4,7 @@ import compression.timestamp.RegularTimeStampCompressionModel;
 import compression.timestamp.TimeStampCompressionModel;
 import compression.timestamp.TimeStampCompressionModelType;
 import compression.value.PMCMeanValueCompressionModel;
+import compression.value.SwingValueCompressionModel;
 import compression.value.ValueCompressionModel;
 import compression.value.ValueCompressionModelType;
 import config.ConfigProperties;
@@ -29,7 +30,7 @@ public class CompressionModelFactory {
 
     public static List<ValueCompressionModel> getValueCompressionModels() {
         List<ValueCompressionModelType> valueModelTypes =  config.getValueModels();
-        final double valueModelErrorBound = config.getValueModelErrorBound();
+        final float valueModelErrorBound = config.getValueModelErrorBound();
 
         return getCompressionModels(valueModelTypes, (modelType) -> CompressionModelFactory.getValueCompressionModelByType(modelType, valueModelErrorBound));
     }
@@ -42,14 +43,14 @@ public class CompressionModelFactory {
     }
 
 
-    private static ValueCompressionModel getValueCompressionModelByType(ValueCompressionModelType valueCompressionModelType, double errorBound) {
+    private static ValueCompressionModel getValueCompressionModelByType(ValueCompressionModelType valueCompressionModelType, float errorBound) {
         switch (valueCompressionModelType) {
             case PMC_MEAN:
                 return new PMCMeanValueCompressionModel(errorBound);
             case GORILLA:
                 //TODO
             case SWING:
-                //TODO
+                return new SwingValueCompressionModel(errorBound);
             default:
                 throw new RuntimeException("Type not defined");
         }
@@ -59,7 +60,7 @@ public class CompressionModelFactory {
     private static TimeStampCompressionModel getTimestampCompressionModelByType(TimeStampCompressionModelType timeStampCompressionModelType, double errorBound) {
         switch (timeStampCompressionModelType){
             case REGULAR:
-                return new RegularTimeStampCompressionModel();
+                return new RegularTimeStampCompressionModel(errorBound);
             case BASEDELTA:
                 //TODO
             case DELTAPAIRS:

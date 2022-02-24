@@ -6,21 +6,37 @@ import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.function.Function;
 
-public abstract class BaseModel<E> {
-    private final double errorBound;
+public abstract class BaseModel {
+    private final Float errorBound;
+    private final Integer lengthBound;
 
-    public BaseModel(double errorBound) {
+    public BaseModel(Float errorBound, Integer lengthBound) {
         // This small hack is added because floating point imprecision can lead to error-bound
         // of zero not really working.
-        if (errorBound == 0) {
-            this.errorBound = 0.00000000000001;
+        if (errorBound != null) {
+            if (errorBound == 0) {
+                this.errorBound = 0.00001F;
+            } else {
+                this.errorBound = errorBound;
+            }
         } else {
-            this.errorBound = errorBound;
+            this.errorBound = null;
         }
+        this.lengthBound = lengthBound;
     }
 
-    public double getErrorBound() {
+    public float getErrorBound() {
+        if (errorBound == null) {
+            throw new UnsupportedOperationException("You tried to get error bound for a model, which has no error bound defined");
+        }
         return errorBound;
+    }
+
+    public int getLengthBound() {
+        if (lengthBound == null) {
+            throw new UnsupportedOperationException("You tried to get length bound for a model, which has no length bound defined");
+        }
+        return lengthBound;
     }
 
     protected abstract void resetModel();
@@ -48,15 +64,10 @@ public abstract class BaseModel<E> {
     public abstract boolean append(DataPoint dataPoint);
 
     /**
-     *
-     * @return greater value represents better compression
+     * @return returns amount of bytes used in the byte buffer to represent the model
      */
-    public final double getCompressionRatio() {
-        int amtDataPoints = this.getLength();
-        // We get the size of the BLOB by reading its position, which indicates how many bytes we have used
-        int amtBytesUsed = this.getBlobRepresentation().position();
-
-        return (double)amtDataPoints/ (double)(amtBytesUsed);
+    public final int getAmountBytesUsed() {
+        return this.getBlobRepresentation().position();
     }
 
     /**

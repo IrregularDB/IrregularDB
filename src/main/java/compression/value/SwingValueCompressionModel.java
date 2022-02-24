@@ -17,14 +17,14 @@ public class SwingValueCompressionModel extends ValueCompressionModel {
     private boolean earlierAppendFailed;
     private LinearFunction upperBound;
     private LinearFunction lowerBound;
-    private final Double errorBoundAsDecimal;
+    private final float errorBoundAsDecimal;
 
-    public SwingValueCompressionModel(double errorBound) {
-        super(errorBound);
+    public SwingValueCompressionModel(float errorBound) {
+        super(errorBound, null);
         // The error bound provided is in percentage, so we first transform it to a decimal number
         // NOTE: due to the same reason as in ModelarDB we here choose to divide with 100.1 instead of 100
         // as we otherwise would allow data points slightly above the error bound.
-        this.errorBoundAsDecimal = super.getErrorBound() / 100.1;
+        this.errorBoundAsDecimal = super.getErrorBound() / 100.1F;
         this.resetModel();
     }
 
@@ -46,7 +46,7 @@ public class SwingValueCompressionModel extends ValueCompressionModel {
             throw new IllegalArgumentException("You tried to append to the SWING-model after it failed an earlier append");
         }
         boolean withinErrorBound;
-        double allowedDerivation = Math.abs(dataPoint.value() * errorBoundAsDecimal);
+        float allowedDerivation = Math.abs(dataPoint.value() * errorBoundAsDecimal);
 
         if (this.getLength() < 2) {
             handleFirstTwoDataPoints(dataPoint, allowedDerivation);  // LINE 2-4: makes a recording and upper+lower bound
@@ -65,7 +65,7 @@ public class SwingValueCompressionModel extends ValueCompressionModel {
         return withinErrorBound;
     }
 
-    private void handleFirstTwoDataPoints(DataPoint dataPoint, double allowedDerivation) {
+    private void handleFirstTwoDataPoints(DataPoint dataPoint, float allowedDerivation) {
         if (initialDataPoint == null) { // First data point
             initialDataPoint = dataPoint;
         } else {
@@ -74,7 +74,7 @@ public class SwingValueCompressionModel extends ValueCompressionModel {
         }
     }
 
-    private boolean checkIfDataPointIsWithinErrorBound(DataPoint dataPoint, double allowedDerivation) {
+    private boolean checkIfDataPointIsWithinErrorBound(DataPoint dataPoint, float allowedDerivation) {
         boolean withinErrorBound = true;
         if (dataPoint.value() < (lowerBound.getValue(dataPoint.timestamp()) - allowedDerivation)) {
             withinErrorBound = false;
@@ -84,7 +84,7 @@ public class SwingValueCompressionModel extends ValueCompressionModel {
         return withinErrorBound;
     }
 
-    private void swingBounds(DataPoint dataPoint, double allowedDerivation) {
+    private void swingBounds(DataPoint dataPoint, float allowedDerivation) {
         if (dataPoint.value() > (lowerBound.getValue(dataPoint.timestamp()) + allowedDerivation)) { // Swing up
             lowerBound = new LinearFunction(initialDataPoint, new DataPoint(dataPoint.timestamp(), dataPoint.value() - allowedDerivation));
         }
@@ -105,8 +105,8 @@ public class SwingValueCompressionModel extends ValueCompressionModel {
         }
 
         // We choose to save the average i.e. the line between our two bounds
-        float slope = (float) ((this.lowerBound.getSlope() + this.upperBound.getSlope()) / 2);
-        float intercept = (float) ((this.lowerBound.getIntercept() + this.upperBound.getIntercept()) / 2);
+        float slope = (this.lowerBound.getSlope() + this.upperBound.getSlope()) / 2;
+        float intercept = (this.lowerBound.getIntercept() + this.upperBound.getIntercept()) / 2;
 
         // We convert to float as this is what we store (i.e. we support floating point precision)
         return ByteBuffer.allocate(8).putFloat(slope).putFloat(intercept);
@@ -114,6 +114,10 @@ public class SwingValueCompressionModel extends ValueCompressionModel {
 
     @Override
     public void reduceToSizeN(int n) {
-        throw new RuntimeException("Not implemented");
+        int length = this.getLength();
+        if (length < n) {
+            throw new IllegalArgumentException("You tried to reduce this size of a model to something smaller than its current size");
+        }
+        dataPoints.subList(n, this.getLength()).clear();
     }
 }

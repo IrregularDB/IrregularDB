@@ -19,7 +19,7 @@ public class TestCompressionModelManagerRegularPMCMean extends CompressionModelM
 
     private List<DataPoint> acceptedDataPoints;
 
-    private Double expectedValue = null;
+    private Float expectedValue = null;
 
     public TestCompressionModelManagerRegularPMCMean(List<ValueCompressionModel> valueCompressionModels, List<TimeStampCompressionModel> timeStampCompressionModels) {
         super(valueCompressionModels, timeStampCompressionModels);
@@ -60,10 +60,11 @@ public class TestCompressionModelManagerRegularPMCMean extends CompressionModelM
         if (timeStampCompressionModels.get(0).getTimeStampCompressionModelType() == TimeStampCompressionModelType.REGULAR &&
                 valueCompressionModels.get(0).getValueCompressionModelType() == ValueCompressionModelType.PMC_MEAN) {
 
-            PMCMeanValueCompressionModel pmcMeanValueCompressionModel = new PMCMeanValueCompressionModel(0);
+            float errorBound = 0;
+            PMCMeanValueCompressionModel pmcMeanValueCompressionModel = new PMCMeanValueCompressionModel(errorBound);
             pmcMeanValueCompressionModel.resetAndAppendAll(acceptedDataPoints);
 
-            RegularTimeStampCompressionModel regularTimeStampCompressionModel = new RegularTimeStampCompressionModel();
+            RegularTimeStampCompressionModel regularTimeStampCompressionModel = new RegularTimeStampCompressionModel(errorBound);
             regularTimeStampCompressionModel.resetAndAppendAll(acceptedDataPoints);
 
             return new CompressionModel(pmcMeanValueCompressionModel, regularTimeStampCompressionModel);

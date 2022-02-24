@@ -101,6 +101,11 @@ public class RegularTimeStampCompressionModel extends TimeStampCompressionModel 
 
     @Override
     public void reduceToSizeN(int n) {
-        //no implementation necessary
+        int length = this.getLength();
+        // no implementation is necessary
+        if (length < n) {
+            throw new IllegalArgumentException("You tried to reduce this size of a model to something smaller than its current size");
+        }
+        timeStamps.subList(n, this.getLength()).clear();
     }
 }

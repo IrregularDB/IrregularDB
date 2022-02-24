@@ -196,4 +196,19 @@ class SwingValueCompressionModelTest {
         // We expect that we use 8 bytes (i.e. 2 floats)
         Assertions.assertEquals(8, swingModel.getAmountBytesUsed());
     }
+
+    @Test
+    void reduceToSizeN() {
+        var values = Arrays.asList(1.0F, 1.0F, 1.0F, 1.0F);
+        swingModel.resetAndAppendAll(createDataPointsFromValues(values));
+        swingModel.reduceToSizeN(2);
+        Assertions.assertEquals(2, swingModel.getLength());
+    }
+
+    @Test
+    void reduceToSizeNIllegalArgument() {
+        var values = Arrays.asList(1.0F, 1.0F, 1.0F, 1.0F);
+        swingModel.resetAndAppendAll(createDataPointsFromValues(values));
+        Assertions.assertThrows(IllegalArgumentException.class, () ->  swingModel.reduceToSizeN(5));
+    }
 }

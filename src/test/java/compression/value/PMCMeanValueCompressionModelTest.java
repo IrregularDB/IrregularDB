@@ -125,4 +125,19 @@ class PMCMeanValueCompressionModelTest {
         // We expect that we use 4 bytes
         Assertions.assertEquals(4, pmcMeanModel.getAmountBytesUsed());
     }
+
+    @Test
+    void reduceToSizeN() {
+        var values = Arrays.asList(1.0F, 1.0F, 1.0F, 1.0F);
+        pmcMeanModel.resetAndAppendAll(createDataPointsFromValues(values));
+        pmcMeanModel.reduceToSizeN(2);
+        Assertions.assertEquals(2, pmcMeanModel.getLength());
+    }
+
+    @Test
+    void reduceToSizeNIllegalArgument() {
+        var values = Arrays.asList(1.0F, 1.0F, 1.0F, 1.0F);
+        pmcMeanModel.resetAndAppendAll(createDataPointsFromValues(values));
+        Assertions.assertThrows(IllegalArgumentException.class, () ->  pmcMeanModel.reduceToSizeN(5));
+    }
 }

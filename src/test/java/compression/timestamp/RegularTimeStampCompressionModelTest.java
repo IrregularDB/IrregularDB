@@ -133,4 +133,19 @@ class RegularTimeStampCompressionModelTest {
         // We expect that we use 4 bytes
         Assertions.assertEquals(4, regularModel.getAmountBytesUsed());
     }
+
+    @Test
+    void reduceToSizeN() {
+        List<Long> timeStamps = Arrays.asList(0L, 100L, 200L, 300L);
+        regularModel.resetAndAppendAll(createDataPointsFromTimeStamps(timeStamps));
+        regularModel.reduceToSizeN(2);
+        Assertions.assertEquals(2, regularModel.getLength());
+    }
+
+    @Test
+    void reduceToSizeNIllegalArgument() {
+        List<Long> timeStamps = Arrays.asList(0L, 100L, 200L, 300L);
+        regularModel.resetAndAppendAll(createDataPointsFromTimeStamps(timeStamps));
+        Assertions.assertThrows(IllegalArgumentException.class, () ->  regularModel.reduceToSizeN(5));
+    }
 }

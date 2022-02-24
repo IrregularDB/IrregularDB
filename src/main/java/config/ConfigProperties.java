@@ -74,7 +74,8 @@ public class ConfigProperties extends Properties{
         return getProperty("database.jdbc.connectionstring");
     }
 
-    public String test(){
-        return getProperty("test");
+    public int getSocketDataReceiverSpawnerPort(){
+        return Integer.parseInt(getProperty("source.socket.port"));
     }
+
 }

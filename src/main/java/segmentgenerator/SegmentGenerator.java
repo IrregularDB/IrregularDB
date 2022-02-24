@@ -12,12 +12,12 @@ import java.util.List;
 public class SegmentGenerator {
 
     private final CompressionModelManager compressionModelManager;
-    private final String timeSeriesKey;
+    private final int timeSeriesId;
     private List<DataPoint> notYetEmitted;
 
-    public SegmentGenerator(CompressionModelManager compressionModelManager, String timeSeriesKey) {
+    public SegmentGenerator(CompressionModelManager compressionModelManager, int timeSeriesId) {
         this.compressionModelManager = compressionModelManager;
-        this.timeSeriesKey = timeSeriesKey;
+        this.timeSeriesId = timeSeriesId;
         this.notYetEmitted = new ArrayList<>();
     }
 
@@ -74,7 +74,7 @@ public class SegmentGenerator {
         ValueCompressionModel valueModel = compressionModel.getValueCompressionModel();
         TimeStampCompressionModel timeStampModel = compressionModel.getTimeStampCompressionModel();
 
-        return new Segment(this.timeSeriesKey, startTime, endTime, valueModel.getValueCompressionModelType().ordinal(), valueModel.getBlobRepresentation(), timeStampModel.getTimeStampCompressionModelType().ordinal(), timeStampModel.getBlobRepresentation());
+        return new Segment(this.timeSeriesId, startTime, endTime, valueModel.getValueCompressionModelType().ordinal(), valueModel.getBlobRepresentation(), timeStampModel.getTimeStampCompressionModelType().ordinal(), timeStampModel.getBlobRepresentation());
     }
 
 }

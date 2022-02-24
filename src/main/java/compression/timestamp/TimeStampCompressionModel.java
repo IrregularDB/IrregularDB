@@ -1,11 +1,7 @@
 package compression.timestamp;
 
 import compression.BaseModel;
-import compression.Encoding;
-import records.DataPoint;
-
-import java.util.List;
-import java.util.function.Function;
+import compression.encoding.Encoding;
 
 public abstract class TimeStampCompressionModel extends BaseModel {
     protected Encoding<Integer> encoding;

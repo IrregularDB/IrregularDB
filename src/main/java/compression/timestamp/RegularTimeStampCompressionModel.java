@@ -13,7 +13,7 @@ public class RegularTimeStampCompressionModel extends TimeStampCompressionModel 
 
     // TODO: update this constructor when adding error-bound
     public RegularTimeStampCompressionModel(double errorBound) {
-        super(null, null, null);
+        super(null, null);
         this.resetModel();
     }
 

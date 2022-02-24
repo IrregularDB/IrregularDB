@@ -1,14 +1,11 @@
 package compression.timestamp;
 
 import compression.BaseModel;
-import compression.encoding.Encoding;
 
 public abstract class TimeStampCompressionModel extends BaseModel {
-    protected Encoding<Integer> encoding;
 
-    public TimeStampCompressionModel(Float errorBound, Integer lengthBound, Encoding<Integer> encoding) {
+    public TimeStampCompressionModel(Float errorBound, Integer lengthBound) {
         super(errorBound, lengthBound);
-        this.encoding = encoding;
     }
 
     /**

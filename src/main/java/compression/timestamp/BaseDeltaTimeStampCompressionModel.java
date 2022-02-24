@@ -12,8 +12,8 @@ public class BaseDeltaTimeStampCompressionModel extends TimeStampCompressionMode
     private long startTime;
     private LinkedList<Integer> deltaTimeStamps;
 
-    public BaseDeltaTimeStampCompressionModel(double errorBound) {
-        super(errorBound);
+    public BaseDeltaTimeStampCompressionModel(float errorBound) {
+        super(errorBound, null);
         this.resetModel();
     }
 

@@ -9,21 +9,20 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class BaseDeltaTimeStampCompressionModelTest {
+class BaseDeltaPairsTimeStampCompressionModelTest {
 
     BaseDeltaTimeStampCompressionModel baseDeltaTimeStampCompressionModel;
     Random random = new Random();
     long previousLong;
-    double previousDouble;
+    float previousFloat;
     List<DataPoint> dataPoints = createTenDataPoints();
 
     @BeforeEach
     void init() {
-        baseDeltaTimeStampCompressionModel = new BaseDeltaTimeStampCompressionModel(0.0);
+        baseDeltaTimeStampCompressionModel = new BaseDeltaTimeStampCompressionModel(0F);
     }
 
     @Test
@@ -42,7 +41,6 @@ class BaseDeltaTimeStampCompressionModelTest {
         baseDeltaTimeStampCompressionModel.append(createDataPoint());
 
         List<DataPoint> dataPointList = createTenDataPoints();
-
         boolean success = baseDeltaTimeStampCompressionModel.resetAndAppendAll(dataPointList);
 
         Assertions.assertTrue(success);
@@ -50,9 +48,9 @@ class BaseDeltaTimeStampCompressionModelTest {
 
     @Test
     public void testBlobRepresentation(){
-        baseDeltaTimeStampCompressionModel.append(new DataPoint(0, 1.1));
-        baseDeltaTimeStampCompressionModel.append(new DataPoint(1, 2.2));
-        baseDeltaTimeStampCompressionModel.append(new DataPoint(2, 3.3));
+        baseDeltaTimeStampCompressionModel.append(new DataPoint(0, 1.1f));
+        baseDeltaTimeStampCompressionModel.append(new DataPoint(1, 2.2f));
+        baseDeltaTimeStampCompressionModel.append(new DataPoint(2, 3.3f));
 
         ByteBuffer blobRepresentation = baseDeltaTimeStampCompressionModel.getBlobRepresentation();
 
@@ -68,9 +66,7 @@ class BaseDeltaTimeStampCompressionModelTest {
     @Test
     public void testReduceSizeToN(){
         dataPoints.forEach(dp -> baseDeltaTimeStampCompressionModel.append(dp));
-
         baseDeltaTimeStampCompressionModel.reduceToSizeN(5);
-
         int actualAmountOfTimeStamps = baseDeltaTimeStampCompressionModel.getTimeStampsAmount();
 
         // Assert list has 5 data points
@@ -80,9 +76,7 @@ class BaseDeltaTimeStampCompressionModelTest {
     @Test
     public void testReduceSizeWithNumberOfTimeStamps(){
         dataPoints.forEach(dp -> baseDeltaTimeStampCompressionModel.append(dp));
-
         baseDeltaTimeStampCompressionModel.reduceToSizeN(9);
-
         int actualAmountOfTimeStamps = baseDeltaTimeStampCompressionModel.getTimeStampsAmount();
 
         assertEquals(9, actualAmountOfTimeStamps);
@@ -91,14 +85,12 @@ class BaseDeltaTimeStampCompressionModelTest {
     @Test
     public void testReduceSizeWithZeroThrowsException(){
         dataPoints.forEach(dp -> baseDeltaTimeStampCompressionModel.append(dp));
-
         assertThrows(IllegalArgumentException.class, () -> baseDeltaTimeStampCompressionModel.reduceToSizeN(0));
     }
 
     @Test
     public void testReduceSizeWithMoreThanListSizeThrowsException(){
         dataPoints.forEach(dp -> baseDeltaTimeStampCompressionModel.append(dp));
-
         assertThrows(IllegalArgumentException.class, () -> baseDeltaTimeStampCompressionModel.reduceToSizeN(20));
     }
 
@@ -106,8 +98,8 @@ class BaseDeltaTimeStampCompressionModelTest {
     // Helper that creates random data points in increasing order
     private DataPoint createDataPoint(){
         previousLong += random.nextLong(100L);
-        previousDouble += random.nextDouble(100.00);
-        return new DataPoint(previousLong, previousDouble);
+        previousFloat += random.nextFloat(100.00f);
+        return new DataPoint(previousLong, previousFloat);
     }
 
     private List<DataPoint> createTenDataPoints(){

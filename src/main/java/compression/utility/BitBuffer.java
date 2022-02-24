@@ -33,20 +33,6 @@ public class BitBuffer {
         return byteBuffer;
     }
 
-    private void handledUnfinishedByte() {
-        while (currByte.length() < Byte.SIZE) {
-            currByte.append("0");
-        }
-        flushCurrentByteToBuffer();
-    }
-
-    private void shortenBufferToSizeN(int n) {
-        ByteBuffer shortenedBuffer = ByteBuffer.allocate(n);
-        this.byteBuffer.flip();
-        shortenedBuffer.put(this.byteBuffer);
-        this.byteBuffer = shortenedBuffer;
-    }
-
     public void putFloat(float value){
         if (byteBuffer.remaining() < 4) {
             extendBufferWithNMoreBytes(4);
@@ -63,6 +49,20 @@ public class BitBuffer {
 
     public void writeBitString(String bitString) {
         bitString.chars().forEach(c -> writeBit((char) c));
+    }
+
+    private void handledUnfinishedByte() {
+        while (currByte.length() < Byte.SIZE) {
+            currByte.append("0");
+        }
+        flushCurrentByteToBuffer();
+    }
+
+    private void shortenBufferToSizeN(int n) {
+        ByteBuffer shortenedBuffer = ByteBuffer.allocate(n);
+        this.byteBuffer.flip();
+        shortenedBuffer.put(this.byteBuffer);
+        this.byteBuffer = shortenedBuffer;
     }
 
     private void flushCurrentByteToBuffer() {

@@ -1,14 +1,18 @@
 package compression.timestamp;
 
 import compression.BaseModel;
+import compression.Encoding;
 import records.DataPoint;
 
 import java.util.List;
 import java.util.function.Function;
 
 public abstract class TimeStampCompressionModel extends BaseModel {
-    public TimeStampCompressionModel(Float errorBound, Integer lengthBound) {
+    protected Encoding<Integer> encoding;
+
+    public TimeStampCompressionModel(Float errorBound, Integer lengthBound, Encoding<Integer> encoding) {
         super(errorBound, lengthBound);
+        this.encoding = encoding;
     }
 
     /**

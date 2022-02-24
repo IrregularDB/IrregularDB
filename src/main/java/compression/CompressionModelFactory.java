@@ -4,6 +4,7 @@ import compression.timestamp.RegularTimeStampCompressionModel;
 import compression.timestamp.TimeStampCompressionModel;
 import compression.timestamp.TimeStampCompressionModelType;
 import compression.value.PMCMeanValueCompressionModel;
+import compression.value.SwingValueCompressionModel;
 import compression.value.ValueCompressionModel;
 import compression.value.ValueCompressionModelType;
 import config.ConfigProperties;
@@ -49,7 +50,7 @@ public class CompressionModelFactory {
             case GORILLA:
                 //TODO
             case SWING:
-                //TODO
+                return new SwingValueCompressionModel(errorBound);
             default:
                 throw new RuntimeException("Type not defined");
         }

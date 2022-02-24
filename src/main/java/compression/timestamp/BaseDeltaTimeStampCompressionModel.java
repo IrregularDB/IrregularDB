@@ -10,9 +10,6 @@ import java.util.List;
 public class BaseDeltaTimeStampCompressionModel extends TimeStampCompressionModel {
 
     private long startTime;
-
-
-
     private LinkedList<Integer> deltaTimeStamps;
 
     public BaseDeltaTimeStampCompressionModel(double errorBound) {
@@ -54,7 +51,13 @@ public class BaseDeltaTimeStampCompressionModel extends TimeStampCompressionMode
 
     @Override
     public void reduceToSizeN(int n) {
-        this.deltaTimeStamps.subList(0, n).clear();
+        if (n <= 0){
+            throw new IllegalArgumentException("n cannot be 0 or lower");
+        } else if (n > this.deltaTimeStamps.size()){
+            throw new IllegalArgumentException("n cannot bigger than list size");
+        }
+
+        this.deltaTimeStamps.subList(n, deltaTimeStamps.size()).clear();
     }
 
     @Override
@@ -76,7 +79,7 @@ public class BaseDeltaTimeStampCompressionModel extends TimeStampCompressionMode
         return startTime;
     }
 
-    public LinkedList<Integer> getDeltaTimeStamps() {
-        return deltaTimeStamps;
+    public int getTimeStampsAmount() {
+        return deltaTimeStamps.size();
     }
 }

@@ -17,7 +17,7 @@ public record ModelPicker (List<ValueCompressionModel> valueCompressionModels, L
         return new CompressionModel(bestValueCompressionModel, bestTimeStampCompressionModel);
     }
 
-    private <T> double calculateAmountBytesPerDataPoint(BaseModel model) {
+    private double calculateAmountBytesPerDataPoint(BaseModel model) {
         // TODO: ensure this overhead is correct, maybe pass it as an input of some kind through the config
         // We have the following overhead:
         //   time_series_id (integer) = 4 bytes

@@ -19,7 +19,7 @@ public class TestCompressionModelManagerRegularPMCMean extends CompressionModelM
 
     private List<DataPoint> acceptedDataPoints;
 
-    private Double expectedValue = null;
+    private Float expectedValue = null;
 
     public TestCompressionModelManagerRegularPMCMean(List<ValueCompressionModel> valueCompressionModels, List<TimeStampCompressionModel> timeStampCompressionModels) {
         super(valueCompressionModels, timeStampCompressionModels);

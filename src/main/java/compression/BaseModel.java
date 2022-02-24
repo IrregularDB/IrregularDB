@@ -15,7 +15,7 @@ public abstract class BaseModel<E> {
         // of zero not really working.
         if (errorBound != null) {
             if (errorBound == 0) {
-                this.errorBound = 0.00000000000001;
+                this.errorBound = 0.00001;
             } else {
                 this.errorBound = errorBound;
             }

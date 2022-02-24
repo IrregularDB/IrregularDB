@@ -20,9 +20,9 @@ class WorkingSetTest {
     public void testOfWorkingSet() throws InterruptedException {
         ConcurrentLinkedQueue<TimeSeriesReading> buffer = new ConcurrentLinkedQueue<>();
 
-        TimeSeriesReading timeSeriesReading1 = new TimeSeriesReading("key1", new DataPoint(1234567, 42.69));
-        TimeSeriesReading timeSeriesReading2 = new TimeSeriesReading("key2", new DataPoint(1234, 4.69));
-        TimeSeriesReading timeSeriesReading3 = new TimeSeriesReading("key1", new DataPoint(123456789, 2.69));
+        TimeSeriesReading timeSeriesReading1 = new TimeSeriesReading("key1", new DataPoint(1234567, 42.69F));
+        TimeSeriesReading timeSeriesReading2 = new TimeSeriesReading("key2", new DataPoint(1234, 4.69F));
+        TimeSeriesReading timeSeriesReading3 = new TimeSeriesReading("key1", new DataPoint(123456789, 2.69F));
 
         TestTimeSeriesFactory testTimeSeriesFactory = new TestTimeSeriesFactory();
 

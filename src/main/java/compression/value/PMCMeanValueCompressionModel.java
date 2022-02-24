@@ -13,10 +13,10 @@ import java.util.List;
 
 
 public class PMCMeanValueCompressionModel extends ValueCompressionModel {
-    private List<Double> values;
-    private double min;
-    private double max;
-    private double sum;
+    private List<Float> values;
+    private float min;
+    private float max;
+    private float sum;
     private boolean earlierAppendFailed;
 
     public PMCMeanValueCompressionModel(double errorBound) {
@@ -26,8 +26,8 @@ public class PMCMeanValueCompressionModel extends ValueCompressionModel {
 
     @Override
     protected void resetModel() {
-        this.min = Double.POSITIVE_INFINITY;
-        this.max = Double.NEGATIVE_INFINITY;
+        this.min = Float.POSITIVE_INFINITY;
+        this.max = Float.NEGATIVE_INFINITY;
         this.sum = 0;
         this.earlierAppendFailed = false;
         this.values = new ArrayList<>();
@@ -43,18 +43,18 @@ public class PMCMeanValueCompressionModel extends ValueCompressionModel {
         return appendValue(dataPoint.value());
     }
 
-    private boolean appendValue(double value) {
+    private boolean appendValue(float value) {
         if (earlierAppendFailed) { // Security added so that if you try to append after an earlier append failed
             throw new IllegalArgumentException("You tried to append to a model that had failed an earlier append");
         }
 
         // We keep track of next values as we only update the min/max/sum if append succeeds
-        double nextMin = Double.min(min, value);
-        double nextMax = Double.max(max, value);
-        double nextSum = sum + value;
+        float nextMin = Float.min(min, value);
+        float nextMax = Float.max(max, value);
+        float nextSum = sum + value;
 
         // Calculate average
-        double mean = nextSum / (this.getLength() + 1);
+        float mean = nextSum / (this.getLength() + 1);
 
         boolean appendSucceeded = PercentageError.isWithinErrorBound(mean, nextMin, super.getErrorBound()) &&
                           PercentageError.isWithinErrorBound(mean, nextMax, super.getErrorBound());
@@ -66,7 +66,7 @@ public class PMCMeanValueCompressionModel extends ValueCompressionModel {
         return appendSucceeded;
     }
 
-    private void updateModelState(double min, double max, double sum, double value) {
+    private void updateModelState(float min, float max, float sum, float value) {
         this.min = min;
         this.max = max;
         this.sum = sum;
@@ -80,7 +80,7 @@ public class PMCMeanValueCompressionModel extends ValueCompressionModel {
         }
 
         // We convert to float as this is what we store (i.e. we support floating point precision)
-        float mean = (float) (this.sum / this.getLength());
+        float mean = (this.sum / this.getLength());
         return ByteBuffer.allocate(4).putFloat(mean);
     }
 

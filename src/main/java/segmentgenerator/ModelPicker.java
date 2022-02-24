@@ -23,8 +23,9 @@ public record ModelPicker (List<ValueCompressionModel> valueCompressionModels, L
         //   time_series_id (integer) = 4 bytes
         //   start_time (long/bigint) = 8 bytes
         //   end_time (long/bigint) = 8 bytes
-        //   model_type (smallint) = 2 bytes
-        int overhead = 4 + 8 + 8 + 2;
+        //   value_model_type (smallint) = 2 bytes
+        //   time_model_type (smallint) = 2 bytes
+        int overhead = 4 + 8 + 8 + 2 + 2;
         int amountBytesUsed = overhead + model.getAmountBytesUsed();
         int amountDataPoints = model.getLength();
         return ((double) amountBytesUsed) / ((double) amountDataPoints);

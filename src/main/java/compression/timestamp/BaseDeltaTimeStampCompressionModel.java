@@ -7,9 +7,12 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-public class BaseDeltaTimeStampCompressionModel extends TimeStampCompressionModel{
+public class BaseDeltaTimeStampCompressionModel extends TimeStampCompressionModel {
 
     private long startTime;
+
+
+
     private LinkedList<Integer> deltaTimeStamps;
 
     public BaseDeltaTimeStampCompressionModel(double errorBound) {
@@ -30,7 +33,7 @@ public class BaseDeltaTimeStampCompressionModel extends TimeStampCompressionMode
 
     @Override
     public boolean append(DataPoint dataPoint) {
-        if (startTime < 0){
+        if (startTime < 0) {
             startTime = dataPoint.timestamp();
             return true;
         }
@@ -42,8 +45,8 @@ public class BaseDeltaTimeStampCompressionModel extends TimeStampCompressionMode
 
     @Override
     public ByteBuffer getBlobRepresentation() {
-        ByteBuffer byteBuffer = ByteBuffer.allocate(this.deltaTimeStamps.size() * 4);
-        for (Integer integer : this.deltaTimeStamps){
+        ByteBuffer byteBuffer = ByteBuffer.allocate((this.deltaTimeStamps.size() + 1) * 4);
+        for (Integer integer : this.deltaTimeStamps) {
             byteBuffer.putInt(integer);
         }
         return byteBuffer;
@@ -51,9 +54,7 @@ public class BaseDeltaTimeStampCompressionModel extends TimeStampCompressionMode
 
     @Override
     public void reduceToSizeN(int n) {
-        for (Integer i : this.deltaTimeStamps){
-            this.deltaTimeStamps.removeLast();
-        }
+        this.deltaTimeStamps.subList(0, n).clear();
     }
 
     @Override
@@ -61,12 +62,21 @@ public class BaseDeltaTimeStampCompressionModel extends TimeStampCompressionMode
         return TimeStampCompressionModelType.BASEDELTA;
     }
 
-    private int getDeltaFromStartTime(long timestamp){
+    private int getDeltaFromStartTime(long timestamp) {
+        long longDelta = timestamp - startTime;
         int delta = (int) (timestamp - startTime);
-        if (delta != timestamp){
+        if (delta != longDelta) {
             System.out.println("BaseDeltaTimeStampCompressionModel:getDeltaFromStartTime(): \"Timestamp not " +
                     "represented correctly by delta \" ");
         }
         return delta;
+    }
+
+    public long getStartTime() {
+        return startTime;
+    }
+
+    public LinkedList<Integer> getDeltaTimeStamps() {
+        return deltaTimeStamps;
     }
 }

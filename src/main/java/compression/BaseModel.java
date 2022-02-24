@@ -6,7 +6,7 @@ import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.function.Function;
 
-public abstract class BaseModel<E> {
+public abstract class BaseModel {
     private final Float errorBound;
     private final Integer lengthBound;
 
@@ -64,15 +64,10 @@ public abstract class BaseModel<E> {
     public abstract boolean append(DataPoint dataPoint);
 
     /**
-     *
-     * @return greater value represents better compression
+     * @return returns amount of bytes used in the byte buffer to represent the model
      */
-    public final double getCompressionRatio() {
-        int amtDataPoints = this.getLength();
-        // We get the size of the BLOB by reading its position, which indicates how many bytes we have used
-        int amtBytesUsed = this.getBlobRepresentation().position();
-
-        return (double)amtDataPoints/ (double)(amtBytesUsed);
+    public final int getAmountBytesUsed() {
+        return this.getBlobRepresentation().position();
     }
 
     /**

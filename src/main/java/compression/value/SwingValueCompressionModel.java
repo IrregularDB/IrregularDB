@@ -114,6 +114,11 @@ public class SwingValueCompressionModel extends ValueCompressionModel {
 
     @Override
     public void reduceToSizeN(int n) {
+        int length = this.getLength();
         // no implementation is necessary
+        if (length < n) {
+            throw new IllegalArgumentException("You tried to reduce this size of a model to something smaller than its current size");
+        }
+        dataPoints.subList(n, this.getLength()).clear();
     }
 }

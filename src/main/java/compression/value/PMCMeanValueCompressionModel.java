@@ -10,6 +10,7 @@ import records.DataPoint;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 public class PMCMeanValueCompressionModel extends ValueCompressionModel {
@@ -91,6 +92,11 @@ public class PMCMeanValueCompressionModel extends ValueCompressionModel {
 
     @Override
     public void reduceToSizeN(int n) {
+        int length = this.getLength();
         // no implementation is necessary
+        if (length < n) {
+            throw new IllegalArgumentException("You tried to reduce this size of a model to something smaller than its current size");
+        }
+        values.subList(n, this.getLength()).clear();
     }
 }

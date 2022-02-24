@@ -13,8 +13,8 @@ CREATE TABLE TimeSeries(
 
 CREATE TABLE Segment(
     time_series_id int not null,
-    start_time int not null,
-    end_time int not null,
+    start_time bigint not null,
+    end_time bigint not null,
     value_model_type int2 not null,
     value_model_blob bytea not null,
     timestamp_model_type int2 not null,

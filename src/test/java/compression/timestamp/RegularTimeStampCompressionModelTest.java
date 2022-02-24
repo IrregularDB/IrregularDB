@@ -121,31 +121,31 @@ class RegularTimeStampCompressionModelTest {
     }
 
     @Test
-    void getCompressionRatio0DataPoints() {
-        Assertions.assertThrows(UnsupportedOperationException.class, () -> regularModel.getCompressionRatio());
+    void getAmountOfBytesUsed0DataPoints() {
+        // We expect this to throw and exception as no model has been made yet.
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> regularModel.getAmountBytesUsed());
     }
 
     @Test
-    void getCompressionRatio2DataPoints() {
-        // We expect that we have used 4 bytes to represent 2 data points so we get 2/4 = 0.5
+    void getAmountOfBytesUsed() {
         List<Long> timeStamps = Arrays.asList(0L, 100L);
         regularModel.resetAndAppendAll(createDataPointsFromTimeStamps(timeStamps));
-        assertEquals(0.5, regularModel.getCompressionRatio());
+        // We expect that we use 4 bytes
+        Assertions.assertEquals(4, regularModel.getAmountBytesUsed());
     }
 
     @Test
-    void getCompressionRatio4DataPoints() {
-        // We expect that we have used 4 bytes to represent 4 data points so we get 4/4 = 1
+    void reduceToSizeN() {
         List<Long> timeStamps = Arrays.asList(0L, 100L, 200L, 300L);
         regularModel.resetAndAppendAll(createDataPointsFromTimeStamps(timeStamps));
-        assertEquals(1, regularModel.getCompressionRatio());
+        regularModel.reduceToSizeN(2);
+        Assertions.assertEquals(2, regularModel.getLength());
     }
 
     @Test
-    void getCompressionRatio8DataPoints() {
-        // We expect that we have used 4 bytes to represent 8 data points so we get 8/4 = 1
-        List<Long> timeStamps = Arrays.asList(0L, 100L, 200L, 300L, 400L, 500L, 600L, 700L);
+    void reduceToSizeNIllegalArgument() {
+        List<Long> timeStamps = Arrays.asList(0L, 100L, 200L, 300L);
         regularModel.resetAndAppendAll(createDataPointsFromTimeStamps(timeStamps));
-        assertEquals(2, regularModel.getCompressionRatio());
+        Assertions.assertThrows(IllegalArgumentException.class, () ->  regularModel.reduceToSizeN(5));
     }
 }

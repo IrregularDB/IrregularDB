@@ -8,6 +8,7 @@ import records.DataPoint;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class CompressionModelManager {
@@ -56,15 +57,17 @@ public class CompressionModelManager {
         this.inactiveValueModels = new ArrayList<>();
         this.inactiveTimestampModels = new ArrayList<>();
 
-        boolean anySuccessValue = this.activeValueModels.stream()
+        List<Boolean> valueSuccesses = this.activeValueModels.stream()
                 .map((valueModel) -> valueModel.resetAndAppendAll(notYetEmitted))
-                .anyMatch(item -> true);
+                .filter(item -> item)
+                .toList();
 
-        boolean anySuccessTimeStamp = this.activeTimeStampModels.stream()
+        List<Boolean> timestampSuccesses = this.activeTimeStampModels.stream()
                 .map((timestampModel) -> timestampModel.resetAndAppendAll(notYetEmitted))
-                .anyMatch(item -> true);
+                .filter(item -> item)
+                .toList();
 
-        return anySuccessValue && anySuccessTimeStamp;
+        return !valueSuccesses.isEmpty() && !timestampSuccesses.isEmpty();
     }
 
 

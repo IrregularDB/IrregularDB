@@ -1,13 +1,18 @@
 package compression;
 
+import compression.encoding.BucketEncoding;
 import compression.timestamp.TimeStampCompressionModelType;
+import compression.utility.BitBuffer;
+import compression.utility.BitStream;
 import compression.value.ValueCompressionModelType;
 import records.DataPoint;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class BlobDecompressor {
 
@@ -22,8 +27,8 @@ public class BlobDecompressor {
                                             Long startTime, Long endTime) {
         return switch (timeStampModelType) {
             case REGULAR -> decompressRegular(timeStampBlob, startTime, endTime);
-            case DELTAPAIRS -> decompressDeltaPairs(timeStampBlob);
-            case BASEDELTA -> decompressBaseDelta(timeStampBlob);
+            case DELTAPAIRS -> decompressDeltaPairs(timeStampBlob, startTime);
+            case BASEDELTA -> decompressBaseDelta(timeStampBlob, startTime);
             case RECOMPUTESI -> decompressRecomputeSI(timeStampBlob);
             default -> throw new IllegalArgumentException("No decompression method has been implemented for the given Time Stamp Model Type");
         };
@@ -41,12 +46,33 @@ public class BlobDecompressor {
         return timeStamps;
     }
 
-    private static List<Long> decompressDeltaPairs(ByteBuffer timeStampBlob) {
-        throw new RuntimeException("Not implemented");
+    private static List<Long> decompressDeltaPairs(ByteBuffer timeStampBlob, long startTime) {
+        BitStream bitStream = new BitStream(timeStampBlob);
+        List<Integer> deltaTimes = BucketEncoding.decode(bitStream);
+
+        List<Long> timeStamps = new ArrayList<>();
+        timeStamps.add(startTime);
+
+        long prevValue = startTime;
+        for (Integer delta : deltaTimes) {
+            prevValue += delta;
+            timeStamps.add(prevValue);
+        }
+        return timeStamps;
     }
 
-    private static List<Long> decompressBaseDelta(ByteBuffer timeStampBlob) {
-        throw new RuntimeException("Not implemented");
+    private static List<Long> decompressBaseDelta(ByteBuffer timeStampBlob, Long startTime) {
+        LinkedList<Integer> deltaTimes = new LinkedList<>();
+        deltaTimes.add(0); // Used to represent startTime
+
+
+        for (int index = 0; index <timeStampBlob.limit(); index += Integer.BYTES) {
+            deltaTimes.addLast(timeStampBlob.getInt(index));
+        }
+
+        return deltaTimes.stream()
+                .map(delta -> startTime + delta)
+                .collect(Collectors.toList());
     }
 
     private static List<Long> decompressRecomputeSI(ByteBuffer timeStampBlob) {

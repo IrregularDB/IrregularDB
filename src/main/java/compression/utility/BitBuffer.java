@@ -4,7 +4,6 @@
 package compression.utility;
 
 import java.nio.ByteBuffer;
-import java.util.List;
 
 
 /**
@@ -31,6 +30,13 @@ public class BitBuffer {
             shortenBufferToSizeN(this.byteBuffer.position());
         }
         return byteBuffer;
+    }
+
+    public int bitsLeftInCurrentByte(){
+        if (currByte.isEmpty()) {
+            return 0;
+        }
+        return Byte.SIZE - currByte.length();
     }
 
     public void putFloat(float value){
@@ -80,5 +86,9 @@ public class BitBuffer {
         this.byteBuffer.flip();
         extendedBuffer.put(this.byteBuffer);
         this.byteBuffer = extendedBuffer;
+    }
+
+    public BitStream getBitStream(){
+        return new BitStream(getByteBuffer());
     }
 }

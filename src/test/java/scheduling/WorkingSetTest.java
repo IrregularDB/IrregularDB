@@ -7,6 +7,8 @@ import records.TimeSeriesReading;
 import segmentgenerator.TestTimeSeries;
 import segmentgenerator.TestTimeSeriesFactory;
 import segmentgenerator.TimeSeries;
+import storage.PostgresConnection;
+import storage.TestDatabaseConnectionFactory;
 
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -23,7 +25,7 @@ class WorkingSetTest {
 
         TestTimeSeriesFactory testTimeSeriesFactory = new TestTimeSeriesFactory();
 
-        WorkingSet workingSet = new WorkingSet(buffer, testTimeSeriesFactory);
+        WorkingSet workingSet = new WorkingSet(buffer, testTimeSeriesFactory, new TestDatabaseConnectionFactory());
 
         workingSet.accept(timeSeriesReading1);
         workingSet.accept(timeSeriesReading2);

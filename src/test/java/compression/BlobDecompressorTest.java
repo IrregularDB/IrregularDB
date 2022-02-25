@@ -1,7 +1,10 @@
 package compression;
 
+import compression.timestamp.BaseDeltaTimeStampCompressionModel;
+import compression.timestamp.DeltaPairsTimeStampCompressionModel;
 import compression.timestamp.TimeStampCompressionModelType;
 import compression.value.ValueCompressionModelType;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import records.DataPoint;
@@ -9,6 +12,7 @@ import records.DataPoint;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 

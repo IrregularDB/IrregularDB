@@ -1,6 +1,8 @@
 package compression;
 
+import compression.encoding.BucketEncoding;
 import compression.timestamp.TimeStampCompressionModelType;
+import compression.utility.BitBuffer;
 import compression.value.ValueCompressionModelType;
 import records.DataPoint;
 

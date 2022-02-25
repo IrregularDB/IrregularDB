@@ -56,8 +56,7 @@ public class BucketEncoding {
         return controlBits + "0".repeat(zeroesToPad) + significantBits;
     }
 
-    public static List<Integer> decode(BitBuffer bitBuffer) {
-        BitBuffer.BitStream bitStream = bitBuffer.getBitStream();
+    public static List<Integer> decode(BitBuffer.BitStream bitStream) {
         ArrayList<Integer> integers = new ArrayList<>();
 
         String controlBits;

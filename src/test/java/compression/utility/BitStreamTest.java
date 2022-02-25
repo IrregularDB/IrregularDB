@@ -61,6 +61,7 @@ class BitStreamTest {
     void hasNNext() {
         // We expect it to have 16 next before anything has been done to it:
         Assertions.assertTrue(bitStream.hasNNext(16));
+        Assertions.assertFalse(bitStream.hasNNext(17));
     }
 
     @Test

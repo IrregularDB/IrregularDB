@@ -22,12 +22,21 @@ public class BucketEncoding {
     /**
      * @param readings we only support positive numbers
      */
-    public static BitBuffer encode(List<Integer> readings) {
-        BitBuffer bitBuffer = new BitBuffer(4);
+    public static BitBuffer2 encode(List<Integer> readings) {
+        BitBuffer2 bitBuffer = new BitBuffer2(4);
         Integer previousReading = null;
         for (Integer reading : readings) {
             String encodeReading = encodeReading(reading, previousReading);
             previousReading = reading;
+
+            int length = encodeReading.length();
+
+            // HACK
+            if (length > 32) {
+                bitBuffer.writeBit(true);
+                String substring = encodeReading.substring(1, length);
+                int i = Integer.parseInt(substring, 2);
+            }
             bitBuffer.writeBitString(encodeReading);
         }
 

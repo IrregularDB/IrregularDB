@@ -3,14 +3,11 @@ package compression.timestamp;
 import records.DataPoint;
 
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
 import java.util.LinkedList;
-import java.util.List;
 
 public class BaseDeltaTimeStampCompressionModel extends TimeStampCompressionModel {
-
     private long startTime;
-    private LinkedList<Integer> deltaTimeStamps;
+    private LinkedList<Integer> deltaTimes;
 
     public BaseDeltaTimeStampCompressionModel(float errorBound) {
         super(errorBound, null);
@@ -20,44 +17,42 @@ public class BaseDeltaTimeStampCompressionModel extends TimeStampCompressionMode
     @Override
     protected void resetModel() {
         this.startTime = -1; // -1 -> startTime not yet set
-        this.deltaTimeStamps = new LinkedList<>();
+        this.deltaTimes = new LinkedList<>();
     }
 
     @Override
     public int getLength() {
-        return deltaTimeStamps.size();
+        return deltaTimes.size();
     }
 
     @Override
-    public boolean append(DataPoint dataPoint) {
+    protected boolean appendDataPoint(DataPoint dataPoint) {
         if (startTime == -1) {
             startTime = dataPoint.timestamp();
             return true;
         }
-
-        this.deltaTimeStamps.addLast(getDeltaFromStartTime(dataPoint.timestamp()));
-
+        this.deltaTimes.addLast(getDeltaFromStartTime(dataPoint.timestamp()));
         return true;
     }
 
     @Override
-    public ByteBuffer getBlobRepresentation() {
-        ByteBuffer byteBuffer = ByteBuffer.allocate((this.deltaTimeStamps.size()) * 4);
-        for (Integer integer : this.deltaTimeStamps) {
+    protected ByteBuffer createByteBuffer() {
+        ByteBuffer byteBuffer = ByteBuffer.allocate((this.deltaTimes.size()) * 4);
+        for (Integer integer : this.deltaTimes) {
             byteBuffer.putInt(integer);
         }
         return byteBuffer;
     }
 
     @Override
-    public void reduceToSizeN(int n) {
+    protected void reduceToSize(int n) {
         if (n <= 0){
             throw new IllegalArgumentException("n cannot be 0 or lower");
-        } else if (n > this.deltaTimeStamps.size()){
+        } else if (n > this.deltaTimes.size()){
             throw new IllegalArgumentException("n cannot bigger than list size");
         }
 
-        this.deltaTimeStamps.subList(n, deltaTimeStamps.size()).clear();
+        this.deltaTimes.subList(n, deltaTimes.size()).clear();
     }
 
     @Override

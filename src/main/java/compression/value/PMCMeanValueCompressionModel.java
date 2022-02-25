@@ -40,7 +40,7 @@ public class PMCMeanValueCompressionModel extends ValueCompressionModel {
     }
 
     @Override
-    public boolean append(DataPoint dataPoint) {
+    protected boolean appendDataPoint(DataPoint dataPoint) {
         return appendValue(dataPoint.value());
     }
 
@@ -75,7 +75,7 @@ public class PMCMeanValueCompressionModel extends ValueCompressionModel {
     }
 
     @Override
-    public ByteBuffer getBlobRepresentation() {
+    protected ByteBuffer createByteBuffer() {
         if (this.getLength() == 0) {
             throw new UnsupportedOperationException("No data points where added to the PMC-mean value model before trying to get the value blob");
         }
@@ -91,7 +91,7 @@ public class PMCMeanValueCompressionModel extends ValueCompressionModel {
     }
 
     @Override
-    public void reduceToSizeN(int n) {
+    protected void reduceToSize(int n) {
         int length = this.getLength();
         if (length < n) {
             throw new IllegalArgumentException("You tried to reduce this size of a model to something smaller than its current size");

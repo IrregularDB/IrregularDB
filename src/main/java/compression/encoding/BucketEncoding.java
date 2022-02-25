@@ -11,11 +11,18 @@ import java.util.Objects;
 public class BucketEncoding {
 
     private static final String SAME_VALUE_ENCODING = "00";
+    private static final String BUCKET_1_CONTROL_BITS = "01";
+    private static final String BUCKET_2_CONTROL_BITS = "10";
+    private static final String BUCKET_3_CONTROL_BITS = "11";
+
     private static final int BUCKET_1_BIT_SIZE = 9;
     private static final int BUCKET_2_BIT_SIZE = 16;
-    private static final int BUCKET_3_BIT_SIZE = 32;
+    private static final int BUCKET_3_BIT_SIZE = 31;
     private static final int AMT_CONTROL_BITS = 2;
 
+    /**
+     * @param readings we only support positive numbers
+     */
     public static BitBuffer encode(List<Integer> readings) {
         BitBuffer bitBuffer = new BitBuffer(4);
         Integer previousReading = null;
@@ -35,8 +42,8 @@ public class BucketEncoding {
      * @param bitBuffer
      */
     private static void finalizeBuffer(BitBuffer bitBuffer) {
-        if (bitBuffer.bitsLeftInCurrentByte() > 1) {
-            bitBuffer.writeBitString("11");
+        if (bitBuffer.bitsLeftInCurrentByte() >= AMT_CONTROL_BITS) {
+            bitBuffer.writeBitString(BUCKET_3_CONTROL_BITS);
         }
     }
 
@@ -54,16 +61,16 @@ public class BucketEncoding {
         String controlBits;
         int zeroesToPad;
         if (amtSignificantBits <= BUCKET_1_BIT_SIZE) {
-            controlBits = "01";
+            controlBits = BUCKET_1_CONTROL_BITS;
             zeroesToPad = BUCKET_1_BIT_SIZE - amtSignificantBits;
         } else if (amtSignificantBits <= BUCKET_2_BIT_SIZE) {
-            controlBits = "10";
+            controlBits = BUCKET_2_CONTROL_BITS;
             zeroesToPad = BUCKET_2_BIT_SIZE - amtSignificantBits;
         } else if (amtSignificantBits <= BUCKET_3_BIT_SIZE) {
-            controlBits = "11";
+            controlBits = BUCKET_3_CONTROL_BITS;
             zeroesToPad = BUCKET_3_BIT_SIZE - amtSignificantBits;
         } else {
-            throw new RuntimeException("Value greater than bucket allows");
+            throw new RuntimeException("Amount of bits greater than bucket allows (you probably tried to insert a negative number)");
         }
 
         return controlBits + "0".repeat(zeroesToPad) + significantBits;
@@ -78,7 +85,7 @@ public class BucketEncoding {
         while (bitStream.hasNNext(AMT_CONTROL_BITS)) {
             controlBits = bitStream.getNBits(AMT_CONTROL_BITS);
 
-            if ("00".equals(controlBits)) {
+            if (SAME_VALUE_ENCODING.equals(controlBits)) {
                 if (lastInteger == -1) {
                     throw new IllegalStateException("BucketEncoding:decode: \"Error - first value cannot have control bit '00'\"");
                 }
@@ -99,13 +106,13 @@ public class BucketEncoding {
 
     private static int controlBitsToLength(String controlBits) {
         switch (controlBits) {
-            case "01" -> {
+            case BUCKET_1_CONTROL_BITS -> {
                 return BUCKET_1_BIT_SIZE;
             }
-            case "10" -> {
+            case BUCKET_2_CONTROL_BITS -> {
                 return BUCKET_2_BIT_SIZE;
             }
-            case "11" -> {
+            case BUCKET_3_CONTROL_BITS -> {
                 return BUCKET_3_BIT_SIZE;
             }
             default ->

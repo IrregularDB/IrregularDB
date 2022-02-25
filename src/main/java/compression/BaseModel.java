@@ -9,6 +9,7 @@ import java.util.function.Function;
 public abstract class BaseModel {
     private final Float errorBound;
     private final Integer lengthBound;
+    private ByteBuffer byteBuffer;
 
     public BaseModel(Float errorBound, Integer lengthBound) {
         // This small hack is added because floating point imprecision can lead to error-bound
@@ -23,6 +24,7 @@ public abstract class BaseModel {
             this.errorBound = null;
         }
         this.lengthBound = lengthBound;
+        byteBuffer = null;
     }
 
     public float getErrorBound() {
@@ -49,6 +51,7 @@ public abstract class BaseModel {
      * @return returns true if the entire time stamp list could be appended
      */
     public final boolean resetAndAppendAll(List<DataPoint> input) {
+        this.byteBuffer = null;
         this.resetModel();
 
         boolean appendSucceeded = true;
@@ -61,7 +64,12 @@ public abstract class BaseModel {
         return appendSucceeded;
     }
 
-    public abstract boolean append(DataPoint dataPoint);
+    public final boolean append(DataPoint dataPoint) {
+        this.byteBuffer = null;
+        return this.appendDataPoint(dataPoint);
+    }
+
+    protected abstract boolean appendDataPoint(DataPoint dataPoint);
 
     /**
      * @return returns amount of bytes used in the byte buffer to represent the model
@@ -74,12 +82,23 @@ public abstract class BaseModel {
      * Byte list representation of the model that should be saved to the database
      * @return ByteBuffer class from java
      */
-    public abstract ByteBuffer getBlobRepresentation();
+    public final ByteBuffer getBlobRepresentation() {
+        if (byteBuffer == null) {
+            byteBuffer = createByteBuffer();
+        }
+        return byteBuffer;
+    }
+
+    protected abstract ByteBuffer createByteBuffer();
 
     /**
      * This method is used when joining time stamp and value compression models
      *  by reducing the longest of the two down to the length of the other one
      */
-    public abstract void reduceToSizeN(int n);
+    public final void reduceToSizeN(int n) {
+        this.byteBuffer = null;
+        reduceToSize(n);
+    }
 
+    protected abstract void reduceToSize(int n);
 }

@@ -41,7 +41,7 @@ public class SwingValueCompressionModel extends ValueCompressionModel {
     }
 
     @Override
-    public boolean append(DataPoint dataPoint) {
+    protected boolean appendDataPoint(DataPoint dataPoint) {
         if (earlierAppendFailed) { // Security added so that if you try to append after an earlier append failed
             throw new IllegalArgumentException("You tried to append to the SWING-model after it failed an earlier append");
         }
@@ -99,7 +99,7 @@ public class SwingValueCompressionModel extends ValueCompressionModel {
     }
 
     @Override
-    public ByteBuffer getBlobRepresentation() {
+    protected ByteBuffer createByteBuffer() {
         if (this.getLength() < 2) {
             throw new UnsupportedOperationException("Swing filter model needs at least two data points before you are able to get its value blob");
         }
@@ -113,7 +113,7 @@ public class SwingValueCompressionModel extends ValueCompressionModel {
     }
 
     @Override
-    public void reduceToSizeN(int n) {
+    protected void reduceToSize(int n) {
         int length = this.getLength();
         if (length < n) {
             throw new IllegalArgumentException("You tried to reduce this size of a model to something smaller than its current size");

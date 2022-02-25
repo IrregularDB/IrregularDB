@@ -11,7 +11,7 @@ import java.util.List;
 public class DeltaPairsTimeStampCompressionModel extends TimeStampCompressionModel {
 
     private Long prevTimeStamp;
-    List<Integer> deltaTimeStamps;
+    List<Integer> deltaTimes;
 
     public DeltaPairsTimeStampCompressionModel(Float errorBound) {
         super(errorBound, -1);
@@ -20,39 +20,40 @@ public class DeltaPairsTimeStampCompressionModel extends TimeStampCompressionMod
 
     @Override
     protected void resetModel() {
-        this.deltaTimeStamps = new ArrayList<>();
+        this.deltaTimes = new ArrayList<>();
         this.prevTimeStamp = null;
     }
 
     @Override
     public int getLength() {
-        return this.deltaTimeStamps.size();
+        return this.deltaTimes.size();
     }
 
     @Override
-    public boolean append(DataPoint dataPoint) {
+    protected boolean appendDataPoint(DataPoint dataPoint) {
         if (prevTimeStamp != null) {
-            this.deltaTimeStamps.add((int) (dataPoint.timestamp() - prevTimeStamp));
+            this.deltaTimes.add((int) (dataPoint.timestamp() - prevTimeStamp));
         }
         prevTimeStamp = dataPoint.timestamp();
         return true;
     }
 
     @Override
-    public ByteBuffer getBlobRepresentation() {
-        BitBuffer encode = BucketEncoding.encode(this.deltaTimeStamps);
+    protected ByteBuffer createByteBuffer() {
+        // TODO: discuss with Kenneth if we should do something like i did in Gorilla
+        BitBuffer encode = BucketEncoding.encode(this.deltaTimes);
         return encode.getByteBuffer();
     }
 
     @Override
-    public void reduceToSizeN(int n) {
+    protected void reduceToSize(int n) {
         if (n <= 0){
             throw new IllegalArgumentException("n cannot be 0 or lower");
-        } else if (n > this.deltaTimeStamps.size()){
+        } else if (n > this.deltaTimes.size()){
             throw new IllegalArgumentException("n cannot bigger than list size");
         }
 
-        this.deltaTimeStamps.subList(n, deltaTimeStamps.size()).clear();
+        this.deltaTimes.subList(n, deltaTimes.size()).clear();
     }
 
     @Override

@@ -217,29 +217,31 @@ class BlobDecompressorTest {
     @Test
     public void testBaseDeltaDecompression(){
         List<DataPoint> expectedDataPoints = new ArrayList<>();
-        expectedDataPoints.add(new DataPoint(0, 5.0F));
+        long startTime = 0;
+        long endTime = 500;
+        expectedDataPoints.add(new DataPoint(startTime, 5.0F));
         expectedDataPoints.add(new DataPoint(100, 5.0F));
         expectedDataPoints.add(new DataPoint(200, 5.0F));
         expectedDataPoints.add(new DataPoint(300, 5.0F));
         expectedDataPoints.add(new DataPoint(400, 5.0F));
-        expectedDataPoints.add(new DataPoint(500, 5.0F));
+        expectedDataPoints.add(new DataPoint(endTime, 5.0F));
 
         List<Long> expectedTimeStamps = expectedDataPoints.stream()
                 .map(DataPoint::timestamp)
                 .collect(Collectors.toList());
 
-        BaseDeltaTimeStampCompressionModel tscm = new BaseDeltaTimeStampCompressionModel(0);
-        boolean success = tscm.resetAndAppendAll(expectedDataPoints);
-        ByteBuffer blobRepresentation = tscm.getBlobRepresentation();
+        var timeStampCompressionModel = new BaseDeltaTimeStampCompressionModel();
+        boolean appendSucceeded = timeStampCompressionModel.resetAndAppendAll(expectedDataPoints);
+        ByteBuffer blobRepresentation = timeStampCompressionModel.getBlobRepresentation();
 
         List<Long> actualDataPointsDecompressed = BlobDecompressor
                 .decompressTimeStamps(TimeStampCompressionModelType.BASEDELTA,
                         blobRepresentation,
-                        tscm.getStartTime(),
-                        500L
+                        startTime,
+                        endTime
                 );
 
-        Assertions.assertTrue(success);
+        Assertions.assertTrue(appendSucceeded);
         Assertions.assertEquals(expectedTimeStamps, actualDataPointsDecompressed);
     }
 
@@ -259,7 +261,7 @@ class BlobDecompressorTest {
 
         List<Long> expectedTimestamps = expectedDataPoints.stream().map(DataPoint::timestamp).toList();
 
-        DeltaPairsTimeStampCompressionModel deltaPairsTimeStampCompressionModel = new DeltaPairsTimeStampCompressionModel(0.0F);
+        DeltaPairsTimeStampCompressionModel deltaPairsTimeStampCompressionModel = new DeltaPairsTimeStampCompressionModel();
         deltaPairsTimeStampCompressionModel.resetAndAppendAll(expectedDataPoints);
 
         ByteBuffer blobRepresentation = deltaPairsTimeStampCompressionModel.getBlobRepresentation();

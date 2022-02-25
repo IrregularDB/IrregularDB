@@ -9,8 +9,8 @@ public class BaseDeltaTimeStampCompressionModel extends TimeStampCompressionMode
     private long startTime;
     private LinkedList<Integer> deltaTimes;
 
-    public BaseDeltaTimeStampCompressionModel(float errorBound) {
-        super(errorBound, null);
+    public BaseDeltaTimeStampCompressionModel() {
+        super(null, null);
         this.resetModel();
     }
 
@@ -68,9 +68,5 @@ public class BaseDeltaTimeStampCompressionModel extends TimeStampCompressionMode
                     "represented correctly by delta \" ");
         }
         return delta;
-    }
-
-    public long getStartTime() {
-        return startTime;
     }
 }

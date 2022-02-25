@@ -22,7 +22,7 @@ class BaseDeltaPairsTimeStampCompressionModelTest {
 
     @BeforeEach
     void init() {
-        baseDeltaTimeStampCompressionModel = new BaseDeltaTimeStampCompressionModel(0F);
+        baseDeltaTimeStampCompressionModel = new BaseDeltaTimeStampCompressionModel();
     }
 
     @Test
@@ -60,7 +60,6 @@ class BaseDeltaPairsTimeStampCompressionModelTest {
         int actualFirstTimeStamp = blobRepresentation.getInt(0);
         int actualSecondTimeStamp = blobRepresentation.getInt(4);
 
-        assertEquals(0, baseDeltaTimeStampCompressionModel.getStartTime());
         assertEquals(1, actualFirstTimeStamp);
         assertEquals(2, actualSecondTimeStamp);
     }

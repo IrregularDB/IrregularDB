@@ -10,6 +10,9 @@ public class BitUtil {
         return Integer.parseInt(bits, 2);
     }
 
+    /**
+     * @return this always returns an 8-bit representation of the byte.
+     */
     public static String byte2Bits(byte b) {
         // This method masks away all the unnecessary bits from for example:
         // -1 = 1111 1111 1111 1111 1111 1111 1111 1111

@@ -13,8 +13,8 @@ public class DeltaPairsTimeStampCompressionModel extends TimeStampCompressionMod
     private Long prevTimeStamp;
     List<Integer> deltaTimes;
 
-    public DeltaPairsTimeStampCompressionModel(Float errorBound) {
-        super(errorBound, -1);
+    public DeltaPairsTimeStampCompressionModel() {
+        super(null, null);
         resetModel();
     }
 
@@ -40,7 +40,6 @@ public class DeltaPairsTimeStampCompressionModel extends TimeStampCompressionMod
 
     @Override
     protected ByteBuffer createByteBuffer() {
-        // TODO: discuss with Kenneth if we should do something like i did in Gorilla
         BitBuffer encode = BucketEncoding.encode(this.deltaTimes);
         return encode.getByteBuffer();
     }

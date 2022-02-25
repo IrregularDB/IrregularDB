@@ -67,9 +67,9 @@ class BitStreamTest {
     void hasNNextAfterRemovingElements() {
         bitStream.getNBits(4);
 
-        // We expect it to no longer have 8 bits:
+        // We expect it to no longer have 16 bits:
         Assertions.assertFalse(bitStream.hasNNext(16));
-        // We instead expect it to have 4 after removing the first 4 bits
+        // We instead expect it to have 12 after removing the first 4 bits
         Assertions.assertTrue(bitStream.hasNNext(12));
     }
 }

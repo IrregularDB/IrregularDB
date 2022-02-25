@@ -12,12 +12,10 @@ import java.nio.charset.StandardCharsets;
 
 public class SocketDataReceiver extends DataReceiver {
 
-    private Socket clientConnection;
     private DataInputStream clientInputStream;
 
     public SocketDataReceiver(WorkingSet workingSet, Socket clientConnection) {
         super(workingSet);
-        this.clientConnection = clientConnection;
         try {
             this.clientInputStream = new DataInputStream(clientConnection.getInputStream());
         } catch (IOException e) {
@@ -28,11 +26,11 @@ public class SocketDataReceiver extends DataReceiver {
     @Override
     public void receiveData() {
         while (true) {
-            sendTimeSeriesReadingToBuffer(getTimeseriesReadingFromSocket());
+            sendTimeSeriesReadingToBuffer(getTimeSeriesReadingFromSocket());
         }
     }
 
-    private TimeSeriesReading getTimeseriesReadingFromSocket() {
+    private TimeSeriesReading getTimeSeriesReadingFromSocket() {
         try {
             long timestamp = clientInputStream.readLong();
             float value = clientInputStream.readFloat();

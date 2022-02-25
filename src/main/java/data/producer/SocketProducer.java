@@ -9,11 +9,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 public class SocketProducer {
-
-
-    private List<TimeSeriesReading> timeSeriesReadings;
-    private String serverIp;
-    private int serverPort;
+    private final List<TimeSeriesReading> timeSeriesReadings;
+    private final String serverIp;
+    private final int serverPort;
     private DataOutputStream dataOutputStream;
 
     public SocketProducer(List<TimeSeriesReading> timeSeriesReadings, String serverIp, int serverPort) {

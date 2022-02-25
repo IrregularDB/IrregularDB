@@ -10,8 +10,6 @@ import java.net.Socket;
 
 public class SocketDataReceiverSpawner extends DataReceiverSpawner {
 
-    private ServerSocket serverSocket;
-
     public SocketDataReceiverSpawner(Partitioner partitioner) {
         super(partitioner);
     }
@@ -23,9 +21,9 @@ public class SocketDataReceiverSpawner extends DataReceiverSpawner {
 
     private void runServerSocket() {
         try {
-            this.serverSocket = new ServerSocket(ConfigProperties.INSTANCE.getSocketDataReceiverSpawnerPort());
+            ServerSocket serverSocket = new ServerSocket(ConfigProperties.INSTANCE.getSocketDataReceiverSpawnerPort());
             while (true) {
-                Socket connection = this.serverSocket.accept();
+                Socket connection = serverSocket.accept();
                 WorkingSet workingSet = partitioner.workingSetToSpawnReceiverFor();
                 runReceiverInThread(new SocketDataReceiver(workingSet, connection));
             }
@@ -33,6 +31,4 @@ public class SocketDataReceiverSpawner extends DataReceiverSpawner {
             e.printStackTrace();
         }
     }
-
-
 }

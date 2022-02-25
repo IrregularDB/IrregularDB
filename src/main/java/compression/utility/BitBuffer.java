@@ -84,43 +84,4 @@ public class BitBuffer {
     public BitStream getBitStream(){
         return new BitStream(getByteBuffer());
     }
-
-    /**
-     * This seems super duper un optimised
-     */
-    public static class BitStream{
-        private int index;
-        private final String allBits;
-        private final int size;
-
-        /**
-         * We cant know without having a number of timestamps how many of the last bits are padding
-         */
-        public BitStream(ByteBuffer byteBuffer) {
-            this.index = 0;
-            StringBuilder stringBuilder = new StringBuilder();
-            for (byte b : byteBuffer.array()) {
-                stringBuilder.append(BitUtil.int2Bits(b));
-            }
-            this.allBits = stringBuilder.toString();
-            this.size = allBits.length();
-        }
-
-        public String getNBits(int n) {
-            if (n < 1) {
-                throw new IllegalArgumentException("You must read at least one bit");
-            }
-            if (n + index < size) {
-                index += n;
-                 return allBits.substring(index - n, index);
-            } else {
-                throw new IndexOutOfBoundsException("There arent that many bits left in the stream");
-            }
-        }
-
-        public boolean hasNNext(int n){
-            return index + n < size;
-        }
-
-    }
 }

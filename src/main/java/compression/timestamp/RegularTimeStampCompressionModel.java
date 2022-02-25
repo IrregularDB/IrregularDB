@@ -13,7 +13,7 @@ public class RegularTimeStampCompressionModel extends TimeStampCompressionModel 
 
     // TODO: update this constructor when adding error-bound
     public RegularTimeStampCompressionModel(double errorBound) {
-        super(null, null, null);
+        super(null, null);
         this.resetModel();
     }
 
@@ -31,7 +31,7 @@ public class RegularTimeStampCompressionModel extends TimeStampCompressionModel 
 
 
     @Override
-    public boolean append(DataPoint dataPoint) {
+    protected boolean appendDataPoint(DataPoint dataPoint) {
         return appendTimeStamp(dataPoint.timestamp());
     }
 
@@ -87,7 +87,7 @@ public class RegularTimeStampCompressionModel extends TimeStampCompressionModel 
     }
 
     @Override
-    public ByteBuffer getBlobRepresentation() {
+    protected ByteBuffer createByteBuffer() {
         if (this.getLength() < 2) {
             throw new UnsupportedOperationException("Regular time stamp model needs at least two data points before you are able to get the time stamp blob");
         }
@@ -100,7 +100,7 @@ public class RegularTimeStampCompressionModel extends TimeStampCompressionModel 
     }
 
     @Override
-    public void reduceToSizeN(int n) {
+    protected void reduceToSize(int n) {
         int length = this.getLength();
         if (length < n) {
             throw new IllegalArgumentException("You tried to reduce this size of a model to something smaller than its current size");

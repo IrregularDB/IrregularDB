@@ -24,7 +24,7 @@ public class BlobDecompressor {
                                             Long startTime, Long endTime) {
         return switch (timeStampModelType) {
             case REGULAR -> decompressRegular(timeStampBlob, startTime, endTime);
-            case DELTAPAIRS -> decompressDeltaPairs(timeStampBlob);
+            case DELTAPAIRS -> decompressDeltaPairs(timeStampBlob, startTime);
             case BASEDELTA -> decompressBaseDelta(timeStampBlob, startTime);
             case RECOMPUTESI -> decompressRecomputeSI(timeStampBlob);
             default -> throw new IllegalArgumentException("No decompression method has been implemented for the given Time Stamp Model Type");
@@ -43,20 +43,38 @@ public class BlobDecompressor {
         return timeStamps;
     }
 
-    private static List<Long> decompressDeltaPairs(ByteBuffer timeStampBlob) {
-        throw new RuntimeException("Not implemented");
+    private static List<Long> decompressDeltaPairs(ByteBuffer timeStampBlob, long startTime) {
+        BitBuffer.BitStream bitStream = new BitBuffer.BitStream(timeStampBlob);
+        List<Integer> deltaPairsTimeStamps = BucketEncoding.decode(bitStream);
+
+        List<Long> timeStamps = new ArrayList<>();
+        timeStamps.add(startTime);
+
+        long prevValue = startTime;
+        for (Integer deltaPairsTimeStamp : deltaPairsTimeStamps) {
+            prevValue += deltaPairsTimeStamp;
+            timeStamps.add(prevValue);
+        }
+        return timeStamps;
     }
 
     private static List<Long> decompressBaseDelta(ByteBuffer timeStampBlob, Long startTime) {
         LinkedList<Integer> deltaTimeStamps = new LinkedList<>();
+        int index = 0;
 
-        while(timeStampBlob.hasRemaining()){
-            deltaTimeStamps.addLast(timeStampBlob.getInt());
+        while(index < timeStampBlob.limit()){
+            deltaTimeStamps.addLast(timeStampBlob.getInt(index));
+            index += Integer.BYTES;
+            timeStampBlob.position(index);
         }
 
-        return deltaTimeStamps.stream()
+        List<Long> timeStamps = deltaTimeStamps.stream()
                 .map(delta -> startTime + delta)
                 .collect(Collectors.toList());
+
+        timeStamps.add(0, startTime);
+
+        return timeStamps;
     }
 
     private static List<Long> decompressRecomputeSI(ByteBuffer timeStampBlob) {

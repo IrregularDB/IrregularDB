@@ -246,7 +246,7 @@ class BlobDecompressorTest {
     /**
      * Delta timestamp compression
      */
-    @Test
+    @Test //TODO reintroduce
     public void testDeltaTimestampCompression(){
         List<DataPoint> expectedDataPoints = new ArrayList<>();
         expectedDataPoints.add(new DataPoint(0, 5.0F));

@@ -1,6 +1,7 @@
 package compression.encoding;
 
 import compression.utility.BitBuffer;
+import compression.utility.BitStream;
 import compression.utility.BitUtil;
 
 import java.util.ArrayList;
@@ -56,7 +57,7 @@ public class BucketEncoding {
         return controlBits + "0".repeat(zeroesToPad) + significantBits;
     }
 
-    public static List<Integer> decode(BitBuffer.BitStream bitStream) {
+    public static List<Integer> decode(BitStream bitStream) {
         ArrayList<Integer> integers = new ArrayList<>();
 
         String controlBits;

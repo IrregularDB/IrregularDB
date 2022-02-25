@@ -6,6 +6,7 @@ import records.DataPoint;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Function;
 
@@ -23,7 +24,7 @@ public class BlobDecompressor {
         return switch (timeStampModelType) {
             case REGULAR -> decompressRegular(timeStampBlob, startTime, endTime);
             case DELTAPAIRS -> decompressDeltaPairs(timeStampBlob);
-            case BASEDELTA -> decompressBaseDelta(timeStampBlob);
+            case BASEDELTA -> decompressBaseDelta(timeStampBlob, startTime);
             case RECOMPUTESI -> decompressRecomputeSI(timeStampBlob);
             default -> throw new IllegalArgumentException("No decompression method has been implemented for the given Time Stamp Model Type");
         };
@@ -45,8 +46,16 @@ public class BlobDecompressor {
         throw new RuntimeException("Not implemented");
     }
 
-    private static List<Long> decompressBaseDelta(ByteBuffer timeStampBlob) {
-        throw new RuntimeException("Not implemented");
+    private static List<Long> decompressBaseDelta(ByteBuffer timeStampBlob, Long startTime) {
+        LinkedList<Integer> deltaTimeStamps = new LinkedList<>();
+
+        while(timeStampBlob.hasRemaining()){
+            deltaTimeStamps.addLast(timeStampBlob.getInt());
+        }
+
+        return deltaTimeStamps.stream()
+                .map(delta -> startTime + delta)
+                .collect(Collectors.toList());
     }
 
     private static List<Long> decompressRecomputeSI(ByteBuffer timeStampBlob) {

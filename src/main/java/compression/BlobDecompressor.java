@@ -2,8 +2,7 @@ package compression;
 
 import compression.encoding.BucketEncoding;
 import compression.timestamp.TimeStampCompressionModelType;
-import compression.utility.BitBuffer;
-import compression.utility.BitStream;
+import compression.utility.BitStream2;
 import compression.value.ValueCompressionModelType;
 import records.DataPoint;
 
@@ -47,7 +46,7 @@ public class BlobDecompressor {
     }
 
     private static List<Long> decompressDeltaPairs(ByteBuffer timeStampBlob, long startTime) {
-        BitStream bitStream = new BitStream(timeStampBlob);
+        BitStream2 bitStream = new BitStream2(timeStampBlob);
         List<Integer> deltaTimes = BucketEncoding.decode(bitStream);
 
         List<Long> timeStamps = new ArrayList<>();

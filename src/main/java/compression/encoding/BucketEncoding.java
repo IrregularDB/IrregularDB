@@ -1,12 +1,11 @@
 package compression.encoding;
 
-import compression.utility.BitBuffer;
-import compression.utility.BitStream;
+import compression.utility.BitBuffer2;
+import compression.utility.BitStream2;
 import compression.utility.BitUtil;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 public class BucketEncoding {
 
@@ -76,7 +75,7 @@ public class BucketEncoding {
         return controlBits + "0".repeat(zeroesToPad) + significantBits;
     }
 
-    public static List<Integer> decode(BitStream bitStream) {
+    public static List<Integer> decode(BitStream2 bitStream) {
         ArrayList<Integer> integers = new ArrayList<>();
 
         String controlBits;

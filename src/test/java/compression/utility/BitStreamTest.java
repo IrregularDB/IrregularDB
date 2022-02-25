@@ -9,7 +9,7 @@ import java.nio.ByteBuffer;
 import static org.junit.jupiter.api.Assertions.*;
 
 class BitStreamTest {
-    BitStream bitStream;
+    BitStream2 bitStream;
 
     @BeforeEach
     void beforeEach() { // Setup bit stream with 1111 1111 0000 0000
@@ -18,7 +18,7 @@ class BitStreamTest {
         byteBuffer.put(b); // We put 1111 1111
         b = 0;
         byteBuffer.put(b); // We put 0000 0000
-        bitStream = new BitStream(byteBuffer);
+        bitStream = new BitStream2(byteBuffer);
     }
 
 

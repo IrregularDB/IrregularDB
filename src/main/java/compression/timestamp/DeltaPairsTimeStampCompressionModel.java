@@ -1,7 +1,7 @@
 package compression.timestamp;
 
 import compression.encoding.BucketEncoding;
-import compression.utility.BitBuffer;
+import compression.utility.BitBuffer2;
 import records.DataPoint;
 
 import java.nio.ByteBuffer;
@@ -40,7 +40,7 @@ public class DeltaPairsTimeStampCompressionModel extends TimeStampCompressionMod
 
     @Override
     protected ByteBuffer createByteBuffer() {
-        BitBuffer encode = BucketEncoding.encode(this.deltaTimes);
+        BitBuffer2 encode = BucketEncoding.encode(this.deltaTimes);
         return encode.getByteBuffer();
     }
 

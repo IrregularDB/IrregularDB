@@ -246,15 +246,16 @@ class BlobDecompressorTest {
     /**
      * Delta timestamp compression
      */
-    @Test //TODO reintroduce
+    @Test
     public void testDeltaTimestampCompression(){
         List<DataPoint> expectedDataPoints = new ArrayList<>();
         expectedDataPoints.add(new DataPoint(0, 5.0F));
         expectedDataPoints.add(new DataPoint(100, 5.0F));
-        expectedDataPoints.add(new DataPoint(200, 5.0F));
-        expectedDataPoints.add(new DataPoint(300, 5.0F));
-        expectedDataPoints.add(new DataPoint(400, 5.0F));
-        expectedDataPoints.add(new DataPoint(500, 5.0F));
+        expectedDataPoints.add(new DataPoint(2000, 5.0F));
+        expectedDataPoints.add(new DataPoint(4000, 5.0F));
+        expectedDataPoints.add(new DataPoint(6000, 5.0F));
+        expectedDataPoints.add(new DataPoint(27000, 5.0F));
+        expectedDataPoints.add(new DataPoint(Integer.MAX_VALUE, 5.0F));
 
         List<Long> expectedTimestamps = expectedDataPoints.stream().map(DataPoint::timestamp).toList();
 
@@ -268,7 +269,7 @@ class BlobDecompressorTest {
         Assertions.assertEquals(expectedTimestamps.size(), decompressedTimeStamps.size());
 
         for (int i = 0; i < expectedTimestamps.size(); i++) {
-            Assertions.assertEquals(expectedTimestamps.get(0), decompressedTimeStamps.get(0));
+            Assertions.assertEquals(expectedTimestamps.get(i), decompressedTimeStamps.get(i));
         }
     }
 }

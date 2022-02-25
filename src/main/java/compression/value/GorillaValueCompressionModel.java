@@ -1,7 +1,7 @@
 package compression.value;
 
-import compression.encoding.Encoding;
-import compression.encoding.GorillaValueEncoder;
+import compression.encoding.GorillaValueEncoding;
+import compression.utility.BitBuffer;
 import records.DataPoint;
 
 import java.nio.ByteBuffer;
@@ -9,23 +9,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class GorillaValueCompressionModel extends ValueCompressionModel {
-    Encoding<Float> valueEncoder;
     List<Float> values;
-    // Helper field used to make it so that we don't reconstruct the byte buffer unnecessary times
-    private int amtValuesRepresentedByCurrentByteBuffer;
-    private ByteBuffer byteBuffer;
 
     public GorillaValueCompressionModel(int lengthBound) {
         super(null, lengthBound);
-        this.valueEncoder = new GorillaValueEncoder();
         this.resetModel();
     }
 
     @Override
     protected void resetModel() {
         values = new ArrayList<>();
-        byteBuffer = null;
-        amtValuesRepresentedByCurrentByteBuffer = -1;
     }
 
     @Override
@@ -34,7 +27,7 @@ public class GorillaValueCompressionModel extends ValueCompressionModel {
     }
 
     @Override
-    public boolean append(DataPoint dataPoint) {
+    protected boolean appendDataPoint(DataPoint dataPoint) {
         if (this.getLength() < super.getLengthBound()) {
             values.add(dataPoint.value());
             return true;
@@ -44,17 +37,13 @@ public class GorillaValueCompressionModel extends ValueCompressionModel {
     }
 
     @Override
-    public ByteBuffer getBlobRepresentation() {
-        int length = this.getLength();
-        if (length != amtValuesRepresentedByCurrentByteBuffer) {
-            this.amtValuesRepresentedByCurrentByteBuffer = length;
-            this.byteBuffer = valueEncoder.encode(values).getByteBuffer();
-        }
-        return byteBuffer;
+    protected ByteBuffer createByteBuffer() {
+        BitBuffer encode = GorillaValueEncoding.encode(values);
+        return encode.getByteBuffer();
     }
 
     @Override
-    public void reduceToSizeN(int n) {
+    protected void reduceToSize(int n) {
         int length = this.getLength();
         if (length < n) {
             throw new IllegalArgumentException("You tried to reduce this size of a model to something smaller than its current size");

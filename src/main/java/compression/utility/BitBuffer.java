@@ -39,11 +39,11 @@ public class BitBuffer {
         return Byte.SIZE - currByte.length();
     }
 
-    public void putFloat(float value){
+    public void putInt(int value){
         if (byteBuffer.remaining() < 4) {
             extendBufferWithNMoreBytes(4);
         }
-        byteBuffer.putFloat(value);
+        byteBuffer.putInt(value);
     }
 
     public void writeBit(char bit) {

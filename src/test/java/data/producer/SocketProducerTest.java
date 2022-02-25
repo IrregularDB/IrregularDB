@@ -7,6 +7,7 @@ import records.TimeSeriesReading;
 import scheduling.Partitioner;
 import scheduling.WorkingSet;
 import sources.SocketDataReceiverSpawner;
+import storage.TestDatabaseConnectionFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -70,7 +71,7 @@ class SocketProducerTest {
 
         @Override
         public WorkingSet workingSetToSpawnReceiverFor() {
-            return new WorkingSet(this.buffer, null);
+            return new WorkingSet(this.buffer, null, new TestDatabaseConnectionFactory());
         }
     }
 }

@@ -32,6 +32,13 @@ public class BitBuffer {
         return byteBuffer;
     }
 
+    public int bitsLeftInCurrentByte(){
+        if (currByte.isEmpty()) {
+            return 0;
+        }
+        return Byte.SIZE - currByte.length();
+    }
+
     public void putFloat(float value){
         if (byteBuffer.remaining() < 4) {
             extendBufferWithNMoreBytes(4);

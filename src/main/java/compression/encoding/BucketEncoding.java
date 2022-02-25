@@ -18,14 +18,24 @@ public class BucketEncoding {
 
     public static BitBuffer encode(List<Integer> readings) {
         BitBuffer bitBuffer = new BitBuffer(4);
-        Integer previousReading;
-
+        Integer previousReading = null;
         for (Integer reading : readings) {
+            String encodeReading = encodeReading(reading, previousReading);
             previousReading = reading;
-            bitBuffer.writeBitString(encodeReading(reading, previousReading));
+            bitBuffer.writeBitString(encodeReading);
+        }
+
+        int bitsLeftInByteOfBuffer = bitBuffer.bitsLeftInCurrentByte();
+
+        if (bitsLeftInByteOfBuffer > 1) {
+            finalizeBuffer(bitsLeftInByteOfBuffer);
         }
 
         return bitBuffer;
+    }
+
+    private static void finalizeBuffer(int bitsLeftInByteOfBuffer) {
+
     }
 
     private static String encodeReading(Integer reading, Integer prevReading) {

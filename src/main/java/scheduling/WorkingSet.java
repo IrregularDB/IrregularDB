@@ -3,6 +3,8 @@ package scheduling;
 import records.TimeSeriesReading;
 import segmentgenerator.TimeSeries;
 import segmentgenerator.TimeSeriesFactory;
+import storage.DatabaseConnection;
+import storage.DatabaseConnectionFactory;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -13,11 +15,13 @@ public class WorkingSet {
     private final Queue<TimeSeriesReading> buffer;
     private final Map<String, TimeSeries> timeSeriesTagToTimeSeries;
     private final TimeSeriesFactory timeSeriesFactory;
+    private final DatabaseConnection databaseConnection;
 
-    public WorkingSet(Queue<TimeSeriesReading> buffer, TimeSeriesFactory timeSeriesFactory) {
+    public WorkingSet(Queue<TimeSeriesReading> buffer, TimeSeriesFactory timeSeriesFactory, DatabaseConnectionFactory databaseConnectionFactory) {
         this.buffer = buffer;
         this.timeSeriesTagToTimeSeries = new HashMap<>();
         this.timeSeriesFactory = timeSeriesFactory;
+        this.databaseConnection = databaseConnectionFactory.createDataBaseConnection();
     }
 
     public void accept(TimeSeriesReading timeSeriesReading){

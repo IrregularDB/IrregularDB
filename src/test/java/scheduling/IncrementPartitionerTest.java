@@ -9,7 +9,7 @@ class IncrementPartitionerTest {
 
     @Test
     void testIncrementPartitioningReturnsWorkingSetsCorrectly() {
-        WorkingSetFactory workingSetFactory = new WorkingSetFactory();
+        TestWorkingSetFactory testWorkingSetFactory = new TestWorkingSetFactory();
 
         IncrementPartitioner incrementPartitioner = new IncrementPartitioner(testWorkingSetFactory, 2);
 

@@ -8,7 +8,7 @@ import sources.DataReceiverSpawner;
 
 class MainTest {
 
-    @Test
+//    @Test
     /**
      * This test is currently dependant on the actual run configuration. The sources used are for reference given here
      * source.csv= src/test/resources/integration-test/01.csv ,\

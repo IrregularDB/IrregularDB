@@ -1,6 +1,7 @@
 package segmentgenerator;
 
 import records.DataPoint;
+import storage.DatabaseConnection;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,8 +9,8 @@ import java.util.List;
 public class TestTimeSeries extends TimeSeries{
     private final List<DataPoint> receivedDataPoints;
 
-    public TestTimeSeries(String timeSeriesKey) {
-        super(timeSeriesKey);
+    public TestTimeSeries(String timeSeriesKey, DatabaseConnection databaseConnection) {
+        super(timeSeriesKey, databaseConnection);
         this.receivedDataPoints = new ArrayList<>();
     }
 

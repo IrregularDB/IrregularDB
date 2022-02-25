@@ -30,7 +30,7 @@ public class BaseDeltaTimeStampCompressionModel extends TimeStampCompressionMode
 
     @Override
     public boolean append(DataPoint dataPoint) {
-        if (startTime < 0) {
+        if (startTime == -1) {
             startTime = dataPoint.timestamp();
             return true;
         }
@@ -42,7 +42,7 @@ public class BaseDeltaTimeStampCompressionModel extends TimeStampCompressionMode
 
     @Override
     public ByteBuffer getBlobRepresentation() {
-        ByteBuffer byteBuffer = ByteBuffer.allocate((this.deltaTimeStamps.size() + 1) * 4);
+        ByteBuffer byteBuffer = ByteBuffer.allocate((this.deltaTimeStamps.size()) * 4);
         for (Integer integer : this.deltaTimeStamps) {
             byteBuffer.putInt(integer);
         }
@@ -77,9 +77,5 @@ public class BaseDeltaTimeStampCompressionModel extends TimeStampCompressionMode
 
     public long getStartTime() {
         return startTime;
-    }
-
-    public int getTimeStampsAmount() {
-        return deltaTimeStamps.size();
     }
 }

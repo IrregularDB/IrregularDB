@@ -53,6 +53,6 @@ public class WorkingSet {
     }
 
     private TimeSeries createTimeSeriesForNewKey(String recordKey){
-        return this.timeSeriesFactory.createTimeSeries(recordKey);
+        return timeSeriesFactory.createTimeSeries(recordKey, this.databaseConnection);
     }
 }

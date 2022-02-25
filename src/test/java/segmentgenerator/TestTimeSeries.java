@@ -1,6 +1,7 @@
 package segmentgenerator;
 
 import records.DataPoint;
+import storage.DatabaseConnection;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -42,8 +42,10 @@ class BaseDeltaPairsTimeStampCompressionModelTest {
 
         List<DataPoint> dataPointList = createTenDataPoints();
         boolean success = baseDeltaTimeStampCompressionModel.resetAndAppendAll(dataPointList);
+        int actualLength = baseDeltaTimeStampCompressionModel.getLength();
 
         Assertions.assertTrue(success);
+        Assertions.assertEquals(9, actualLength);
     }
 
     @Test
@@ -54,7 +56,7 @@ class BaseDeltaPairsTimeStampCompressionModelTest {
 
         ByteBuffer blobRepresentation = baseDeltaTimeStampCompressionModel.getBlobRepresentation();
 
-        // First value is not stored in the byte buffer
+        // base value not stored in byte buffer
         int actualFirstTimeStamp = blobRepresentation.getInt(0);
         int actualSecondTimeStamp = blobRepresentation.getInt(4);
 
@@ -67,7 +69,7 @@ class BaseDeltaPairsTimeStampCompressionModelTest {
     public void testReduceSizeToN(){
         dataPoints.forEach(dp -> baseDeltaTimeStampCompressionModel.append(dp));
         baseDeltaTimeStampCompressionModel.reduceToSizeN(5);
-        int actualAmountOfTimeStamps = baseDeltaTimeStampCompressionModel.getTimeStampsAmount();
+        int actualAmountOfTimeStamps = baseDeltaTimeStampCompressionModel.getLength();
 
         // Assert list has 5 data points
         assertEquals(5, actualAmountOfTimeStamps);
@@ -77,7 +79,7 @@ class BaseDeltaPairsTimeStampCompressionModelTest {
     public void testReduceSizeWithNumberOfTimeStamps(){
         dataPoints.forEach(dp -> baseDeltaTimeStampCompressionModel.append(dp));
         baseDeltaTimeStampCompressionModel.reduceToSizeN(9);
-        int actualAmountOfTimeStamps = baseDeltaTimeStampCompressionModel.getTimeStampsAmount();
+        int actualAmountOfTimeStamps = baseDeltaTimeStampCompressionModel.getLength();
 
         assertEquals(9, actualAmountOfTimeStamps);
     }

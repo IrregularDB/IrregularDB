@@ -1,7 +1,7 @@
 package scheduling;
 
-import records.TimeSeriesReading;
 import segmentgenerator.TimeSeriesFactory;
+import storage.DatabaseConnectionFactory;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
 

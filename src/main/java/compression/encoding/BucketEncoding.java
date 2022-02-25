@@ -54,6 +54,7 @@ public class BucketEncoding {
             throw new RuntimeException("Value greater than bucket allows");
         }
 
+
         return controlBits + "0".repeat(zeroesToPad) + significantBits;
     }
 

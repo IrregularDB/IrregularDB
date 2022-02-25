@@ -25,17 +25,19 @@ public class BucketEncoding {
             bitBuffer.writeBitString(encodeReading);
         }
 
-        int bitsLeftInByteOfBuffer = bitBuffer.bitsLeftInCurrentByte();
-
-        if (bitsLeftInByteOfBuffer > 1) {
-            finalizeBuffer(bitsLeftInByteOfBuffer);
-        }
+        finalizeBuffer(bitBuffer);
 
         return bitBuffer;
     }
 
-    private static void finalizeBuffer(int bitsLeftInByteOfBuffer) {
-
+    /**
+     * There can be an unfinished byte. In order to handle this we write 11 as control bits that require more bits than are available in the stream. This indicates end of stream
+     * @param bitBuffer
+     */
+    private static void finalizeBuffer(BitBuffer bitBuffer) {
+        if (bitBuffer.bitsLeftInCurrentByte() > 1) {
+            bitBuffer.writeBitString("11");
+        }
     }
 
     private static String encodeReading(Integer reading, Integer prevReading) {
@@ -84,8 +86,13 @@ public class BucketEncoding {
                 integers.add(lastInteger);
             } else {
                 int bitsInBucket = controlBitsToLength(controlBits);
-                lastInteger = BitUtil.bits2Int(bitStream.getNBits(bitsInBucket));
-                integers.add(lastInteger);
+                if (bitStream.hasNNext(bitsInBucket)) {
+                    lastInteger = BitUtil.bits2Int(bitStream.getNBits(bitsInBucket));
+                    integers.add(lastInteger);
+                } else {
+                    //this indicates end of stream, and remaining bits of stream are without significance
+                    break;
+                }
             }
         }
         return integers;

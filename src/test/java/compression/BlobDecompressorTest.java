@@ -281,7 +281,7 @@ class BlobDecompressorTest {
         boolean appendSucceeded = timeStampCompressionModel.resetAndAppendAll(expectedDataPoints);
         ByteBuffer blobRepresentation = timeStampCompressionModel.getBlobRepresentation();
 
-        List<Long> actualDataPointsDecompressed = BlobDecompressor
+        List<Long> actualTimeStampsDecompressed = BlobDecompressor
                 .decompressTimeStamps(TimeStampCompressionModelType.BASEDELTA,
                         blobRepresentation,
                         startTime,
@@ -289,7 +289,7 @@ class BlobDecompressorTest {
                 );
 
         Assertions.assertTrue(appendSucceeded);
-        Assertions.assertEquals(expectedTimeStamps, actualDataPointsDecompressed);
+        Assertions.assertEquals(expectedTimeStamps, actualTimeStampsDecompressed);
     }
 
     /**

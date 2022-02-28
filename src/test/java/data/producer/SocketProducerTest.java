@@ -7,6 +7,7 @@ import records.TimeSeriesReading;
 import scheduling.Partitioner;
 import scheduling.WorkingSet;
 import sources.SocketDataReceiverSpawner;
+import storage.TestDatabaseConnection;
 import storage.TestDatabaseConnectionFactory;
 
 import java.util.ArrayList;

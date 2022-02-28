@@ -5,6 +5,7 @@ import compression.utility.BitStream;
 import compression.utility.BitUtil;
 
 import javax.management.InstanceNotFoundException;
+import java.util.ArrayList;
 import java.util.List;
 
 public class GorillaValueEncoding {
@@ -88,8 +89,49 @@ public class GorillaValueEncoding {
     }
 
     public static List<Float> decode(BitStream bitStream) {
-        // TODO: remember that 0 means 32 for length
-        // TODO: remember the finalizing of buffer means we get 11 at the end, and if there then is not enough bits left then this should fail
-        throw new RuntimeException("Not implemented");
+        List<Float> floatValues = new ArrayList<>();
+
+        int leadingZeroes = Integer.MAX_VALUE;
+        int trailingZeroes = Integer.MAX_VALUE;
+        int length = Integer.MAX_VALUE;
+
+
+        int previousValue =  BitUtil.bits2Int(bitStream.getNBits(Integer.SIZE));
+        floatValues.add(Float.intBitsToFloat(previousValue));
+
+        String controlBit;
+        while (bitStream.hasNNext(1)) {
+            controlBit = bitStream.getNBits(1);
+            if (controlBit.equals(SAME_VALUE_CONTROL_BIT)) {
+                floatValues.add(Float.intBitsToFloat(previousValue));
+            } else {
+                if (!bitStream.hasNNext(AMT_BITS_USED_FOR_LEADING_ZEROES + AMT_BITS_USED_FOR_LENGTH)) {
+                    break; //this indicates end of stream, and remaining bits of stream are without significance
+                }
+
+                controlBit += bitStream.getNBits(1);
+                if (controlBit.equals(OUTSIDE_RANGE_CONTROL_BIT)) { // New leading zero and trailing zero
+                    // Calculate new values:
+                    leadingZeroes = BitUtil.bits2Int(bitStream.getNBits(AMT_BITS_USED_FOR_LEADING_ZEROES));
+                    length = BitUtil.bits2Int(bitStream.getNBits(AMT_BITS_USED_FOR_LENGTH));
+                    if (length == 0) {
+                        length = 32;
+                    }
+                    trailingZeroes = Integer.SIZE - length - leadingZeroes;
+
+                } else if (controlBit.equals(INSIDE_RANGE_CONTROL_BIT)) {
+                    // Reuse current values
+                } else {
+                    throw new RuntimeException("You should not get here");
+                }
+
+                int significantBits = BitUtil.bits2Int(bitStream.getNBits(length));
+                int shiftedBits = significantBits << trailingZeroes;
+                int value = previousValue ^ shiftedBits;
+                previousValue = value;
+                floatValues.add(Float.intBitsToFloat(previousValue));
+            }
+        }
+        return floatValues;
     }
 }

@@ -11,21 +11,14 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 class GorillaValueEncodingTest {
-    List<Float> values;
-    BitBuffer encoding;
-    BitStream bitStream;
-
-    @BeforeEach
-    void beforeEach() {
-        values = List.of(1.0F, 1.0F, 1.0F, 2.0F, 4.0F, 7.0F);
-        encoding = GorillaValueEncoding.encode(values);
-    }
-
-
     @Test
     void encode() {
+        List<Float> values = List.of(1.0F, 1.0F, 1.0F, 2.0F, 4.0F, 7.0F);
+        BitBuffer encoding =  GorillaValueEncoding.encode(values);
+        BitStream bitStream;
+
         bitStream = encoding.getBitStream();
-        int integerRepresentationFirstValue = BitUtil.bits2Int(bitStream.getNBits(32));
+        int integerRepresentationFirstValue = BitUtil.bits2Int(bitStream.getNBits(Integer.SIZE));
         float firstValue = Float.intBitsToFloat(integerRepresentationFirstValue);
 
         assertEquals(1.0F, firstValue);
@@ -70,8 +63,20 @@ class GorillaValueEncodingTest {
 
     @Test
     void decode() {
-        List<Float> decodedValues = GorillaValueEncoding.decode(encoding.getBitStream());
+        List<Float> values = List.of(1.0F, 1.0F, 1.0F, 2.0F, 4.0F, 7.0F);
+        BitBuffer encoding =  GorillaValueEncoding.encode(values);
 
+        List<Float> decodedValues = GorillaValueEncoding.decode(encoding.getBitStream());
+        assertEquals(values, decodedValues);
+    }
+
+
+    @Test
+    void decode2() {
+        List<Float> values = List.of(1.0F, 3.0F, 1.0F, 5.0F, 5.0F, 100000.0F);
+        BitBuffer encoding =  GorillaValueEncoding.encode(values);
+
+        List<Float> decodedValues = GorillaValueEncoding.decode(encoding.getBitStream());
         assertEquals(values, decodedValues);
     }
 }

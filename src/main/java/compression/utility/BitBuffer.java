@@ -59,7 +59,7 @@ public class BitBuffer {
 
     private void handledUnfinishedByte() {
         while (currByte.length() < Byte.SIZE) {
-            currByte.append("0");
+            currByte.append("1");
         }
         flushCurrentByteToBuffer();
     }

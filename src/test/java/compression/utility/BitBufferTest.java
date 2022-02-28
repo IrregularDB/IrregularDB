@@ -59,15 +59,15 @@ class BitBufferTest {
 
     @Test
     void write1Bit() {
-        bitBuffer.writeBit('1');
+        bitBuffer.writeBit('0');
 
         ByteBuffer byteBuffer = bitBuffer.getByteBuffer();
         // We expect it to shorten the byte buffer down to 1 byte even though we allocated 2
         Assertions.assertEquals(1, byteBuffer.capacity());
 
-        // We expect it to simply append the current byte with zeroes on the end of it
-        // so we expect the following string "1000 0000", which is equivalent to - 128
-        Assertions.assertEquals(-128, byteBuffer.get(0));
+        // We expect it to simply append the current byte with ones on the end of it
+        // so we expect the following string "0111 1111", which is equivalent to 127
+        Assertions.assertEquals(127, byteBuffer.get(0));
     }
 
     @Test
@@ -110,8 +110,8 @@ class BitBufferTest {
 
         // We expect 1111 1111 which is equivalent to -1
         Assertions.assertEquals(-1, byteBuffer.get(0));
-        // We expect it to fill it out with zeroes giving 0000 0000
-        Assertions.assertEquals(0, byteBuffer.get(1));
+        // We expect it to fill it out with ones giving 0111 1111
+        Assertions.assertEquals(127, byteBuffer.get(1));
     }
 
     @Test

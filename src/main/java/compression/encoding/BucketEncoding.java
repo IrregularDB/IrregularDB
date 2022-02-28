@@ -32,19 +32,7 @@ public class BucketEncoding {
             bitBuffer.writeBitString(encodeReading);
         }
 
-        finalizeBuffer(bitBuffer);
-
         return bitBuffer;
-    }
-
-    /**
-     * There can be an unfinished byte. In order to handle this we write 11 as control bits that require more bits than are available in the stream. This indicates end of stream
-     * @param bitBuffer
-     */
-    private static void finalizeBuffer(BitBuffer bitBuffer) {
-        if (bitBuffer.bitsLeftInCurrentByte() >= AMT_CONTROL_BITS) {
-            bitBuffer.writeBitString(BUCKET_3_CONTROL_BITS);
-        }
     }
 
     private static String encodeReading(Integer reading, Integer prevReading) {

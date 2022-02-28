@@ -4,6 +4,7 @@ import compression.utility.BitBuffer;
 import compression.utility.BitStream;
 import compression.utility.BitUtil;
 
+import javax.management.InstanceNotFoundException;
 import java.util.List;
 
 public class GorillaValueEncoding {
@@ -18,11 +19,12 @@ public class GorillaValueEncoding {
 
     public static BitBuffer encode(List<Float> values) {
         BitBuffer bitBuffer = new BitBuffer(16);
-        int previousLeadingZeroes = -1;
-        int previousTrailingZeroes = -1;
+        int previousLeadingZeroes = Integer.MAX_VALUE;
+        int previousTrailingZeroes = Integer.MAX_VALUE;
 
-        // Get BIT representation of the float value
+        // Get BIT representation of the float value and write the initial value to the buffer
         int previousValue =  Float.floatToIntBits(values.get(0));
+        bitBuffer.putInt(previousValue);
 
         for (int i = 1; i < values.size(); i++) {
             var currValue = Float.floatToIntBits(values.get(i));
@@ -30,45 +32,64 @@ public class GorillaValueEncoding {
             if (xor == 0) {
                 bitBuffer.writeBitString(SAME_VALUE_CONTROL_BIT);
             } else {
-                int leadingZeroes = Integer.numberOfLeadingZeros(currValue);
-                int trailingZeroes = Integer.numberOfTrailingZeros(currValue);
+                int leadingZeroes = Integer.numberOfLeadingZeros(xor);
+                if (leadingZeroes >= 16) { // We only use 4 bits for LZ so we can at max represent 15
+                    leadingZeroes = 15;
+                }
+                int trailingZeroes = Integer.numberOfTrailingZeros(xor);
 
-                // When there is less leading zeroes or trailing zeroes then we have to store a new range
-                if ((previousLeadingZeroes == -1) || (leadingZeroes < previousLeadingZeroes) || (trailingZeroes < previousTrailingZeroes)) {
-                    bitBuffer.writeBitString(createOutSideRangeString(leadingZeroes, trailingZeroes, currValue));
+                if ((leadingZeroes >= previousLeadingZeroes) && (trailingZeroes >= previousTrailingZeroes)) {
+                    // We can reuse the old range when there is less than or same amount of leading zeroes and trailing
+                    // zeroes in our current value
+                    writeInsideRangeString(bitBuffer, previousLeadingZeroes, previousTrailingZeroes, xor);
+                } else {
+                    // When there is less leading zeroes or trailing zeroes then we have to store a new range
+                    writeOutSideRangeString(bitBuffer, leadingZeroes, trailingZeroes, xor);
                     previousLeadingZeroes = leadingZeroes;
                     previousTrailingZeroes = trailingZeroes;
-                } else {
-                    int lengthOfSignificantBits = Integer.SIZE - previousLeadingZeroes - previousTrailingZeroes;
-
                 }
             }
+            previousValue = currValue;
         }
 
         return bitBuffer;
     }
 
-    private static String createOutSideRangeString(int leadingZeroes, int trailingZeroes, int currValue) {
-        int lengthOfSignificantBits = Integer.SIZE - leadingZeroes - trailingZeroes - 1; // The minus 1 is necessary to store length = 32
-        return OUTSIDE_RANGE_CONTROL_BIT +
-                createBitEncodingWithSpecifiedLength(leadingZeroes, AMT_BITS_USED_FOR_LEADING_ZEROES) +   // LZ
-                createBitEncodingWithSpecifiedLength(lengthOfSignificantBits, AMT_BITS_USED_FOR_LENGTH) + // L
-                createSignificantBitsString(currValue, lengthOfSignificantBits);                          // Signif-bits
+    private static void writeOutSideRangeString(BitBuffer bitBuffer, int leadingZeroes, int trailingZeroes, int currValue) {
+        int lengthOfSignificantBits = Integer.SIZE - leadingZeroes - trailingZeroes ;
+        if (lengthOfSignificantBits == 32) {  // We represent length 32 as 0 (because the case of zero would mean the values are the same XOR == 0 case instead
+            lengthOfSignificantBits = 0;
+        }
+        String outSideRangeString = OUTSIDE_RANGE_CONTROL_BIT +
+                createBitEncodingWithSpecifiedAmtBits(leadingZeroes, AMT_BITS_USED_FOR_LEADING_ZEROES) +   // LZ
+                createBitEncodingWithSpecifiedAmtBits(lengthOfSignificantBits, AMT_BITS_USED_FOR_LENGTH) + // L
+                createSignificantBitsString(currValue, trailingZeroes); // Signif-bits
+        bitBuffer.writeBitString(outSideRangeString);
     }
 
-    private static String createBitEncodingWithSpecifiedLength(int value, int amtBits) {
+    private static String createSignificantBitsString(int value, int trailingZeroes) {
+        // we use zero-fill right shifting
+        int shiftedValue = value >>> trailingZeroes;
+        return BitUtil.int2Bits(shiftedValue);
+    }
+
+    private static void writeInsideRangeString(BitBuffer bitBuffer, int leadingZeroes, int trailingZeroes, int currValue) {
+        int lengthOfSignificantBits = Integer.SIZE - leadingZeroes - trailingZeroes;
+        int shiftedValue = currValue >>> trailingZeroes;
+        String insideRangeString = INSIDE_RANGE_CONTROL_BIT + createBitEncodingWithSpecifiedAmtBits(shiftedValue, lengthOfSignificantBits);
+        bitBuffer.writeBitString(insideRangeString);
+    }
+
+    private static String createBitEncodingWithSpecifiedAmtBits(int value, int amtBits) {
         String bitString = BitUtil.int2Bits(value);
         int amtBitsInValue = bitString.length();
         int zeroesToPad = amtBits - amtBitsInValue;
-
         return "0".repeat(zeroesToPad) + bitString;
     }
 
-    private static String createSignificantBitsString(int value, int length) {
-        throw new RuntimeException("NOT IMPLEMENTED");
-    }
-
     public static List<Float> decode(BitStream bitStream) {
+        // TODO: remember that 0 means 32 for length
+        // TODO: remember the finalizing of buffer means we get 11 at the end, and if there then is not enough bits left then this should fail
         throw new RuntimeException("Not implemented");
     }
 }

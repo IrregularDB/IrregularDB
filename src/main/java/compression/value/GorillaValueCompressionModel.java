@@ -38,6 +38,10 @@ public class GorillaValueCompressionModel extends ValueCompressionModel {
 
     @Override
     protected ByteBuffer createByteBuffer() {
+        if (this.getLength() == 0) {
+            throw new UnsupportedOperationException("No data points where added to the Gorilla value model before trying to get the value blob");
+        }
+
         BitBuffer encode = GorillaValueEncoding.encode(values);
         return encode.getByteBuffer();
     }

@@ -1,6 +1,7 @@
 package compression;
 
 import compression.encoding.BucketEncoding;
+import compression.encoding.GorillaValueEncoding;
 import compression.timestamp.TimeStampCompressionModelType;
 import compression.utility.BitBuffer;
 import compression.utility.BitStream;
@@ -104,6 +105,17 @@ public class BlobDecompressor {
     }
 
     private static List<DataPoint> decompressGorilla(ByteBuffer valueBlob, List<Long> timeStamps) {
-        throw new RuntimeException("Not implemented");
+        BitStream bitStream = new BitStream(valueBlob);
+
+        List<Float> decodedValues = GorillaValueEncoding.decode(bitStream);
+        int amtValues = decodedValues.size();
+        if (amtValues != timeStamps.size()) {
+            throw new RuntimeException("The amount of values and time stamps did not match up");
+        }
+        List<DataPoint> dataPoints = new ArrayList<>();
+        for (int i = 0; i < amtValues; i++) {
+            dataPoints.add(new DataPoint(timeStamps.get(i), decodedValues.get(i)));
+        }
+        return dataPoints;
     }
 }

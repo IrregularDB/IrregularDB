@@ -108,7 +108,6 @@ public class GorillaValueEncoding {
                 if (!bitStream.hasNNext(AMT_BITS_USED_FOR_LEADING_ZEROES + AMT_BITS_USED_FOR_LENGTH)) {
                     break; //this indicates end of stream, and remaining bits of stream are without significance
                 }
-
                 controlBit += bitStream.getNBits(1);
                 if (controlBit.equals(OUTSIDE_RANGE_CONTROL_BIT)) { // New leading zero and trailing zero
                     // Calculate new values:
@@ -118,11 +117,6 @@ public class GorillaValueEncoding {
                         length = 32;
                     }
                     trailingZeroes = Integer.SIZE - length - leadingZeroes;
-
-                } else if (controlBit.equals(INSIDE_RANGE_CONTROL_BIT)) {
-                    // Reuse current values
-                } else {
-                    throw new RuntimeException("You should not get here");
                 }
 
                 int significantBits = BitUtil.bits2Int(bitStream.getNBits(length));

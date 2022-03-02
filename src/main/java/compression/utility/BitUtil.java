@@ -17,7 +17,8 @@ public class BitUtil {
     }
 
     public static int bits2Int(String bits) {
-        return Integer.parseInt(bits, 2);
+        // Necessary hack to parse 1111 1111 1111 1111 1111 1111 1111 1111
+        return (int)(Long.parseLong(bits, 2));
     }
 
     /**

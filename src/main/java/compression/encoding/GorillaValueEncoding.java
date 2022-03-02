@@ -25,11 +25,11 @@ public class GorillaValueEncoding {
         int previousTrailingZeroes = Integer.MAX_VALUE;
 
         // Get BIT representation of the float value and write the initial value to the buffer
-        int previousValue =  Float.floatToIntBits(values.get(0));
+        int previousValue =  Float.floatToRawIntBits(values.get(0));
         bitBuffer.putInt(previousValue);
 
         for (int i = 1; i < values.size(); i++) {
-            var currValue = Float.floatToIntBits(values.get(i));
+            var currValue = Float.floatToRawIntBits(values.get(i));
             int xor = currValue ^ previousValue;
             if (xor == 0) {
                 bitBuffer.writeBitString(SAME_VALUE_CONTROL_BIT);
@@ -70,6 +70,10 @@ public class GorillaValueEncoding {
     }
 
     private static String createSignificantBitsString(int value, int trailingZeroes, int lengthOfSignificantBits) {
+        if (lengthOfSignificantBits == 0) {
+            lengthOfSignificantBits = 32;
+        }
+
         // we use zero-fill right shifting
         int shiftedValue = value >>> trailingZeroes;
         return BitUtil.int2Bits(shiftedValue, lengthOfSignificantBits);
@@ -92,7 +96,6 @@ public class GorillaValueEncoding {
 
         int previousValue =  BitUtil.bits2Int(bitStream.getNBits(Integer.SIZE));
         floatValues.add(Float.intBitsToFloat(previousValue));
-
         String controlBit;
         while (bitStream.hasNNext(1)) {
             controlBit = bitStream.getNBits(1);

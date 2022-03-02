@@ -3,9 +3,11 @@ package compression.encoding;
 import compression.utility.BitBuffer;
 import compression.utility.BitStream;
 import compression.utility.BitUtil;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -17,7 +19,7 @@ class GorillaValueEncodingTest {
     }
 
     @Test
-    void encodeManyValues() {
+    void encodeManyFloatValues() {
         List<Float> values = List.of(1.0F, 1.0F, 1.0F, 2.0F, 4.0F, 7.0F);
         BitBuffer encoding =  GorillaValueEncoding.encode(values);
         BitStream bitStream = encoding.getBitStream();
@@ -135,17 +137,8 @@ class GorillaValueEncodingTest {
     }
 
     @Test
-    void decode() {
+    void decodeManyFloatValues() {
         List<Float> values = List.of(1.0F, 1.0F, 1.0F, 2.0F, 4.0F, 7.0F);
-        BitBuffer encoding =  GorillaValueEncoding.encode(values);
-
-        List<Float> decodedValues = GorillaValueEncoding.decode(encoding.getBitStream());
-        assertEquals(values, decodedValues);
-    }
-
-    @Test
-    void decode2() {
-        List<Float> values = List.of(1.0F, 3.0F, 1.0F, 5.0F, 5.0F, 100000.0F);
         BitBuffer encoding =  GorillaValueEncoding.encode(values);
 
         List<Float> decodedValues = GorillaValueEncoding.decode(encoding.getBitStream());
@@ -176,4 +169,74 @@ class GorillaValueEncodingTest {
         List<Float> decodedValues = GorillaValueEncoding.decode(encoding.getBitStream());
         assertEquals(values, decodedValues);
     }
+
+    @Test
+    void decodeWithOneEmptyBit() {
+        float v1 = Float.intBitsToFloat(0);
+        List<Float> values = new ArrayList<>();
+        int amtValuesToInsert = 8;
+        for (int i = 0; i < amtValuesToInsert; i++) {
+            values.add(v1);
+        }
+        BitBuffer encoding =  GorillaValueEncoding.encode(values);
+        BitStream bitStream = encoding.getBitStream();
+        // We added the same value 8 times. We therefore expect it to encode this as 40 bits:
+            // - first 32 bits for the original value
+            // - then 7 * times 1 bit used to store control bit "0"
+            // - then padding one "1"'s on the end
+        Assertions.assertEquals(40, bitStream.getSize());
+
+        // The decompressor should ignore the last padding bit
+        List<Float> decodedValues = GorillaValueEncoding.decode(bitStream);
+        assertEquals(values, decodedValues);
+    }
+
+    @Test
+    void decodeWithMultipleEmptyBits() {
+        float v1 = Float.intBitsToFloat(0);
+        List<Float> values = new ArrayList<>();
+        int amtValuesToInsert = 2;
+        for (int i = 0; i < amtValuesToInsert; i++) {
+            values.add(v1);
+        }
+        BitBuffer encoding =  GorillaValueEncoding.encode(values);
+        BitStream bitStream = encoding.getBitStream();
+        // We added the same value 8 times. We therefore expect it to encode this as 40 bits:
+        // - first 32 bits for the original value
+        // - then 1 * times 1 bit used to store control bit "0"
+        // - then padding 7 "1"'s on the end
+        Assertions.assertEquals(40, bitStream.getSize());
+
+        // The decompressor should ignore the last padding bits
+        List<Float> decodedValues = GorillaValueEncoding.decode(bitStream);
+        assertEquals(values, decodedValues);
+    }
+
+    // This test checks we handle the edge case where we hit 101 as last bits
+    @Test
+    void decodeWhereWeHit101AsLastBits() {
+        float v1 = Float.intBitsToFloat(0);
+        float v2 = Float.intBitsToFloat(Integer.MIN_VALUE);
+
+        List<Float> values = List.of(v1, v2, v2, v1);
+
+        BitBuffer encoding =  GorillaValueEncoding.encode(values);
+
+        BitStream bitStream = encoding.getBitStream();
+        /* We here expect it to use
+            - first 32 bits for the original value
+            - Then for the next value we get 12 bits: as XOR = 1000 0000 ...
+                - CB = 11
+                - LZ = 0000
+                - L  = 00001
+                - SIGNIF-BITS = 1
+            - Then 0 as we store the same value
+            - Then 101 because XOR is again XOR = 1000 0000 ... which is within the previous range and SIGNIF-BITS length is 1
+        */
+        Assertions.assertEquals(48, bitStream.getSize());
+
+        List<Float> decodedValues = GorillaValueEncoding.decode(bitStream);
+        assertEquals(values, decodedValues);
+    }
+
 }

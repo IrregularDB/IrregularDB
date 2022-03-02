@@ -19,7 +19,8 @@ public class GorillaValueEncoding {
 
 
     public static BitBuffer encode(List<Float> values) {
-        BitBuffer bitBuffer = new BitBuffer(16);
+        // We finish the byte with 1's as we can then in the decoding detect end of stream
+        BitBuffer bitBuffer = new BitBuffer(16, true);
         int previousLeadingZeroes = Integer.MAX_VALUE;
         int previousTrailingZeroes = Integer.MAX_VALUE;
 
@@ -34,7 +35,7 @@ public class GorillaValueEncoding {
                 bitBuffer.writeBitString(SAME_VALUE_CONTROL_BIT);
             } else {
                 int leadingZeroes = Integer.numberOfLeadingZeros(xor);
-                if (leadingZeroes >= 16) { // We only use 4 bits for LZ so we can at max represent 15
+                if (leadingZeroes > 15) { // We only use 4 bits for LZ so we can at max represent 15
                     leadingZeroes = 15;
                 }
                 int trailingZeroes = Integer.numberOfTrailingZeros(xor);
@@ -105,11 +106,14 @@ public class GorillaValueEncoding {
             if (controlBit.equals(SAME_VALUE_CONTROL_BIT)) {
                 floatValues.add(Float.intBitsToFloat(previousValue));
             } else {
-                if (!bitStream.hasNNext(AMT_BITS_USED_FOR_LEADING_ZEROES + AMT_BITS_USED_FOR_LENGTH)) {
+                if (!bitStream.hasNNext(2)){
                     break; //this indicates end of stream, and remaining bits of stream are without significance
                 }
                 controlBit += bitStream.getNBits(1);
                 if (controlBit.equals(OUTSIDE_RANGE_CONTROL_BIT)) { // New leading zero and trailing zero
+                    if (!bitStream.hasNNext(AMT_BITS_USED_FOR_LEADING_ZEROES + AMT_BITS_USED_FOR_LENGTH)) {
+                        break; //this indicates end of stream, and remaining bits of stream are without significance
+                    }
                     // Calculate new values:
                     leadingZeroes = BitUtil.bits2Int(bitStream.getNBits(AMT_BITS_USED_FOR_LEADING_ZEROES));
                     length = BitUtil.bits2Int(bitStream.getNBits(AMT_BITS_USED_FOR_LENGTH));
@@ -122,8 +126,8 @@ public class GorillaValueEncoding {
                 int significantBits = BitUtil.bits2Int(bitStream.getNBits(length));
                 int shiftedBits = significantBits << trailingZeroes;
                 int value = previousValue ^ shiftedBits;
+                floatValues.add(Float.intBitsToFloat(value));
                 previousValue = value;
-                floatValues.add(Float.intBitsToFloat(previousValue));
             }
         }
         return floatValues;

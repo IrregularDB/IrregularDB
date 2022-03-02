@@ -24,7 +24,8 @@ public class BucketEncoding {
      * @param readings we only support positive numbers
      */
     public static BitBuffer encode(List<Integer> readings) {
-        BitBuffer bitBuffer = new BitBuffer(4);
+        // We finish the byte with 1's as we can then in the decoding detect end of stream
+        BitBuffer bitBuffer = new BitBuffer(4, true);
         Integer previousReading = null;
         for (Integer reading : readings) {
             String encodeReading = encodeReading(reading, previousReading);

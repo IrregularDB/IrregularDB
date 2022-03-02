@@ -63,30 +63,23 @@ public class GorillaValueEncoding {
             lengthOfSignificantBits = 0;
         }
         String outSideRangeString = OUTSIDE_RANGE_CONTROL_BIT +
-                createBitEncodingWithSpecifiedAmtBits(leadingZeroes, AMT_BITS_USED_FOR_LEADING_ZEROES) +   // LZ
-                createBitEncodingWithSpecifiedAmtBits(lengthOfSignificantBits, AMT_BITS_USED_FOR_LENGTH) + // L
-                createSignificantBitsString(currValue, trailingZeroes); // Signif-bits
+                BitUtil.int2Bits(leadingZeroes, AMT_BITS_USED_FOR_LEADING_ZEROES) +   // LZ
+                BitUtil.int2Bits(lengthOfSignificantBits, AMT_BITS_USED_FOR_LENGTH) + // L
+                createSignificantBitsString(currValue, trailingZeroes, lengthOfSignificantBits); // Signif-bits
         bitBuffer.writeBitString(outSideRangeString);
     }
 
-    private static String createSignificantBitsString(int value, int trailingZeroes) {
+    private static String createSignificantBitsString(int value, int trailingZeroes, int lengthOfSignificantBits) {
         // we use zero-fill right shifting
         int shiftedValue = value >>> trailingZeroes;
-        return BitUtil.int2Bits(shiftedValue);
+        return BitUtil.int2Bits(shiftedValue, lengthOfSignificantBits);
     }
 
-    private static void writeInsideRangeString(BitBuffer bitBuffer, int leadingZeroes, int trailingZeroes, int currValue) {
-        int lengthOfSignificantBits = Integer.SIZE - leadingZeroes - trailingZeroes;
-        int shiftedValue = currValue >>> trailingZeroes;
-        String insideRangeString = INSIDE_RANGE_CONTROL_BIT + createBitEncodingWithSpecifiedAmtBits(shiftedValue, lengthOfSignificantBits);
+    private static void writeInsideRangeString(BitBuffer bitBuffer, int previousLeadingZeroes, int previousTrailingZeroes, int currValue) {
+        int lengthOfSignificantBits = Integer.SIZE - previousLeadingZeroes - previousTrailingZeroes;
+        String significantBitsString = createSignificantBitsString(currValue, previousTrailingZeroes, lengthOfSignificantBits);
+        String insideRangeString = INSIDE_RANGE_CONTROL_BIT + significantBitsString;
         bitBuffer.writeBitString(insideRangeString);
-    }
-
-    private static String createBitEncodingWithSpecifiedAmtBits(int value, int amtBits) {
-        String bitString = BitUtil.int2Bits(value);
-        int amtBitsInValue = bitString.length();
-        int zeroesToPad = amtBits - amtBitsInValue;
-        return "0".repeat(zeroesToPad) + bitString;
     }
 
     public static List<Float> decode(BitStream bitStream) {

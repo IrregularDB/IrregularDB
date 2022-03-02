@@ -12,12 +12,11 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class GorillaValueEncodingTest {
     @Test
-    void encode() {
+    void encodeManyValues() {
         List<Float> values = List.of(1.0F, 1.0F, 1.0F, 2.0F, 4.0F, 7.0F);
         BitBuffer encoding =  GorillaValueEncoding.encode(values);
-        BitStream bitStream;
+        BitStream bitStream = encoding.getBitStream();
 
-        bitStream = encoding.getBitStream();
         int integerRepresentationFirstValue = BitUtil.bits2Int(bitStream.getNBits(Integer.SIZE));
         float firstValue = Float.intBitsToFloat(integerRepresentationFirstValue);
 
@@ -62,6 +61,37 @@ class GorillaValueEncodingTest {
     }
 
     @Test
+    void encodeValueWithMoreLZThan15() {
+        float v1 = Float.intBitsToFloat(0);
+        float v2 = Float.intBitsToFloat(1);
+        float v3 = Float.intBitsToFloat(0);
+
+        List<Float> values = List.of(v1, v2, v3);
+        BitBuffer encoding =  GorillaValueEncoding.encode(values);
+        BitStream bitStream = encoding.getBitStream();
+
+        int integerRepresentationFirstValue = BitUtil.bits2Int(bitStream.getNBits(Integer.SIZE));
+        float firstValue = Float.intBitsToFloat(integerRepresentationFirstValue);
+
+        assertEquals(v1, firstValue);
+
+        // The xor of v1 and v2 should give: 0000 0000 0000 0000 0000 0000 0000 0001
+        // I.e. LZ = 15 (as this is max) and L = 17
+        // So we expect:
+        // CB (outside): 11
+        // LZ (4-bits) : 1 -> 1111
+        // L (5-bits)  : 17 -> 10001
+        // SIGNIF-BITS : 0000 0000 0000 0000 1
+        assertEquals(("11 1111 10001 0000 0000 0000 0000 1").replace(" ", ""), bitStream.getNBits(28));
+
+        // The xor of v2 and v3 should give the same as above and therefore be inside the range
+        // So we expect:
+        // CB (inside): 10
+        // SIGNIF-BITS : 0000 0000 0000 0000 1
+        assertEquals(("10 0000 0000 0000 0000 1").replace(" ", ""), bitStream.getNBits(19));
+    }
+
+    @Test
     void decode() {
         List<Float> values = List.of(1.0F, 1.0F, 1.0F, 2.0F, 4.0F, 7.0F);
         BitBuffer encoding =  GorillaValueEncoding.encode(values);
@@ -70,10 +100,22 @@ class GorillaValueEncodingTest {
         assertEquals(values, decodedValues);
     }
 
-
     @Test
     void decode2() {
         List<Float> values = List.of(1.0F, 3.0F, 1.0F, 5.0F, 5.0F, 100000.0F);
+        BitBuffer encoding =  GorillaValueEncoding.encode(values);
+
+        List<Float> decodedValues = GorillaValueEncoding.decode(encoding.getBitStream());
+        assertEquals(values, decodedValues);
+    }
+
+    @Test
+    void decodeValueWithMoreLZThan15() {
+        float v1 = Float.intBitsToFloat(0);
+        float v2 = Float.intBitsToFloat(1);
+        float v3 = Float.intBitsToFloat(0);
+
+        List<Float> values = List.of(v1, v2, v3);
         BitBuffer encoding =  GorillaValueEncoding.encode(values);
 
         List<Float> decodedValues = GorillaValueEncoding.decode(encoding.getBitStream());

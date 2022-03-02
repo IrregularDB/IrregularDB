@@ -6,6 +6,16 @@ public class BitUtil {
         return Integer.toBinaryString(i);
     }
 
+    public static String int2Bits(int i, int amtBits) {
+        String bitString = BitUtil.int2Bits(i);
+        int amtBitsInValue = bitString.length();
+        int zeroesToPad = amtBits - amtBitsInValue;
+        if (zeroesToPad < 0) {
+            throw new IllegalArgumentException("You tried to represent the integer: " + i + ". Using only: " + amtBits + ". Which is not possible");
+        }
+        return "0".repeat(zeroesToPad) + bitString;
+    }
+
     public static int bits2Int(String bits) {
         return Integer.parseInt(bits, 2);
     }

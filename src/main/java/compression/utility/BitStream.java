@@ -23,6 +23,10 @@ public class BitStream{
         this.size = allBits.length();
     }
 
+    public int getSize() {
+        return size;
+    }
+
     public String getNBits(int n) {
         if (n < 1) {
             throw new IllegalArgumentException("You must read at least one bit");

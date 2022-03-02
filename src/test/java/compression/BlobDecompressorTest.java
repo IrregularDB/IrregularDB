@@ -3,6 +3,8 @@ package compression;
 import compression.timestamp.BaseDeltaTimeStampCompressionModel;
 import compression.timestamp.DeltaPairsTimeStampCompressionModel;
 import compression.timestamp.TimeStampCompressionModelType;
+import compression.value.GorillaValueCompressionModel;
+import compression.value.ValueCompressionModel;
 import compression.value.ValueCompressionModelType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -59,6 +61,13 @@ class BlobDecompressorTest {
     void setupSwingValueModel(float slope, float intercept) {
         valueModelType = ValueCompressionModelType.SWING;
         valueBlob = ByteBuffer.allocate(8).putFloat(slope).putFloat(intercept);
+    }
+
+    void setupGorillaValueModel(List<DataPoint> dataPoints) {
+        valueModelType = ValueCompressionModelType.GORILLA;
+        ValueCompressionModel gorillaModel = new GorillaValueCompressionModel(dataPoints.size());
+        gorillaModel.resetAndAppendAll(dataPoints);
+        valueBlob = gorillaModel.getBlobRepresentation();
     }
 
     /***
@@ -169,7 +178,6 @@ class BlobDecompressorTest {
         setupSwingValueModel(-0.05F, 10.00F);
 
         List<Long> timeStamps = List.of(0L, 1L, 2L, 3L, 4L, 5L);
-        List<DataPoint> dataPoints = callValueDecompressor(timeStamps);
         List<DataPoint> expectedDataPoints = new ArrayList<>();
         expectedDataPoints.add(new DataPoint(0, 10.00F));
         expectedDataPoints.add(new DataPoint(1, 9.95F));
@@ -178,9 +186,10 @@ class BlobDecompressorTest {
         expectedDataPoints.add(new DataPoint(4, 9.80F));
         expectedDataPoints.add(new DataPoint(5, 9.75F));
 
+        List<DataPoint> actualDataPoints = callValueDecompressor(timeStamps);
         var allowedDifference = 0.000001;
-        for (int i = 0; i < dataPoints.size(); i++) {
-            DataPoint actualDataPoint = dataPoints.get(i);
+        for (int i = 0; i < actualDataPoints.size(); i++) {
+            DataPoint actualDataPoint = actualDataPoints.get(i);
             DataPoint expectedDataPoint = expectedDataPoints.get(i);
             double difference = actualDataPoint.value() - expectedDataPoint.value();
             assertTrue(difference < allowedDifference);
@@ -188,8 +197,46 @@ class BlobDecompressorTest {
         }
     }
 
+    @Test
+    void decompressGorilla() {
+        List<DataPoint> expectedDataPoints = new ArrayList<>();
+        expectedDataPoints.add(new DataPoint(0, 10.00F));
+        expectedDataPoints.add(new DataPoint(1, 33.0F));
+        expectedDataPoints.add(new DataPoint(2, 45.0F));
+        expectedDataPoints.add(new DataPoint(3, 45.0F));
+        expectedDataPoints.add(new DataPoint(4, 90.0F));
+        expectedDataPoints.add(new DataPoint(5, 10.0F));
+
+        List<Long> timeStamps = expectedDataPoints.stream()
+                .map(DataPoint::timestamp).toList();
+
+        setupGorillaValueModel(expectedDataPoints);
+        List<DataPoint> actualDataPoints = callValueDecompressor(timeStamps);
+
+        assertEquals(expectedDataPoints, actualDataPoints);
+    }
+
+    @Test
+    void decompressGorillaIrregularTime() {
+        List<DataPoint> expectedDataPoints = new ArrayList<>();
+        expectedDataPoints.add(new DataPoint(0, 10.00F));
+        expectedDataPoints.add(new DataPoint(3, 33.0F));
+        expectedDataPoints.add(new DataPoint(7, 45.0F));
+        expectedDataPoints.add(new DataPoint(10, 45.0F));
+        expectedDataPoints.add(new DataPoint(14, 90.0F));
+        expectedDataPoints.add(new DataPoint(15, 10.0F));
+
+        List<Long> timeStamps = expectedDataPoints.stream()
+                .map(DataPoint::timestamp).toList();
+
+        setupGorillaValueModel(expectedDataPoints);
+        List<DataPoint> actualDataPoints = callValueDecompressor(timeStamps);
+
+        assertEquals(expectedDataPoints, actualDataPoints);
+    }
+
     /***
-     * From here we add a few tests, where we combine the two methods to ensure they also work together
+     * We test a combination of two methods
      */
     @Test
     void decompressRegularAndPMCMean() {
@@ -234,7 +281,7 @@ class BlobDecompressorTest {
         boolean appendSucceeded = timeStampCompressionModel.resetAndAppendAll(expectedDataPoints);
         ByteBuffer blobRepresentation = timeStampCompressionModel.getBlobRepresentation();
 
-        List<Long> actualDataPointsDecompressed = BlobDecompressor
+        List<Long> actualTimeStampsDecompressed = BlobDecompressor
                 .decompressTimeStamps(TimeStampCompressionModelType.BASEDELTA,
                         blobRepresentation,
                         startTime,
@@ -242,7 +289,7 @@ class BlobDecompressorTest {
                 );
 
         Assertions.assertTrue(appendSucceeded);
-        Assertions.assertEquals(expectedTimeStamps, actualDataPointsDecompressed);
+        Assertions.assertEquals(expectedTimeStamps, actualTimeStampsDecompressed);
     }
 
     /**

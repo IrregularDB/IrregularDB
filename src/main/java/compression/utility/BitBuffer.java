@@ -13,13 +13,24 @@ import java.nio.ByteBuffer;
 public class BitBuffer {
     private ByteBuffer byteBuffer;
     private StringBuilder currByte;
+    private final String valueUsedToFinishBitBuffer;
 
     public BitBuffer(int initialByteBufferSize) {
+        this(initialByteBufferSize, true);
+    }
+
+    public BitBuffer(int initialByteBufferSize, boolean finishWithOnes) {
         if (initialByteBufferSize < 1) {
             throw new IllegalArgumentException("The initial buffer size should at least be 1");
         }
         this.byteBuffer = ByteBuffer.allocate(initialByteBufferSize);
         this.currByte = new StringBuilder();
+
+        if (finishWithOnes) {
+            this.valueUsedToFinishBitBuffer = "1";
+        } else {
+            this.valueUsedToFinishBitBuffer = "0";
+        }
     }
 
     public ByteBuffer getByteBuffer() {
@@ -39,11 +50,11 @@ public class BitBuffer {
         return Byte.SIZE - currByte.length();
     }
 
-    public void putFloat(float value){
+    public void putInt(int value){
         if (byteBuffer.remaining() < 4) {
             extendBufferWithNMoreBytes(4);
         }
-        byteBuffer.putFloat(value);
+        byteBuffer.putInt(value);
     }
 
     public void writeBit(char bit) {
@@ -59,7 +70,7 @@ public class BitBuffer {
 
     private void handledUnfinishedByte() {
         while (currByte.length() < Byte.SIZE) {
-            currByte.append("0");
+            currByte.append(valueUsedToFinishBitBuffer);
         }
         flushCurrentByteToBuffer();
     }

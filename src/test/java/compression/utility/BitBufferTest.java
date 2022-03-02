@@ -34,40 +34,40 @@ class BitBufferTest {
     }
 
     @Test
-    void putOneDoubleValue() {
-        bitBuffer.putFloat(1.0F);
+    void putOneNumberValue() {
+        bitBuffer.putInt(1);
 
         // We test that the buffer automatically extends to 4 bytes to store a float
         ByteBuffer byteBuffer = bitBuffer.getByteBuffer();
         Assertions.assertEquals(4, byteBuffer.capacity());
-        Assertions.assertEquals(1.0F, byteBuffer.getFloat(0));
+        Assertions.assertEquals(1, byteBuffer.getInt(0));
     }
 
     @Test
-    void putThreeDoubleValues() {
+    void putThreeNumberValues() {
         // We test that the buffer automatically extends with more bytes to allow us to store multiple doubles
-        bitBuffer.putFloat(1.0F);
-        bitBuffer.putFloat(2.0F);
-        bitBuffer.putFloat(3.0F);
+        bitBuffer.putInt(1);
+        bitBuffer.putInt(2);
+        bitBuffer.putInt(3);
 
         ByteBuffer byteBuffer = bitBuffer.getByteBuffer();
         Assertions.assertEquals(12, byteBuffer.capacity());
-        Assertions.assertEquals(1.0F, byteBuffer.getFloat(0));
-        Assertions.assertEquals(2.0F, byteBuffer.getFloat(4));
-        Assertions.assertEquals(3.0F, byteBuffer.getFloat(8));
+        Assertions.assertEquals(1, byteBuffer.getInt(0));
+        Assertions.assertEquals(2, byteBuffer.getInt(4));
+        Assertions.assertEquals(3, byteBuffer.getInt(8));
     }
 
     @Test
     void write1Bit() {
-        bitBuffer.writeBit('1');
+        bitBuffer.writeBit('0');
 
         ByteBuffer byteBuffer = bitBuffer.getByteBuffer();
         // We expect it to shorten the byte buffer down to 1 byte even though we allocated 2
         Assertions.assertEquals(1, byteBuffer.capacity());
 
-        // We expect it to simply append the current byte with zeroes on the end of it
-        // so we expect the following string "1000 0000", which is equivalent to - 128
-        Assertions.assertEquals(-128, byteBuffer.get(0));
+        // We expect it to simply append the current byte with ones on the end of it
+        // so we expect the following string "0111 1111", which is equivalent to 127
+        Assertions.assertEquals(127, byteBuffer.get(0));
     }
 
     @Test
@@ -110,8 +110,8 @@ class BitBufferTest {
 
         // We expect 1111 1111 which is equivalent to -1
         Assertions.assertEquals(-1, byteBuffer.get(0));
-        // We expect it to fill it out with zeroes giving 0000 0000
-        Assertions.assertEquals(0, byteBuffer.get(1));
+        // We expect it to fill it out with ones giving 0111 1111
+        Assertions.assertEquals(127, byteBuffer.get(1));
     }
 
     @Test

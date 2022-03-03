@@ -17,17 +17,6 @@ class BitBufferNewTest {
         return string.replace(" ", "");
     }
 
-    // TODO: delete me
-    @Test
-    void byteBufferPlayGround() {
-
-        ByteBuffer byteBuffer = ByteBuffer.allocate(16);
-        byte currByte = byteBuffer.get(0);
-
-        assertEquals(0, currByte);
-    }
-
-
     @BeforeEach
     void beforeEach() {
         bitBuffer = new BitBufferNew(true);

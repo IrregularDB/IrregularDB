@@ -17,8 +17,16 @@ public class BitUtil {
     }
 
     public static int bits2Int(String bits) {
-        // Necessary hack to parse 1111 1111 1111 1111 1111 1111 1111 1111
-        return (int)(Long.parseLong(bits, 2));
+        try {
+            return Integer.parseInt(bits, 2);
+        } catch (NumberFormatException e) {
+            if (bits.length() > 32) {
+                throw new IllegalArgumentException("You tried to convert an bit string that was larger than 32 bits");
+            } else {
+                // Necessary hack to parse 32 bit integers e.g. 1111 1111 1111 1111 1111 1111 1111 1111
+                return (int)(Long.parseLong(bits, 2));
+            }
+        }
     }
 
     /**

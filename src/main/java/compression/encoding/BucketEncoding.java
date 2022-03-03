@@ -78,7 +78,7 @@ public class BucketEncoding {
             writeControlBitToBuffer(BUCKET_3_CONTROL_BITS, bitBuffer);
             bitBuffer.writeIntUsingNBits(reading, BUCKET_3_BIT_SIZE);
         } else {
-            throw new RuntimeException("Amount of bits greater than bucket allows (you probably tried to insert a negative number)");
+            throw new IllegalArgumentException("Amount of bits greater than bucket allows (you probably tried to insert a negative number)");
         }
     }
 

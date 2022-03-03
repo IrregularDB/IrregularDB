@@ -1,12 +1,11 @@
 package compression.encoding;
 
-import compression.utility.BitBuffer;
+import compression.utility.BitBufferOld;
 import compression.utility.BitStream;
 import compression.utility.BitUtil;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 public class BucketEncoding {
 
@@ -23,9 +22,9 @@ public class BucketEncoding {
     /**
      * @param readings we only support positive numbers
      */
-    public static BitBuffer encode(List<Integer> readings) {
+    public static BitBufferOld encode(List<Integer> readings) {
         // We finish the byte with 1's as we can then in the decoding detect end of stream
-        BitBuffer bitBuffer = new BitBuffer(4, true);
+        BitBufferOld bitBuffer = new BitBufferOld(true);
         Integer previousReading = null;
         for (Integer reading : readings) {
             String encodeReading = encodeReading(reading, previousReading);

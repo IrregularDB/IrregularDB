@@ -43,7 +43,7 @@ public class GorillaValueCompressionModel extends ValueCompressionModel {
         }
 
         BitBuffer encode = GorillaValueEncoding.encode(values);
-        return encode.getByteBuffer();
+        return encode.getFinishedByteBuffer();
     }
 
     @Override

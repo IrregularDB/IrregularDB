@@ -3,7 +3,6 @@ package compression;
 import compression.encoding.BucketEncoding;
 import compression.encoding.GorillaValueEncoding;
 import compression.timestamp.TimeStampCompressionModelType;
-import compression.utility.BitBuffer;
 import compression.utility.BitStream;
 import compression.value.ValueCompressionModelType;
 import records.DataPoint;

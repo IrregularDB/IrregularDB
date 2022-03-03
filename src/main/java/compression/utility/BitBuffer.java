@@ -1,105 +1,64 @@
-// The idea behind this BitBuffer is based on the one published in relation to ModelarDB
-// LINK: https://github.com/skejserjensen/ModelarDB
-
 package compression.utility;
+
+import jdk.jshell.spi.ExecutionControl;
 
 import java.nio.ByteBuffer;
 
+public abstract class BitBuffer {
 
-/**
- * This class is used to have an automatically extending byte buffer
- * that can keep track of bit values
- */
-public class BitBuffer {
-    private ByteBuffer byteBuffer;
-    private StringBuilder currByte;
-    private final String valueUsedToFinishBitBuffer;
+    // Public abstract methods:
+    abstract public void writeFalseBit();
 
-    public BitBuffer(int initialByteBufferSize) {
-        this(initialByteBufferSize, true);
-    }
+    abstract public void writeTrueBit();
 
-    public BitBuffer(int initialByteBufferSize, boolean finishWithOnes) {
-        if (initialByteBufferSize < 1) {
-            throw new IllegalArgumentException("The initial buffer size should at least be 1");
-        }
-        this.byteBuffer = ByteBuffer.allocate(initialByteBufferSize);
-        this.currByte = new StringBuilder();
+    abstract public void writeIntUsingNBits(int i, int n);
 
-        if (finishWithOnes) {
-            this.valueUsedToFinishBitBuffer = "1";
-        } else {
-            this.valueUsedToFinishBitBuffer = "0";
-        }
-    }
+    abstract public int bitsLeftInCurrentByte();
 
-    public ByteBuffer getByteBuffer() {
-        if (currByte.length() != 0) { // We have an unfinished byte
+    // Public non-abstract methods:
+    public final ByteBuffer getFinishedByteBuffer() {
+        if (bitsLeftInCurrentByte() != 0) { // We have an unfinished byte
             handledUnfinishedByte();
         }
-        if (byteBuffer.hasRemaining()) { // We have allocated more bytes than needed
-            shortenBufferToSizeN(this.byteBuffer.position());
+        if (this.getByteBuffer().hasRemaining()) { // We have allocated more bytes than needed
+            shortenBufferToSizeN(this.getByteBuffer().position());
         }
-        return byteBuffer;
+        return this.getByteBuffer();
     }
 
-    public int bitsLeftInCurrentByte(){
-        if (currByte.isEmpty()) {
-            return 0;
-        }
-        return Byte.SIZE - currByte.length();
+    public final BitStream getBitStream(){
+        return new BitStream(getFinishedByteBuffer());
     }
 
-    public void putInt(int value){
-        if (byteBuffer.remaining() < 4) {
+    /**
+     * Write the integer using 4 bytes (32 bits) using ByteBuffer.putInt(i)
+     * @param i the integer to be written as raw value
+     */
+    public final void writeRawInt(int i) {
+        if (this.getByteBuffer().remaining() < 4) {
             extendBufferWithNMoreBytes(4);
         }
-        byteBuffer.putInt(value);
+        this.getByteBuffer().putInt(i);
     }
 
-    public void writeBit(char bit) {
-        currByte.append(bit);
-        if (currByte.length() == Byte.SIZE) {
-            flushCurrentByteToBuffer();
-        }
+    // Protected methods
+    abstract protected ByteBuffer getByteBuffer();
+
+    abstract protected void setByteBuffer(ByteBuffer byteBuffer);
+
+    abstract protected void handledUnfinishedByte();
+
+    protected final void extendBufferWithNMoreBytes(int n) {
+        ByteBuffer extendedBuffer = ByteBuffer.allocate(this.getByteBuffer().capacity() + n);
+        this.getByteBuffer().flip();
+        extendedBuffer.put(this.getByteBuffer());
+        this.setByteBuffer(extendedBuffer);
     }
 
-    public void writeBitString(String bitString) {
-        bitString.chars().forEach(c -> writeBit((char) c));
-    }
-
-    private void handledUnfinishedByte() {
-        while (currByte.length() < Byte.SIZE) {
-            currByte.append(valueUsedToFinishBitBuffer);
-        }
-        flushCurrentByteToBuffer();
-    }
-
+    // Private methods
     private void shortenBufferToSizeN(int n) {
         ByteBuffer shortenedBuffer = ByteBuffer.allocate(n);
-        this.byteBuffer.flip();
-        shortenedBuffer.put(this.byteBuffer);
-        this.byteBuffer = shortenedBuffer;
-    }
-
-    private void flushCurrentByteToBuffer() {
-        if (!byteBuffer.hasRemaining()) {
-            // We double up the byte buffer size instead of having to extend it after each new byte
-            extendBufferWithNMoreBytes(byteBuffer.capacity());
-        }
-        // This hack is necessary as BYTE.parse does not really work that well with 8 bit values
-        byteBuffer.put((byte)Integer.parseInt(currByte.toString(), 2));
-        currByte = new StringBuilder();
-    }
-
-    private void extendBufferWithNMoreBytes(int n) {
-        ByteBuffer extendedBuffer = ByteBuffer.allocate(byteBuffer.capacity() + n);
-        this.byteBuffer.flip();
-        extendedBuffer.put(this.byteBuffer);
-        this.byteBuffer = extendedBuffer;
-    }
-
-    public BitStream getBitStream(){
-        return new BitStream(getByteBuffer());
-    }
-}
+        this.getByteBuffer().flip();
+        shortenedBuffer.put(this.getByteBuffer());
+        this.setByteBuffer(shortenedBuffer);
+    }}

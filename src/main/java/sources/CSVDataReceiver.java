@@ -11,8 +11,6 @@ public class CSVDataReceiver extends DataReceiver {
     private final String elementDelimiter;
     private final String absoluteFilePath;
 
-
-    // TODO: Esben tag en beslutning
     public CSVDataReceiver(String absoluteFilePath, WorkingSet workingSet, String elementDelimiter) {
         super(workingSet);
         this.elementDelimiter = elementDelimiter;

@@ -1,9 +1,6 @@
 package compression.encoding;
 
-import compression.utility.BitBuffer;
-import compression.utility.BitBufferOld;
-import compression.utility.BitStream;
-import compression.utility.BitUtil;
+import compression.utility.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,7 +22,7 @@ public class BucketEncoding {
      */
     public static BitBuffer encode(List<Integer> readings) {
         // We finish the byte with 1's as we can then in the decoding detect end of stream
-        BitBuffer bitBuffer = new BitBufferOld(true);
+        BitBuffer bitBuffer = new BitBufferNew(true);
         Integer previousReading = null;
         for (Integer reading : readings) {
             encodeReading(bitBuffer, reading, previousReading);

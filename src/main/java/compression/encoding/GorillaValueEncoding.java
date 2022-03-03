@@ -1,9 +1,6 @@
 package compression.encoding;
 
-import compression.utility.BitBuffer;
-import compression.utility.BitBufferOld;
-import compression.utility.BitStream;
-import compression.utility.BitUtil;
+import compression.utility.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,7 +17,7 @@ public class GorillaValueEncoding {
 
     public static BitBuffer encode(List<Float> values) {
         // We finish the byte with 1's as we can then in the decoding detect end of stream
-        BitBuffer bitBuffer = new BitBufferOld(true);
+        BitBuffer bitBuffer = new BitBufferNew(true);
         int previousLeadingZeroes = Integer.MAX_VALUE;
         int previousTrailingZeroes = Integer.MAX_VALUE;
 

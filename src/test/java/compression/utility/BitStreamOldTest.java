@@ -1,5 +1,7 @@
 package compression.utility;
 
+import compression.utility.BitStream.BitStream;
+import compression.utility.BitStream.BitStreamOld;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -8,7 +10,7 @@ import java.nio.ByteBuffer;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class BitStreamTest {
+class BitStreamOldTest {
     BitStream bitStream;
 
     @BeforeEach
@@ -18,7 +20,7 @@ class BitStreamTest {
         byteBuffer.put(b); // We put 1111 1111
         b = 0;
         byteBuffer.put(b); // We put 0000 0000
-        bitStream = new BitStream(byteBuffer);
+        bitStream = new BitStreamOld(byteBuffer);
     }
 
 

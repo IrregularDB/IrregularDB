@@ -1,11 +1,13 @@
-package compression.utility;
+package compression.utility.BitStream;
+
+import compression.utility.BitUtil;
 
 import java.nio.ByteBuffer;
 
 /**
  * This seems super duper un optimised
  */
-public class BitStream{
+public class BitStreamOld implements BitStream {
     private int index;
     private final String allBits;
     private final int size;
@@ -13,7 +15,7 @@ public class BitStream{
     /**
      * We cant know without having a number of timestamps how many of the last bits are padding
      */
-    public BitStream(ByteBuffer byteBuffer) {
+    public BitStreamOld(ByteBuffer byteBuffer) {
         this.index = 0;
         StringBuilder stringBuilder = new StringBuilder();
         for (byte b : byteBuffer.array()) {

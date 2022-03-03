@@ -1,6 +1,8 @@
 package compression.encoding;
 
 import compression.utility.*;
+import compression.utility.BitBuffer.BitBuffer;
+import compression.utility.BitBuffer.BitBufferNew;
 
 import java.util.ArrayList;
 import java.util.List;

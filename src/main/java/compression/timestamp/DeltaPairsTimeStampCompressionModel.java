@@ -1,7 +1,7 @@
 package compression.timestamp;
 
 import compression.encoding.BucketEncoding;
-import compression.utility.BitBuffer;
+import compression.utility.BitBuffer.BitBuffer;
 import records.DataPoint;
 
 import java.nio.ByteBuffer;

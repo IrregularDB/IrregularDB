@@ -1,5 +1,6 @@
-package compression.utility;
+package compression.utility.BitBuffer;
 
+import compression.utility.BitStream;
 import jdk.jshell.spi.ExecutionControl;
 
 import java.nio.ByteBuffer;

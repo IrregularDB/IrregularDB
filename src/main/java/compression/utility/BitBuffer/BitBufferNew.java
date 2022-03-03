@@ -1,4 +1,4 @@
-package compression.utility;
+package compression.utility.BitBuffer;
 
 import java.nio.ByteBuffer;
 

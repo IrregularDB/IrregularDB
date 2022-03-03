@@ -1,5 +1,7 @@
 package compression.utility;
 
+import compression.utility.BitBuffer.BitBuffer;
+import compression.utility.BitBuffer.BitBufferOld;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

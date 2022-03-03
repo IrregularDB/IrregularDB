@@ -1,6 +1,6 @@
 package compression.encoding;
 
-import compression.utility.BitBuffer;
+import compression.utility.BitBuffer.BitBuffer;
 import compression.utility.BitStream;
 import compression.utility.BitUtil;
 import org.junit.jupiter.api.Assertions;

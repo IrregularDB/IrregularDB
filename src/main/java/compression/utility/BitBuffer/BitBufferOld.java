@@ -1,7 +1,9 @@
 // The idea behind this BitBuffer is based on the one published in relation to ModelarDB
 // LINK: https://github.com/skejserjensen/ModelarDB
 
-package compression.utility;
+package compression.utility.BitBuffer;
+
+import compression.utility.BitUtil;
 
 import java.nio.ByteBuffer;
 

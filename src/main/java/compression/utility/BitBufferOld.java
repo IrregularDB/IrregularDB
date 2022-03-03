@@ -69,7 +69,8 @@ public class BitBufferOld extends BitBuffer {
         flushCurrentByteToBuffer();
     }
 
-    public void writeBitString(String bitString) {
+
+    private void writeBitString(String bitString) {
         bitString.chars().forEach(c -> writeBit((char) c));
     }
 

@@ -11,6 +11,10 @@ import static org.junit.jupiter.api.Assertions.*;
 class BitBufferOldTest {
     BitBufferOld bitBuffer;
 
+    String removeSpace(String string) {
+        return string.replace(" ", "");
+    }
+
     @BeforeEach
     void beforeEach() {
         bitBuffer = new BitBufferOld(true);
@@ -34,80 +38,86 @@ class BitBufferOldTest {
     }
 
     @Test
-    void putOneNumberValue() {
+    void putOneRawInt() {
         bitBuffer.writeRawInt(1);
 
-        // We test that the buffer automatically extends to 4 bytes to store a float
         ByteBuffer byteBuffer = bitBuffer.getFinishedByteBuffer();
-        Assertions.assertEquals(4, byteBuffer.capacity());
         Assertions.assertEquals(1, byteBuffer.getInt(0));
+
+        // We also expect it to automatically shrink the byte buffer to size 4
+        Assertions.assertEquals(4, byteBuffer.capacity());
     }
 
     @Test
-    void putThreeNumberValues() {
-        // We test that the buffer automatically extends with more bytes to allow us to store multiple doubles
+    void putFiveRawInts() {
+        // We test that the buffer automatically extends with 4 more bytes to allow us to store multiple doubles
         bitBuffer.writeRawInt(1);
         bitBuffer.writeRawInt(2);
         bitBuffer.writeRawInt(3);
+        bitBuffer.writeRawInt(4);
+        bitBuffer.writeRawInt(5);
+
 
         ByteBuffer byteBuffer = bitBuffer.getFinishedByteBuffer();
-        Assertions.assertEquals(12, byteBuffer.capacity());
+        Assertions.assertEquals(20, byteBuffer.capacity());
         Assertions.assertEquals(1, byteBuffer.getInt(0));
         Assertions.assertEquals(2, byteBuffer.getInt(4));
         Assertions.assertEquals(3, byteBuffer.getInt(8));
+        Assertions.assertEquals(4, byteBuffer.getInt(12));
+        Assertions.assertEquals(5, byteBuffer.getInt(16));
     }
 
     @Test
-    void writeBitString() {
-        bitBuffer.writeBitString("00001111");
+    void writeFalseBit() {
+        // We check that writing false bit 8 times creates the byte 0000 0000 (which is equivalent to 0)
+        for (int i = 0; i < 8; i++) {
+            bitBuffer.writeFalseBit();
+        }
         ByteBuffer byteBuffer = bitBuffer.getFinishedByteBuffer();
-        // We expect it to shorten the byte buffer down to 1 byte even though we allocated 2
-        Assertions.assertEquals(1, byteBuffer.capacity());
-
-        // We expect 0000 1111 which is equivalent to 15
-        Assertions.assertEquals(15, byteBuffer.get(0));
+        Assertions.assertEquals(0, byteBuffer.get(0));
     }
 
     @Test
-    void writeBitStringWithUnfinishedByte() {
-        // We have 9 bits i.e. an extra zero
-        bitBuffer.writeBitString("111111110");
+    void writeTrueBit() {
+        // we check that writing true bit 8 times creates the byte 1111 1111 (which is equivalent to -1)
+        for (int i = 0; i < 8; i++) {
+            bitBuffer.writeTrueBit();
+        }
         ByteBuffer byteBuffer = bitBuffer.getFinishedByteBuffer();
-
-        Assertions.assertEquals(2, byteBuffer.capacity());
-
-        // We expect 1111 1111 which is equivalent to -1
         Assertions.assertEquals(-1, byteBuffer.get(0));
-        // We expect it to fill it out with ones giving 0111 1111
-        Assertions.assertEquals(127, byteBuffer.get(1));
     }
 
     @Test
-    void writeLongBitString() {
-        bitBuffer.writeBitString("000011111111000000000000");
-        ByteBuffer byteBuffer = bitBuffer.getFinishedByteBuffer();
-        // We expect it to automatically extend
-        Assertions.assertEquals(3, byteBuffer.capacity());
+    void writeIntUsingNBitsFor9BitValue() {
+        String bitPattern = removeSpace("0000 0000 1");
+        bitBuffer.writeIntUsingNBits(BitUtil.bits2Int(bitPattern), 9);
 
-        // We first expect 0000 1111 which is equivalent to 15
-        Assertions.assertEquals(15, byteBuffer.get(0));
-        // We then expect 11110000, which is equivalent to -16
-        Assertions.assertEquals(-16, byteBuffer.get(1));
-        // Then last we expect 00000000, which is equivalent to 0
-        Assertions.assertEquals(0, byteBuffer.get(2));
+        // We expect it to create two bytes:
+        //  - 1000 0000 (equivalent to 0)
+        //  - 1111 1111 (equivalent to -1)
+        ByteBuffer byteBuffer = bitBuffer.getFinishedByteBuffer();
+        Assertions.assertEquals(0, byteBuffer.get(0));
+        Assertions.assertEquals(-1, byteBuffer.get(1));
     }
 
     @Test
-    void writeTwoStrings() {
-        bitBuffer.writeBitString("00001111");
-        bitBuffer.writeBitString("11110000");
-        ByteBuffer byteBuffer = bitBuffer.getFinishedByteBuffer();
-        Assertions.assertEquals(2, byteBuffer.capacity());
+    void writeIntUsingNBitsWithNLessThanSize() {
+        // We write the following 8 bit value using only 2 bits
+        String bitPattern = removeSpace("0000 0001");
+        bitBuffer.writeIntUsingNBits(BitUtil.bits2Int(bitPattern), 2);
 
-        // We first expect 0000 1111 which is equivalent to 15
-        Assertions.assertEquals(15, byteBuffer.get(0));
-        // We then expect 11110000, which is equivalent to -16
-        Assertions.assertEquals(-16, byteBuffer.get(1));
+        // We then expect it to have only 01 in the buffer, which is the filled out with 1's after it giving
+        // 0111 1111 (which is equivalent to 127)
+        ByteBuffer byteBuffer = bitBuffer.getFinishedByteBuffer();
+        Assertions.assertEquals(127, byteBuffer.get(0));
     }
 
+    @Test
+    void handledUnfinishedByte() {
+        bitBuffer.writeFalseBit();
+
+        // We expect it to finish the current byte with 1's so we get 0111 1111 which is equivalent to
+        ByteBuffer byteBuffer = bitBuffer.getFinishedByteBuffer();
+        Assertions.assertEquals(127, byteBuffer.get(0));
+    }
 }

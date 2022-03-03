@@ -29,6 +29,11 @@ public class BitStreamOld implements BitStream {
         return size;
     }
 
+    @Override
+    public int getNextNBitsAsInteger(int n) {
+        return BitUtil.bits2Int(getNBits(n));
+    }
+
     public String getNBits(int n) {
         if (n < 1) {
             throw new IllegalArgumentException("You must read at least one bit");

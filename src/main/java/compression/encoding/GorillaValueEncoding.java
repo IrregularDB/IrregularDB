@@ -9,9 +9,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class GorillaValueEncoding {
-    private static final String SAME_VALUE_CONTROL_BIT = "0";
-    private static final String INSIDE_RANGE_CONTROL_BIT = "10";
-    private static final String OUTSIDE_RANGE_CONTROL_BIT = "11";
+    private static final byte SAME_VALUE_CONTROL_BIT = 0b0;
+    private static final byte INSIDE_RANGE_CONTROL_BIT = 0b10;
+    private static final byte OUTSIDE_RANGE_CONTROL_BIT = 0b11;
 
     // Notice these values are one smaller than in standard GORILLA as we work on floats
     private static final int AMT_BITS_USED_FOR_LEADING_ZEROES = 4;
@@ -57,7 +57,7 @@ public class GorillaValueEncoding {
         return bitBuffer;
     }
 
-    private static void writeControlBitToBuffer(String controlBits, BitBuffer bitBuffer) {
+    private static void writeControlBitToBuffer(byte controlBits, BitBuffer bitBuffer) {
         switch (controlBits) {
             case SAME_VALUE_CONTROL_BIT -> bitBuffer.writeFalseBit();
             case INSIDE_RANGE_CONTROL_BIT -> {
@@ -109,32 +109,32 @@ public class GorillaValueEncoding {
         int length = Integer.MAX_VALUE;
 
 
-        int previousValue =  BitUtil.bits2Int(bitStream.getNBits(Integer.SIZE));
+        int previousValue = bitStream.getNextNBitsAsInteger(Integer.SIZE);
         floatValues.add(Float.intBitsToFloat(previousValue));
-        String controlBit;
+        byte controlBit;
         while (bitStream.hasNNext(1)) {
-            controlBit = bitStream.getNBits(1);
-            if (controlBit.equals(SAME_VALUE_CONTROL_BIT)) {
+            controlBit = (byte) bitStream.getNextNBitsAsInteger(1);
+            if (controlBit == SAME_VALUE_CONTROL_BIT) {
                 floatValues.add(Float.intBitsToFloat(previousValue));
             } else {
                 if (!bitStream.hasNNext(2)){
                     break; //this indicates end of stream, and remaining bits of stream are without significance
                 }
-                controlBit += bitStream.getNBits(1);
-                if (controlBit.equals(OUTSIDE_RANGE_CONTROL_BIT)) { // New leading zero and trailing zero
+                controlBit = (byte) bitStream.getNextNBitsAsInteger(1);
+                if (controlBit == 1) { // New leading zero and trailing as we had 11
                     if (!bitStream.hasNNext(AMT_BITS_USED_FOR_LEADING_ZEROES + AMT_BITS_USED_FOR_LENGTH)) {
                         break; //this indicates end of stream, and remaining bits of stream are without significance
                     }
                     // Calculate new values:
-                    leadingZeroes = BitUtil.bits2Int(bitStream.getNBits(AMT_BITS_USED_FOR_LEADING_ZEROES));
-                    length = BitUtil.bits2Int(bitStream.getNBits(AMT_BITS_USED_FOR_LENGTH));
+                    leadingZeroes = bitStream.getNextNBitsAsInteger(AMT_BITS_USED_FOR_LEADING_ZEROES);
+                    length = bitStream.getNextNBitsAsInteger(AMT_BITS_USED_FOR_LENGTH);
                     if (length == 0) {
                         length = 32;
                     }
                     trailingZeroes = Integer.SIZE - length - leadingZeroes;
                 }
 
-                int significantBits = BitUtil.bits2Int(bitStream.getNBits(length));
+                int significantBits = bitStream.getNextNBitsAsInteger(length);
                 int shiftedBits = significantBits << trailingZeroes;
                 int value = previousValue ^ shiftedBits;
                 floatValues.add(Float.intBitsToFloat(value));

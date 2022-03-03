@@ -6,5 +6,7 @@ public interface BitStream {
 
     String getNBits(int n);
 
+    int getNextNBitsAsInteger(int n);
+
     boolean hasNNext(int n);
 }

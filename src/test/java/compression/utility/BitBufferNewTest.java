@@ -8,33 +8,27 @@ import java.nio.ByteBuffer;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class BitBufferOldTest {
+class BitBufferNewTest {
     BitBuffer bitBuffer;
 
     private String removeSpace(String string) {
         return string.replace(" ", "");
     }
 
-    @BeforeEach
-    void beforeEach() {
-        bitBuffer = new BitBufferOld(true);
+    // TODO: delete me
+    @Test
+    void byteBufferPlayGround() {
+
+        ByteBuffer byteBuffer = ByteBuffer.allocate(16);
+        byte currByte = byteBuffer.get(0);
+
+        assertEquals(0, currByte);
     }
 
-    @Test
-    void parseByte() {
-        // This is not really a test of our code but how parse byte works
-        // as we can see from this test it append zeroes in the FRONT
-        byte b = (byte) Integer.parseInt("1", 2);
-        assertEquals(1, b);
 
-        b = (byte) Integer.parseInt("01111111", 2);
-        assertEquals(127, b);
-
-        b = (byte) Integer.parseInt("10000000", 2);
-        assertEquals(-128, b);
-
-        b = (byte) Integer.parseInt("11111111", 2);
-        assertEquals(-1, b);
+    @BeforeEach
+    void beforeEach() {
+        bitBuffer = new BitBufferNew(true);
     }
 
     @Test

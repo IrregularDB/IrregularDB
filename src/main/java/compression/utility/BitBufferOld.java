@@ -16,8 +16,8 @@ public class BitBufferOld extends BitBuffer {
     private final String valueUsedToFinishBitBuffer;
 
     public BitBufferOld(boolean finishWithOnes) {
-        int initialByteBufferSize;
-        this.byteBuffer = ByteBuffer.allocate(16);
+        int initialByteBufferSize = 16;
+        this.byteBuffer = ByteBuffer.allocate(initialByteBufferSize);
         this.currByte = new StringBuilder();
 
         if (finishWithOnes) {

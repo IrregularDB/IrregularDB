@@ -40,6 +40,23 @@ public class BucketEncoding {
         }
     }
 
+    private static void encodeNumber(Integer reading, BitBuffer bitBuffer) {
+        int amtSignificantBits = Integer.SIZE - Integer.numberOfLeadingZeros(reading);
+
+        if (amtSignificantBits <= BUCKET_1_BIT_SIZE) {
+            writeControlBitToBuffer(BUCKET_1_CONTROL_BITS, bitBuffer);
+            bitBuffer.writeIntUsingNBits(reading, BUCKET_1_BIT_SIZE);
+        } else if (amtSignificantBits <= BUCKET_2_BIT_SIZE) {
+            writeControlBitToBuffer(BUCKET_2_CONTROL_BITS, bitBuffer);
+            bitBuffer.writeIntUsingNBits(reading, BUCKET_2_BIT_SIZE);
+        } else if (amtSignificantBits <= BUCKET_3_BIT_SIZE) {
+            writeControlBitToBuffer(BUCKET_3_CONTROL_BITS, bitBuffer);
+            bitBuffer.writeIntUsingNBits(reading, BUCKET_3_BIT_SIZE);
+        } else {
+            throw new IllegalArgumentException("Amount of bits greater than bucket allows (you probably tried to insert a negative number)");
+        }
+    }
+
     private static void writeControlBitToBuffer(String controlBits, BitBuffer bitBuffer) {
         switch (controlBits) {
             case SAME_VALUE_ENCODING -> {
@@ -59,23 +76,6 @@ public class BucketEncoding {
                 bitBuffer.writeTrueBit();
             }
             default -> throw new IllegalArgumentException("unknown controlBits");
-        }
-    }
-
-    private static void encodeNumber(Integer reading, BitBuffer bitBuffer) {
-        int amtSignificantBits = Integer.SIZE - Integer.numberOfLeadingZeros(reading);
-
-        if (amtSignificantBits <= BUCKET_1_BIT_SIZE) {
-            writeControlBitToBuffer(BUCKET_1_CONTROL_BITS, bitBuffer);
-            bitBuffer.writeIntUsingNBits(reading, BUCKET_1_BIT_SIZE);
-        } else if (amtSignificantBits <= BUCKET_2_BIT_SIZE) {
-            writeControlBitToBuffer(BUCKET_2_CONTROL_BITS, bitBuffer);
-            bitBuffer.writeIntUsingNBits(reading, BUCKET_2_BIT_SIZE);
-        } else if (amtSignificantBits <= BUCKET_3_BIT_SIZE) {
-            writeControlBitToBuffer(BUCKET_3_CONTROL_BITS, bitBuffer);
-            bitBuffer.writeIntUsingNBits(reading, BUCKET_3_BIT_SIZE);
-        } else {
-            throw new IllegalArgumentException("Amount of bits greater than bucket allows (you probably tried to insert a negative number)");
         }
     }
 

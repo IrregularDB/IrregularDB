@@ -32,7 +32,7 @@ public class PostgresConnection implements DatabaseConnection {
             PreparedStatement preparedStatement = connection.prepareStatement(INSERT_SEGMENT_STATEMENT);
             preparedStatement.setInt(1, segment.timeSeriesId());
             preparedStatement.setLong(2, segment.startTime());
-            preparedStatement.setLong(3, segment.endTime());
+            preparedStatement.setInt(3, (int) (segment.endTime() - segment.startTime()));
             preparedStatement.setInt(4, combineTwoModelTypes(segment.valueModelType(), segment.timestampModelType())); // we are now combining the two model types
             preparedStatement.setBytes(5, segment.valueBlob().array());
             preparedStatement.setBytes(6, segment.timestampBlob().array());

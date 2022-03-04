@@ -43,15 +43,4 @@ class BitUtilTest {
         Assertions.assertEquals("11110110", BitUtil.byte2Bits(testByte));
     }
 
-    @Test
-    public void TestOfCombinedModelTypes() {
-        int valueModelType = 5;
-        int timestampType = 2;
-        short combined = BitUtil.combineTwoModelTypes(valueModelType, timestampType);
-        BitUtil.ValueTimeStampModelPair seperated = BitUtil.combinedModelTypesToIndividual(combined);
-
-        Assertions.assertEquals(valueModelType, seperated.valueModelType);
-        Assertions.assertEquals(timestampType, seperated.timeStampModelType);
-    }
-
 }

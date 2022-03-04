@@ -1,6 +1,8 @@
 package storage;
 
+import compression.utility.BitUtil;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import records.Segment;
 import java.nio.ByteBuffer;
 
@@ -25,6 +27,18 @@ class PostgresConnectionTest {
     public void testDBInsertsSegment(){
         Segment segment = new Segment(1, 111L,222L,1, ByteBuffer.allocate(0), 1, ByteBuffer.allocate(0));
         this.postgresConnection.insertSegment(segment);
+    }
+
+
+    @Test
+    public void TestOfCombinedModelTypes() {
+        int valueModelType = 5;
+        int timestampType = 2;
+        short combined = PostgresConnection.combineTwoModelTypes(valueModelType, timestampType);
+        PostgresConnection.ValueTimeStampModelPair seperated = PostgresConnection.combinedModelTypesToIndividual(combined);
+
+        Assertions.assertEquals(valueModelType, seperated.valueModelType);
+        Assertions.assertEquals(timestampType, seperated.timeStampModelType);
     }
 
 }

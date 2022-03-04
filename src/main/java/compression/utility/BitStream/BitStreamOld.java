@@ -57,7 +57,7 @@ public class BitStreamOld implements BitStream {
         }
     }
 
-    public String getNBits(int n) {
+    private String getNBits(int n) {
         if (n < 1) {
             throw new IllegalArgumentException("You must read at least one bit");
         }

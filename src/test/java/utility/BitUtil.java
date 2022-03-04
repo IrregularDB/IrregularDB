@@ -2,10 +2,6 @@ package utility;
 
 public class BitUtil {
 
-    public static String int2Bits(int i){
-        return Integer.toBinaryString(i);
-    }
-
     public static int bits2Int(String bits) {
         if (bits.length() < 32) {
             return Integer.parseInt(bits, 2);

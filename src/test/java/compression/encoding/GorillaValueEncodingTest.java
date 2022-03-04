@@ -2,7 +2,7 @@ package compression.encoding;
 
 import compression.utility.BitBuffer.BitBuffer;
 import compression.utility.BitStream.BitStream;
-import utility.BitUtil;
+import utility.BitPattern;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -12,10 +12,6 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 class GorillaValueEncodingTest {
-
-    String removeSpace(String string) {
-        return string.replace(" ", "");
-    }
 
     @Test
     void encodeManyFloatValues() {
@@ -40,18 +36,16 @@ class GorillaValueEncodingTest {
         // LZ (4-bits) : 1 -> 0001
         // L (5-bits)  : 8 -> 01000
         // SIGNIF-BITS : 1111 1111
-        String expectedBitPattern = removeSpace("11 0001 01000 1111 1111");
-        int expectedValue = BitUtil.bits2Int(expectedBitPattern);
-        assertEquals(expectedValue, bitStream.getNextNBitsAsInteger(expectedBitPattern.length()));
+        BitPattern bitPattern = new BitPattern("11 0001 01000 1111 1111");
+        assertEquals(bitPattern.getIntRepresentation(), bitStream.getNextNBitsAsInteger(bitPattern.getAmtBits()));
 
         // 2.0F xor 4.0F gives: 0000 0000 1000 0000 0000 0000 0000 0000
         // I.e. LZ = 8 and TZ = 23
         // So we expect:
         // CB (inside): 10 (as both values are greater than or equal to the previous ones)
         // SIGNIF-BITS : 0000 0001
-        expectedBitPattern = removeSpace("10 0000 0001");
-        expectedValue = BitUtil.bits2Int(expectedBitPattern);
-        assertEquals(expectedValue, bitStream.getNextNBitsAsInteger(expectedBitPattern.length()));
+        bitPattern = new BitPattern("10 0000 0001");
+        assertEquals(bitPattern.getIntRepresentation(), bitStream.getNextNBitsAsInteger(bitPattern.getAmtBits()));
 
         // 4.0F xor 7.0F gives: 0000 0000 0110 0000 0000 0000 0000 0000
         // I.e. LZ = 9 and TZ = 21
@@ -60,15 +54,13 @@ class GorillaValueEncodingTest {
         // LZ (4-bits) : 9 -> 1001
         // L (5-bits)  : 2 -> 00010
         // SIGNIF-BITS : 11
-        expectedBitPattern = removeSpace("11 1001 00010 11");
-        expectedValue = BitUtil.bits2Int(expectedBitPattern);
-        assertEquals(expectedValue, bitStream.getNextNBitsAsInteger(expectedBitPattern.length()));
+        bitPattern = new BitPattern("11 1001 00010 11");
+        assertEquals(bitPattern.getIntRepresentation(), bitStream.getNextNBitsAsInteger(bitPattern.getAmtBits()));
 
         // As we have used 32+1+1+19+10+13 = 76 bits. So we allocated 10 bytes to fit these so we have 4 bits left.
         // We expect the buffer to fill these with ones.
-        expectedBitPattern = removeSpace("1111");
-        expectedValue = BitUtil.bits2Int(expectedBitPattern);
-        assertEquals(expectedValue, bitStream.getNextNBitsAsInteger(expectedBitPattern.length()));
+        bitPattern = new BitPattern("1111");
+        assertEquals(bitPattern.getIntRepresentation(), bitStream.getNextNBitsAsInteger(bitPattern.getAmtBits()));
 
         // There should then be no bits left
         assertThrows(IndexOutOfBoundsException.class, () -> bitStream.getNextNBitsAsInteger(1));
@@ -96,17 +88,15 @@ class GorillaValueEncodingTest {
         // LZ (4-bits) : 1 -> 1111
         // L (5-bits)  : 17 -> 10001
         // SIGNIF-BITS : 0000 0000 0000 0000 1
-        String expectedBitPattern = removeSpace("11 1111 10001 0000 0000 0000 0000 1");
-        int expectedValue = BitUtil.bits2Int(expectedBitPattern);
-        assertEquals(expectedValue, bitStream.getNextNBitsAsInteger(expectedBitPattern.length()));
+        BitPattern bitPattern = new BitPattern("11 1111 10001 0000 0000 0000 0000 1");
+        assertEquals(bitPattern.getIntRepresentation(), bitStream.getNextNBitsAsInteger(bitPattern.getAmtBits()));
 
         // The xor of v2 and v3 should give the same as above and therefore be inside the range
         // So we expect:
         // CB (inside): 10
         // SIGNIF-BITS : 0000 0000 0000 0000 1
-        expectedBitPattern = removeSpace("10 0000 0000 0000 0000 1");
-        expectedValue = BitUtil.bits2Int(expectedBitPattern);
-        assertEquals(expectedValue, bitStream.getNextNBitsAsInteger(expectedBitPattern.length()));
+        bitPattern = new BitPattern("10 0000 0000 0000 0000 1");
+        assertEquals(bitPattern.getIntRepresentation(), bitStream.getNextNBitsAsInteger(bitPattern.getAmtBits()));
     }
 
 
@@ -133,25 +123,21 @@ class GorillaValueEncodingTest {
         // LZ (4-bits) : 0 -> 0000
         // L (5-bits)  : 0 -> 00000 (as 32 is represented using 0)
         // SIGNIF-BITS : 1111 1111 1111 1111 1111 1111 1111 1111
-        String expectedBitPattern = removeSpace("11 0000 00000");
-        int expectedValue = BitUtil.bits2Int(expectedBitPattern);
-        assertEquals(expectedValue, bitStream.getNextNBitsAsInteger(expectedBitPattern.length()));
+        BitPattern bitPattern = new BitPattern("11 0000 00000");
+        assertEquals(bitPattern.getIntRepresentation(), bitStream.getNextNBitsAsInteger(bitPattern.getAmtBits()));
 
-        expectedBitPattern = removeSpace("1111 1111 1111 1111 1111 1111 1111 1111");
-        expectedValue = BitUtil.bits2Int(expectedBitPattern);
-        assertEquals(expectedValue, bitStream.getNextNBitsAsInteger(expectedBitPattern.length()));
+        bitPattern = new BitPattern("1111 1111 1111 1111 1111 1111 1111 1111");
+        assertEquals(bitPattern.getIntRepresentation(), bitStream.getNextNBitsAsInteger(bitPattern.getAmtBits()));
 
         // The xor of v2 and v3 should give the same as above and therefore be inside the range
         // So we expect:
         // CB (inside): 10
         // SIGNIF-BITS : 1111 1111 1111 1111 1111 1111 1111 1111
-        expectedBitPattern = removeSpace("10");
-        expectedValue = BitUtil.bits2Int(expectedBitPattern);
-        assertEquals(expectedValue, bitStream.getNextNBitsAsInteger(expectedBitPattern.length()));
+        bitPattern = new BitPattern("10");
+        assertEquals(bitPattern.getIntRepresentation(), bitStream.getNextNBitsAsInteger(bitPattern.getAmtBits()));
 
-        expectedBitPattern = removeSpace("1111 1111 1111 1111 1111 1111 1111 1111");
-        expectedValue = BitUtil.bits2Int(expectedBitPattern);
-        assertEquals(expectedValue, bitStream.getNextNBitsAsInteger(expectedBitPattern.length()));
+        bitPattern = new BitPattern("1111 1111 1111 1111 1111 1111 1111 1111");
+        assertEquals(bitPattern.getIntRepresentation(), bitStream.getNextNBitsAsInteger(bitPattern.getAmtBits()));
     }
 
     @Test

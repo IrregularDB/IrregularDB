@@ -1,4 +1,4 @@
-package compression.utility;
+package compression.utility.BitStream;
 
 import compression.utility.BitStream.BitStream;
 import compression.utility.BitStream.BitStreamOld;

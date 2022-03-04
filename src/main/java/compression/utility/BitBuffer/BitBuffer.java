@@ -1,5 +1,6 @@
 package compression.utility.BitBuffer;
 
+import compression.utility.BitStream.BitStreamNew;
 import jdk.jshell.spi.ExecutionControl;
 import compression.utility.BitStream.BitStream;
 import compression.utility.BitStream.BitStreamOld;
@@ -29,8 +30,7 @@ public abstract class BitBuffer {
     }
 
     public final BitStream getBitStream(){
-        // TODO(EKN): update this to use new BitStream
-        return new BitStreamOld(getFinishedByteBuffer());
+        return new BitStreamNew(getFinishedByteBuffer());
     }
 
     // Protected methods

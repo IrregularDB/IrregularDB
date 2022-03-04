@@ -4,6 +4,7 @@ import compression.encoding.BucketEncoding;
 import compression.encoding.GorillaValueEncoding;
 import compression.timestamp.TimeStampCompressionModelType;
 import compression.utility.BitStream.BitStream;
+import compression.utility.BitStream.BitStreamNew;
 import compression.utility.BitStream.BitStreamOld;
 import compression.value.ValueCompressionModelType;
 import records.DataPoint;
@@ -48,8 +49,7 @@ public class BlobDecompressor {
     }
 
     private static List<Long> decompressDeltaPairs(ByteBuffer timeStampBlob, long startTime) {
-        // TODO REPLACE THIS WITH NEW BIT STREAM
-        BitStream bitStream = new BitStreamOld(timeStampBlob);
+        BitStream bitStream = new BitStreamNew(timeStampBlob);
         List<Integer> deltaTimes = BucketEncoding.decode(bitStream);
 
         List<Long> timeStamps = new ArrayList<>();
@@ -106,8 +106,7 @@ public class BlobDecompressor {
     }
 
     private static List<DataPoint> decompressGorilla(ByteBuffer valueBlob, List<Long> timeStamps) {
-        // TODO: replace with new bit stream
-        BitStream bitStream = new BitStreamOld(valueBlob);
+        BitStream bitStream = new BitStreamNew(valueBlob);
 
         List<Float> decodedValues = GorillaValueEncoding.decode(bitStream);
         int amtValues = decodedValues.size();

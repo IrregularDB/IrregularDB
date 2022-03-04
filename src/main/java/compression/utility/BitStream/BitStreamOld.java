@@ -62,7 +62,7 @@ public class BitStreamOld implements BitStream {
         if (n < 1) {
             throw new IllegalArgumentException("You must read at least one bit");
         }
-        if (n + (index - 1) < size) {
+        if (hasNNext(n)) {
             String output = allBits.substring(index, index + n);
             index += n;
             return output;

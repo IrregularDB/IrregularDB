@@ -39,8 +39,8 @@ class PostgresConnectionTest {
         short combined = PostgresConnection.combineTwoModelTypes(valueModelType, timestampType);
         PostgresConnection.ValueTimeStampModelPair seperated = PostgresConnection.combinedModelTypesToIndividual(combined);
 
-        Assertions.assertEquals(valueModelType, seperated.valueModelType);
-        Assertions.assertEquals(timestampType, seperated.timeStampModelType);
+        Assertions.assertEquals(valueModelType, seperated.valueModelType());
+        Assertions.assertEquals(timestampType, seperated.timeStampModelType());
     }
 
 }

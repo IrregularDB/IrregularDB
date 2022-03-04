@@ -26,7 +26,7 @@ public class GorillaValueEncoding {
 
         // Get BIT representation of the float value and write the initial value to the buffer
         int previousValue =  Float.floatToRawIntBits(values.get(0));
-        bitBuffer.writeRawInt(previousValue);
+        bitBuffer.writeIntUsingNBits(previousValue, Integer.SIZE);
 
         for (int i = 1; i < values.size(); i++) {
             var currValue = Float.floatToRawIntBits(values.get(i));

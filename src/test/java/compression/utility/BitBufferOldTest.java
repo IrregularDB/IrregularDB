@@ -40,36 +40,6 @@ class BitBufferOldTest {
     }
 
     @Test
-    void putOneRawInt() {
-        bitBuffer.writeRawInt(1);
-
-        ByteBuffer byteBuffer = bitBuffer.getFinishedByteBuffer();
-        Assertions.assertEquals(1, byteBuffer.getInt(0));
-
-        // We also expect it to automatically shrink the byte buffer to size 4
-        Assertions.assertEquals(4, byteBuffer.capacity());
-    }
-
-    @Test
-    void putFiveRawInts() {
-        // We test that the buffer automatically extends with 4 more bytes to allow us to store multiple doubles
-        bitBuffer.writeRawInt(1);
-        bitBuffer.writeRawInt(2);
-        bitBuffer.writeRawInt(3);
-        bitBuffer.writeRawInt(4);
-        bitBuffer.writeRawInt(5);
-
-
-        ByteBuffer byteBuffer = bitBuffer.getFinishedByteBuffer();
-        Assertions.assertEquals(20, byteBuffer.capacity());
-        Assertions.assertEquals(1, byteBuffer.getInt(0));
-        Assertions.assertEquals(2, byteBuffer.getInt(4));
-        Assertions.assertEquals(3, byteBuffer.getInt(8));
-        Assertions.assertEquals(4, byteBuffer.getInt(12));
-        Assertions.assertEquals(5, byteBuffer.getInt(16));
-    }
-
-    @Test
     void writeFalseBit() {
         // We check that writing false bit 8 times creates the byte 0000 0000 (which is equivalent to 0)
         for (int i = 0; i < 8; i++) {

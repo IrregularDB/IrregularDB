@@ -28,7 +28,7 @@ public class BitBufferNew extends BitBuffer {
 
     @Override
     public int bitsLeftInCurrentByte() {
-        return bitsLeft;
+        return bitsLeft % 8;
     }
 
     @Override
@@ -88,14 +88,11 @@ public class BitBufferNew extends BitBuffer {
 
     @Override
     protected void handledUnfinishedByte() {
-        if (bitsLeft != Byte.SIZE) {
-            int currAmountBitsLeft = bitsLeft;
-            for (int i = 0; i < currAmountBitsLeft; i++) {
-                if (finishWithOnes) {
-                    writeTrueBit();
-                } else {
-                    writeFalseBit();
-                }
+        while (this.bitsLeftInCurrentByte() != 0) {
+            if (finishWithOnes) {
+                writeTrueBit();
+            } else {
+                writeFalseBit();
             }
         }
     }

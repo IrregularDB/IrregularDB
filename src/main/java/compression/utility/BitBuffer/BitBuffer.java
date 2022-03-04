@@ -1,5 +1,6 @@
 package compression.utility.BitBuffer;
 
+import jdk.jshell.spi.ExecutionControl;
 import compression.utility.BitStream.BitStream;
 import compression.utility.BitStream.BitStreamOld;
 
@@ -30,17 +31,6 @@ public abstract class BitBuffer {
     public final BitStream getBitStream(){
         // TODO(EKN): update this to use new BitStream
         return new BitStreamOld(getFinishedByteBuffer());
-    }
-
-    /**
-     * Write the integer using 4 bytes (32 bits) using ByteBuffer.putInt(i)
-     * @param i the integer to be written as raw value
-     */
-    public final void writeRawInt(int i) {
-        if (this.getByteBuffer().remaining() < 4) {
-            extendBufferWithNMoreBytes(4);
-        }
-        this.getByteBuffer().putInt(i);
     }
 
     // Protected methods

@@ -25,15 +25,17 @@ class PostgresConnectionTest {
 
     //@Test
     public void testDBInsertsSegment(){
-        Segment segment = new Segment(1, 111L,222L,1, ByteBuffer.allocate(0), 1, ByteBuffer.allocate(0));
+        byte valueModelTypeId = 0b1;
+        byte timeStampModelTypeId = 0b1;
+        Segment segment = new Segment(1, 111L,222L, valueModelTypeId, ByteBuffer.allocate(0), timeStampModelTypeId, ByteBuffer.allocate(0));
         this.postgresConnection.insertSegment(segment);
     }
 
 
     @Test
     public void TestOfCombinedModelTypes() {
-        int valueModelType = 5;
-        int timestampType = 2;
+        byte valueModelType = 5;
+        byte timestampType = 2;
         short combined = PostgresConnection.combineTwoModelTypes(valueModelType, timestampType);
         PostgresConnection.ValueTimeStampModelPair seperated = PostgresConnection.combinedModelTypesToIndividual(combined);
 

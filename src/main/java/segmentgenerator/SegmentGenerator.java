@@ -74,7 +74,7 @@ public class SegmentGenerator {
         ValueCompressionModel valueModel = compressionModel.getValueCompressionModel();
         TimeStampCompressionModel timeStampModel = compressionModel.getTimeStampCompressionModel();
 
-        return new Segment(this.timeSeriesId, startTime, endTime, valueModel.getValueCompressionModelType().ordinal(), valueModel.getBlobRepresentation(), timeStampModel.getTimeStampCompressionModelType().ordinal(), timeStampModel.getBlobRepresentation());
+        return new Segment(this.timeSeriesId, startTime, endTime, (byte) valueModel.getValueCompressionModelType().ordinal(), valueModel.getBlobRepresentation(), (byte) timeStampModel.getTimeStampCompressionModelType().ordinal(), timeStampModel.getBlobRepresentation());
     }
 
 }

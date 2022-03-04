@@ -75,7 +75,7 @@ public class PostgresConnection implements DatabaseConnection {
     }
 
 
-    public static short combineTwoModelTypes(int valueModelType, int timestampModelType){
+    public static short combineTwoModelTypes(byte valueModelType, byte timestampModelType){
         return (short) ((valueModelType << 8) | timestampModelType);
     }
 

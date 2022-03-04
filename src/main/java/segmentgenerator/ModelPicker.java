@@ -24,7 +24,7 @@ public record ModelPicker (List<ValueCompressionModel> valueCompressionModels, L
         //   start_time (long/bigint) = 8 bytes
         //   end_time (int) = 4 bytes
         //   value_timestamp_model_type (smallint) = 2 bytes
-        //   bytea (varbyte) in postgresql has an overhead of 4 bytes, this goes for both the blobs
+        //   bytea (varbyte) in postgresql has an overhead of 4 bytes, this goes for both the blobs = 4 + 4 bytes
         int overhead = 4 + 8 + 4 + 2 + 4 + 4;
         int amountBytesUsed = overhead + model.getAmountBytesUsed();
         int amountDataPoints = model.getLength();

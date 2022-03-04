@@ -1,7 +1,7 @@
 package compression.value;
 
 import compression.encoding.GorillaValueEncoding;
-import compression.utility.BitBuffer;
+import compression.utility.BitBuffer.BitBuffer;
 import records.DataPoint;
 
 import java.nio.ByteBuffer;
@@ -43,7 +43,7 @@ public class GorillaValueCompressionModel extends ValueCompressionModel {
         }
 
         BitBuffer encode = GorillaValueEncoding.encode(values);
-        return encode.getByteBuffer();
+        return encode.getFinishedByteBuffer();
     }
 
     @Override

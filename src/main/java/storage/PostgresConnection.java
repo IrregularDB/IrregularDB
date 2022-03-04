@@ -84,14 +84,5 @@ public class PostgresConnection implements DatabaseConnection {
         return new ValueTimeStampModelPair(combined >> 8, combined & leastSignificantByteMask);
     }
 
-
-    public static class ValueTimeStampModelPair{
-        public final int valueModelType;
-        public final int timeStampModelType;
-
-        public ValueTimeStampModelPair(int valueModelType, int timeStampModelType) {
-            this.valueModelType = valueModelType;
-            this.timeStampModelType = timeStampModelType;
-        }
-    }
+    public static record ValueTimeStampModelPair(int valueModelType, int  timeStampModelType) {};
 }

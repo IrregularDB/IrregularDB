@@ -1,5 +1,6 @@
 package storage;
 
+import compression.utility.BitUtil;
 import config.ConfigProperties;
 import records.Segment;
 
@@ -32,10 +33,9 @@ public class PostgresConnection implements DatabaseConnection {
             preparedStatement.setInt(1, segment.timeSeriesId());
             preparedStatement.setLong(2, segment.startTime());
             preparedStatement.setLong(3, segment.endTime());
-            preparedStatement.setInt(4, segment.valueModelType());
+            preparedStatement.setInt(4, BitUtil.combineTwoModelTypes(segment.valueModelType(), segment.timestampModelType())); // we are now combining the two model types
             preparedStatement.setBytes(5, segment.valueBlob().array());
-            preparedStatement.setInt(6, segment.timestampModelType());
-            preparedStatement.setBytes(7, segment.timestampBlob().array());
+            preparedStatement.setBytes(6, segment.timestampBlob().array());
 
             preparedStatement.execute();
 

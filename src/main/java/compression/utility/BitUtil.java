@@ -41,4 +41,24 @@ public class BitUtil {
         // Then if the string is too short it formats it to be 8 long
         return String.format("%8s", byteString).replace(' ', '0');
     }
+
+    public static short combineTwoModelTypes(int valueModelType, int timestampModelType){
+        return (short) ((valueModelType << 8) | timestampModelType);
+    }
+
+    public static ValueTimeStampModelPair combinedModelTypesToIndividual(short combined) {
+        final short leastSignificantByteMask = 0b0000000011111111;
+        return new ValueTimeStampModelPair(combined >> 8, combined & leastSignificantByteMask);
+    }
+
+
+    public static class ValueTimeStampModelPair{
+        public final int valueModelType;
+        public final int timeStampModelType;
+
+        public ValueTimeStampModelPair(int valueModelType, int timeStampModelType) {
+            this.valueModelType = valueModelType;
+            this.timeStampModelType = timeStampModelType;
+        }
+    }
 }

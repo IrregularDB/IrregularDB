@@ -15,9 +15,8 @@ CREATE TABLE Segment(
     time_series_id int not null,
     start_time bigint not null,
     end_time bigint not null,
-    value_model_type int2 not null,
+    value_timestamp_model_type int2 not null,
     value_model_blob bytea not null,
-    timestamp_model_type int2 not null,
     timestamp_model_blob bytea not null,
     CONSTRAINT fk_time_series
                     FOREIGN KEY(time_series_id)

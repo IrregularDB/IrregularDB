@@ -1,7 +1,5 @@
 package compression.utility.BitStream;
 
-import compression.utility.BitUtil;
-
 import java.nio.ByteBuffer;
 
 /**
@@ -19,19 +17,44 @@ public class BitStreamOld implements BitStream {
         this.index = 0;
         StringBuilder stringBuilder = new StringBuilder();
         for (byte b : byteBuffer.array()) {
-            stringBuilder.append(BitUtil.byte2Bits(b));
+            stringBuilder.append(byte2Bits(b));
         }
         this.allBits = stringBuilder.toString();
         this.size = allBits.length();
     }
 
+    private String byte2Bits(byte b) {
+        // This method masks away all the unnecessary bits from for example:
+        // -1 = 1111 1111 1111 1111 1111 1111 1111 1111
+        // By & them with the 0xFF mask
+        int i = b & 0xFF;
+        String byteString = Integer.toBinaryString(i);
+
+        // Then if the string is too short it formats it to be 8 long
+        return String.format("%8s", byteString).replace(' ', '0');
+    }
+
+    @Override
     public int getSize() {
         return size;
     }
 
     @Override
+    public boolean hasNNext(int n){
+        return (index-1) + n < size;
+    }
+
+    @Override
     public int getNextNBitsAsInteger(int n) {
-        return BitUtil.bits2Int(getNBits(n));
+        String bitPattern = getNBits(n);
+        if (n < 32) {
+            return Integer.parseInt(bitPattern, 2);
+        } else if (n == 32) {
+            // Necessary hack to parse 32 bit integers e.g. 1111 1111 1111 1111 1111 1111 1111 1111
+            return (int)(Long.parseLong(bitPattern, 2));
+        } else {
+            throw new IllegalArgumentException("You tried to get more than 32 bits as an integer");
+        }
     }
 
     public String getNBits(int n) {
@@ -45,9 +68,5 @@ public class BitStreamOld implements BitStream {
         } else {
             throw new IndexOutOfBoundsException("There arent that many bits left in the stream");
         }
-    }
-
-    public boolean hasNNext(int n){
-        return (index-1) + n < size;
     }
 }

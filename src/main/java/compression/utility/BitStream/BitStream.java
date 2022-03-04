@@ -4,7 +4,7 @@ public interface BitStream {
 
     int getSize();
 
-    String getNBits(int n);
+    // String getNBits(int n);
 
     int getNextNBitsAsInteger(int n);
 

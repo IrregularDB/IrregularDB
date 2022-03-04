@@ -3,8 +3,6 @@
 
 package compression.utility.BitBuffer;
 
-import compression.utility.BitUtil;
-
 import java.nio.ByteBuffer;
 
 
@@ -51,8 +49,18 @@ public class BitBufferOld extends BitBuffer {
 
     @Override
     public void writeIntUsingNBits(int i, int n) {
-        String s = BitUtil.int2Bits(i, n);
+        String s = int2Bits(i, n);
         writeBitString(s);
+    }
+
+    private String int2Bits(int i, int amtBits) {
+        String bitString = Integer.toBinaryString(i);
+        int amtBitsInValue = bitString.length();
+        int zeroesToPad = amtBits - amtBitsInValue;
+        if (zeroesToPad < 0) {
+            throw new IllegalArgumentException("You tried to represent the integer: " + i + ". Using only: " + amtBits + ". Which is not possible");
+        }
+        return "0".repeat(zeroesToPad) + bitString;
     }
 
     @Override

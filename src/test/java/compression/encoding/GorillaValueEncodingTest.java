@@ -2,7 +2,7 @@ package compression.encoding;
 
 import compression.utility.BitBuffer.BitBuffer;
 import compression.utility.BitStream.BitStream;
-import compression.utility.BitUtil;
+import utility.BitUtil;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 

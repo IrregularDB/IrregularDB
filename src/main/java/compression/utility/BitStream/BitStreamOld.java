@@ -46,11 +46,12 @@ public class BitStreamOld implements BitStream {
 
     @Override
     public int getNextNBitsAsInteger(int n) {
-        String bitPattern = getNBits(n);
         if (n < 32) {
+            String bitPattern = getNBits(n);
             return Integer.parseInt(bitPattern, 2);
         } else if (n == 32) {
             // Necessary hack to parse 32 bit integers e.g. 1111 1111 1111 1111 1111 1111 1111 1111
+            String bitPattern = getNBits(n);
             return (int)(Long.parseLong(bitPattern, 2));
         } else {
             throw new IllegalArgumentException("You tried to get more than 32 bits as an integer");

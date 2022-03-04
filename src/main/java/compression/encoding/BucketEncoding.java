@@ -1,12 +1,11 @@
 package compression.encoding;
 
-import compression.utility.BitBuffer;
-import compression.utility.BitStream;
-import compression.utility.BitUtil;
+import compression.utility.*;
+import compression.utility.BitBuffer.BitBuffer;
+import compression.utility.BitBuffer.BitBufferNew;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 public class BucketEncoding {
 
@@ -25,44 +24,61 @@ public class BucketEncoding {
      */
     public static BitBuffer encode(List<Integer> readings) {
         // We finish the byte with 1's as we can then in the decoding detect end of stream
-        BitBuffer bitBuffer = new BitBuffer(4, true);
+        BitBuffer bitBuffer = new BitBufferNew(true);
         Integer previousReading = null;
         for (Integer reading : readings) {
-            String encodeReading = encodeReading(reading, previousReading);
+            encodeReading(bitBuffer, reading, previousReading);
             previousReading = reading;
-            bitBuffer.writeBitString(encodeReading);
         }
 
         return bitBuffer;
     }
 
-    private static String encodeReading(Integer reading, Integer prevReading) {
+    private static void encodeReading(BitBuffer bitBuffer, Integer reading, Integer prevReading) {
         if (reading.equals(prevReading)) {
-            return SAME_VALUE_ENCODING;
+            writeControlBitToBuffer(SAME_VALUE_ENCODING, bitBuffer);
+        } else {
+            encodeNumber(reading, bitBuffer);
         }
-        String significantBits = BitUtil.int2Bits(reading);
-        return encodeNumber(significantBits);
     }
 
-    private static String encodeNumber(String significantBits) {
-        int amtSignificantBits = significantBits.length();
+    private static void encodeNumber(Integer reading, BitBuffer bitBuffer) {
+        int amtSignificantBits = Integer.SIZE - Integer.numberOfLeadingZeros(reading);
 
-        String controlBits;
-        int zeroesToPad;
         if (amtSignificantBits <= BUCKET_1_BIT_SIZE) {
-            controlBits = BUCKET_1_CONTROL_BITS;
-            zeroesToPad = BUCKET_1_BIT_SIZE - amtSignificantBits;
+            writeControlBitToBuffer(BUCKET_1_CONTROL_BITS, bitBuffer);
+            bitBuffer.writeIntUsingNBits(reading, BUCKET_1_BIT_SIZE);
         } else if (amtSignificantBits <= BUCKET_2_BIT_SIZE) {
-            controlBits = BUCKET_2_CONTROL_BITS;
-            zeroesToPad = BUCKET_2_BIT_SIZE - amtSignificantBits;
+            writeControlBitToBuffer(BUCKET_2_CONTROL_BITS, bitBuffer);
+            bitBuffer.writeIntUsingNBits(reading, BUCKET_2_BIT_SIZE);
         } else if (amtSignificantBits <= BUCKET_3_BIT_SIZE) {
-            controlBits = BUCKET_3_CONTROL_BITS;
-            zeroesToPad = BUCKET_3_BIT_SIZE - amtSignificantBits;
+            writeControlBitToBuffer(BUCKET_3_CONTROL_BITS, bitBuffer);
+            bitBuffer.writeIntUsingNBits(reading, BUCKET_3_BIT_SIZE);
         } else {
-            throw new RuntimeException("Amount of bits greater than bucket allows (you probably tried to insert a negative number)");
+            throw new IllegalArgumentException("Amount of bits greater than bucket allows (you probably tried to insert a negative number)");
         }
+    }
 
-        return controlBits + "0".repeat(zeroesToPad) + significantBits;
+    private static void writeControlBitToBuffer(String controlBits, BitBuffer bitBuffer) {
+        switch (controlBits) {
+            case SAME_VALUE_ENCODING -> {
+                bitBuffer.writeFalseBit();
+                bitBuffer.writeFalseBit();
+            }
+            case BUCKET_1_CONTROL_BITS -> {
+                bitBuffer.writeFalseBit();
+                bitBuffer.writeTrueBit();
+            }
+            case BUCKET_2_CONTROL_BITS -> {
+                bitBuffer.writeTrueBit();
+                bitBuffer.writeFalseBit();
+            }
+            case BUCKET_3_CONTROL_BITS -> {
+                bitBuffer.writeTrueBit();
+                bitBuffer.writeTrueBit();
+            }
+            default -> throw new IllegalArgumentException("unknown controlBits");
+        }
     }
 
     public static List<Integer> decode(BitStream bitStream) {

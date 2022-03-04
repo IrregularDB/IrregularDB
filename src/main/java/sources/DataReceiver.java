@@ -13,7 +13,7 @@ public abstract class DataReceiver {
         this.workingSet = workingSet;
     }
 
-    public void sendTimeSeriesReadingToBuffer(TimeSeriesReading timeSeriesReading){
+    protected void sendTimeSeriesReadingToBuffer(TimeSeriesReading timeSeriesReading){
         this.workingSet.accept(timeSeriesReading);
     }
 

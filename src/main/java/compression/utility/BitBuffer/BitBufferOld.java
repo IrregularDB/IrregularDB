@@ -57,10 +57,7 @@ public class BitBufferOld extends BitBuffer {
 
     @Override
     public int bitsLeftInCurrentByte(){
-        if (currByte.isEmpty()) {
-            return 0;
-        }
-        return Byte.SIZE - currByte.length();
+        return Byte.SIZE - currByte.length() % 8;
     }
 
     @Override

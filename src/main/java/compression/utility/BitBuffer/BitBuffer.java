@@ -31,17 +31,6 @@ public abstract class BitBuffer {
         return new BitStream(getFinishedByteBuffer());
     }
 
-    /**
-     * Write the integer using 4 bytes (32 bits) using ByteBuffer.putInt(i)
-     * @param i the integer to be written as raw value
-     */
-    public final void writeRawInt(int i) {
-        if (this.getByteBuffer().remaining() < 4) {
-            extendBufferWithNMoreBytes(4);
-        }
-        this.getByteBuffer().putInt(i);
-    }
-
     // Protected methods
     abstract protected ByteBuffer getByteBuffer();
 

@@ -22,5 +22,6 @@ CREATE TABLE Segment(
     CONSTRAINT fk_time_series
                     FOREIGN KEY(time_series_id)
                     REFERENCES TimeSeries(id)
-                    ON DELETE CASCADE
+                    ON DELETE CASCADE,
+    CONSTRAINT pk_timeId_startTime primary key(time_series_id, start_time)
 );

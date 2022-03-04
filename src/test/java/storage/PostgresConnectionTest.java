@@ -37,10 +37,25 @@ class PostgresConnectionTest {
         byte valueModelType = 5;
         byte timestampType = 2;
         short combined = PostgresConnection.combineTwoModelTypes(valueModelType, timestampType);
-        PostgresConnection.ValueTimeStampModelPair seperated = PostgresConnection.combinedModelTypesToIndividual(combined);
+        PostgresConnection.ValueTimeStampModelPair modelPair = PostgresConnection.combinedModelTypesToIndividual(combined);
 
-        Assertions.assertEquals(valueModelType, seperated.valueModelType());
-        Assertions.assertEquals(timestampType, seperated.timeStampModelType());
+        Assertions.assertEquals(valueModelType, modelPair.valueModelType());
+        Assertions.assertEquals(timestampType, modelPair.timeStampModelType());
+    }
+
+    @Test
+    public void TestOfCombinedModelTypesWithNegativeValueModelType() {
+        byte valueModelType = -1;
+        byte timestampModelType = 127;
+
+        Assertions.assertThrows(IllegalArgumentException.class, () -> PostgresConnection.combineTwoModelTypes(valueModelType, timestampModelType));
+    }
+
+    @Test
+    public void TestOfCombinedModelTypesWithNegativeTimeStampModelType() {
+        byte valueModelType = 127;
+        byte timestampModelType = -1;
+        Assertions.assertThrows(IllegalArgumentException.class, () -> PostgresConnection.combineTwoModelTypes(valueModelType, timestampModelType));
     }
 
 }

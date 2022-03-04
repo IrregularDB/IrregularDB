@@ -76,6 +76,9 @@ public class PostgresConnection implements DatabaseConnection {
 
 
     public static short combineTwoModelTypes(byte valueModelType, byte timestampModelType){
+        if (valueModelType < 0 || timestampModelType < 0) {
+            throw new IllegalArgumentException("The model types ids must be positive");
+        }
         return (short) ((valueModelType << 8) | timestampModelType);
     }
 
@@ -84,5 +87,5 @@ public class PostgresConnection implements DatabaseConnection {
         return new ValueTimeStampModelPair(combined >> 8, combined & leastSignificantByteMask);
     }
 
-    public static record ValueTimeStampModelPair(int valueModelType, int  timeStampModelType) {};
+    public static record ValueTimeStampModelPair(int valueModelType, int  timeStampModelType) {}
 }

@@ -41,5 +41,4 @@ public class BitUtil {
         // Then if the string is too short it formats it to be 8 long
         return String.format("%8s", byteString).replace(' ', '0');
     }
-
 }

@@ -9,7 +9,7 @@ import java.util.function.Function;
 public abstract class BaseModel {
     private final Float errorBound;
     private final Integer lengthBound;
-    private ByteBuffer byteBuffer;
+    private ByteBuffer byteBuffer; //Used as a cache for a blob
 
     public BaseModel(Float errorBound, Integer lengthBound) {
         // This small hack is added because floating point imprecision can lead to error-bound

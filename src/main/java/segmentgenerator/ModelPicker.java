@@ -8,16 +8,20 @@ import compression.value.ValueCompressionModel;
 import java.util.Comparator;
 import java.util.List;
 
-public record ModelPicker (List<ValueCompressionModel> valueCompressionModels, List<TimeStampCompressionModel> timeStampCompressionModels){
+public class ModelPicker{
 
-    public CompressionModel findBestCompressionModel(){
-        ValueCompressionModel bestValueCompressionModel = getBestValueModel();
-        TimeStampCompressionModel bestTimeStampCompressionModel = getBestTimeStampModel();
+    private ModelPicker(){
+        //should not be instanciated
+    }
+
+    public static CompressionModel findBestCompressionModel(List<ValueCompressionModel> valueCompressionModels, List<TimeStampCompressionModel> timeStampCompressionModels){
+        ValueCompressionModel bestValueCompressionModel = getBestValueModel(valueCompressionModels);
+        TimeStampCompressionModel bestTimeStampCompressionModel = getBestTimeStampModel(timeStampCompressionModels);
 
         return new CompressionModel(bestValueCompressionModel, bestTimeStampCompressionModel);
     }
 
-    private double calculateAmountBytesPerDataPoint(BaseModel model) {
+    private static double calculateAmountBytesPerDataPoint(BaseModel model) {
         // TODO: ensure this overhead is correct, maybe pass it as an input of some kind through the config
         // We have the following overhead:
         //   time_series_id (integer) = 4 bytes
@@ -31,14 +35,14 @@ public record ModelPicker (List<ValueCompressionModel> valueCompressionModels, L
         return ((double) amountBytesUsed) / ((double) amountDataPoints);
     }
 
-    private ValueCompressionModel getBestValueModel(){
-        return this.valueCompressionModels.stream()
-                .min(Comparator.comparing(this::calculateAmountBytesPerDataPoint))
+    private static ValueCompressionModel getBestValueModel(List<ValueCompressionModel> valueCompressionModels){
+        return valueCompressionModels.stream()
+                .min(Comparator.comparing(ModelPicker::calculateAmountBytesPerDataPoint))
                 .orElseThrow(() -> new RuntimeException("In ModelPicker:getBestValueModel() - Should not happen"));
     }
 
-    private TimeStampCompressionModel getBestTimeStampModel() {
-        return this.timeStampCompressionModels.stream()
-                .min(Comparator.comparing(this::calculateAmountBytesPerDataPoint))
+    private static TimeStampCompressionModel getBestTimeStampModel(List<TimeStampCompressionModel> timeStampCompressionModels) {
+        return timeStampCompressionModels.stream()
+                .min(Comparator.comparing(ModelPicker::calculateAmountBytesPerDataPoint))
                 .orElseThrow(() -> new RuntimeException("In ModelPicker:getBestTimeStampModel() - Should not happen"));    }
 }

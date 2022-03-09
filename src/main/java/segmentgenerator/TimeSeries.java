@@ -4,7 +4,6 @@ import compression.CompressionModelFactory;
 import records.DataPoint;
 import records.Segment;
 import storage.DatabaseConnection;
-import storage.PostgresConnection;
 
 public class TimeSeries {
     private final String timeSeriesTag;
@@ -14,8 +13,12 @@ public class TimeSeries {
     public TimeSeries(String timeSeriesTag, DatabaseConnection dbConnection) {
         this.timeSeriesTag = timeSeriesTag;
         this.databaseConnection = dbConnection;
-        int timeSeriesId = databaseConnection.getTimeSeriesId(this.timeSeriesTag);
+        int timeSeriesId = getTimeSeriesIdFromDb();
         this.segmentGenerator = new SegmentGenerator(new CompressionModelManager(CompressionModelFactory.getValueCompressionModels(), CompressionModelFactory.getTimestampCompressionModels()), timeSeriesId);
+    }
+
+    private int getTimeSeriesIdFromDb() {
+        return databaseConnection.getTimeSeriesId(this.timeSeriesTag);
     }
 
     public void processDataPoint(DataPoint dataPoint) {
@@ -30,7 +33,7 @@ public class TimeSeries {
         return timeSeriesTag;
     }
 
-    void sendToDb(Segment segment) {
+    private void sendToDb(Segment segment) {
         this.databaseConnection.insertSegment(segment);
     }
 }

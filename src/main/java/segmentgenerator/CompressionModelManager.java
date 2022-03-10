@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class CompressionModelManager {
 
@@ -19,16 +20,12 @@ public class CompressionModelManager {
     private List<ValueCompressionModel> inactiveValueModels;
     private List<TimeStampCompressionModel> inactiveTimestampModels;
 
-    private final ModelPicker modelPicker;
-
     public CompressionModelManager(List<ValueCompressionModel> valueCompressionModels, List<TimeStampCompressionModel> timeStampCompressionModels) {
         this.activeValueModels = new ArrayList<>(valueCompressionModels);
         this.activeTimeStampModels = new ArrayList<>(timeStampCompressionModels);
 
         this.inactiveValueModels = new ArrayList<>();
         this.inactiveTimestampModels = new ArrayList<>();
-
-        this.modelPicker = new ModelPicker(valueCompressionModels, timeStampCompressionModels);
     }
 
     public boolean tryAppendDataPointToAllModels(DataPoint dataPoint) {
@@ -72,6 +69,8 @@ public class CompressionModelManager {
 
 
     public CompressionModel getBestCompressionModel() {
-        return modelPicker.findBestCompressionModel();
+        List<ValueCompressionModel> valueModels = Stream.concat(activeValueModels.stream(), inactiveValueModels.stream()).toList();
+        List<TimeStampCompressionModel> timeStampModels = Stream.concat(activeTimeStampModels.stream(), inactiveTimestampModels.stream()).toList();
+        return ModelPicker.findBestCompressionModel(valueModels, timeStampModels);
     }
 }

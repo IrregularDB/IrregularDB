@@ -10,7 +10,7 @@ public class BitBufferNew extends BitBuffer {
     private int bitsLeft;
     private byte currByte;
     private ByteBuffer byteBuffer;
-    boolean finishWithOnes;
+    private final boolean finishWithOnes;
 
     public BitBufferNew(boolean finishWithOnes) {
         int initialByteBufferSize = 16;

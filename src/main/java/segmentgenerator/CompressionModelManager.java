@@ -70,7 +70,7 @@ public class CompressionModelManager {
 
     public CompressionModel getBestCompressionModel() {
         List<ValueCompressionModel> valueModels = Stream.concat(activeValueModels.stream(), inactiveValueModels.stream()).toList();
-        List<TimeStampCompressionModel> timeStampCompressionModels = Stream.concat(activeTimeStampModels.stream(), inactiveTimestampModels.stream()).toList();
-        return ModelPicker.findBestCompressionModel(valueModels, timeStampCompressionModels);
+        List<TimeStampCompressionModel> timeStampModels = Stream.concat(activeTimeStampModels.stream(), inactiveTimestampModels.stream()).toList();
+        return ModelPicker.findBestCompressionModel(valueModels, timeStampModels);
     }
 }

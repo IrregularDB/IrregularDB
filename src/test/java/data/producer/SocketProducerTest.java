@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 class SocketProducerTest {
 
@@ -58,6 +59,34 @@ class SocketProducerTest {
 
         for (int i = 0; i < testData.size(); i++) {
             Assertions.assertEquals(testData.get(i), workingSetBuffer.poll());
+        }
+    }
+
+    @Test
+    void connectAndSendDataSeveralTagsInOneStream() {
+        Queue<TimeSeriesReading> workingSetBuffer = new ConcurrentLinkedQueue<>();
+        TestPartitioner testPartitioner = new TestPartitioner(workingSetBuffer);
+        SocketDataReceiverSpawner socketDataReceiverSpawner = new SocketDataReceiverSpawner(testPartitioner);
+        socketDataReceiverSpawner.spawn();
+
+
+        List<TimeSeriesReading> testData1 = getNTestDataForTag("key1", 5);
+        List<TimeSeriesReading> testData2 = getNTestDataForTag("key2", 5);
+        List<TimeSeriesReading> testData3 = getNTestDataForTag("key1", 5);
+        List<TimeSeriesReading> allTestData = Stream.concat(Stream.concat(testData1.stream(), testData2.stream()), testData3.stream()).toList();
+        SocketProducer socketProducer = new SocketProducer(allTestData, "localhost", 4672);
+        socketProducer.connectAndSendData();
+
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        Assertions.assertEquals(allTestData.size(), workingSetBuffer.size());
+
+        for (int i = 0; i < allTestData.size(); i++) {
+            Assertions.assertEquals(allTestData.get(i), workingSetBuffer.poll());
         }
     }
 

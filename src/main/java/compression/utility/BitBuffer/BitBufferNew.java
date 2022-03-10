@@ -1,3 +1,7 @@
+// The implementation of this bit stream is based on code
+// published in relation to ModelarDB
+// LINK: https://github.com/skejserjensen/ModelarDB
+
 package compression.utility.BitBuffer;
 
 import java.nio.ByteBuffer;
@@ -63,11 +67,7 @@ public class BitBufferNew extends BitBuffer {
                 int howFarToShiftRight = n - this.bitsLeft;
                 int shiftedValue = (i >> howFarToShiftRight);
 
-                /* To get the mask we shift a 1 left until we reach bits left then we minus 1 to convert all the bits
-                   to the right of it to ones. E.g. if bitsLeft = 4, Then we get the following mask:
-                        0b00000001 << 4 = 0b00010000
-                        0b00010000 - 1  = 0b00001111 */
-                byte mask = (byte)((0b00000001 << this.bitsLeft) - 1);
+                byte mask = getByteMask(bitsLeft);
                 this.currByte |= (byte) (shiftedValue & mask);
             } else { // Enough bits left in current byte
                 amtBitsToWriteInCurrentIteration = n;
@@ -84,6 +84,14 @@ public class BitBufferNew extends BitBuffer {
                 flushCurrentByteToBuffer();
             }
         }
+    }
+
+    private byte getByteMask(int bitsLeftInByte){
+        /* To get the mask we shift a 1 left until we reach bits left then we minus 1 to convert all the bits
+           to the right of it to ones. E.g. if bitsLeft = 4, Then we get the following mask:
+             0b00000001 << 4 = 0b00010000
+             0b00010000 - 1  = 0b00001111 */
+        return (byte)((0b00000001 << bitsLeftInByte) - 1);
     }
 
     @Override

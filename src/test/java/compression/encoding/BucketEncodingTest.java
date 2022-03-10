@@ -1,8 +1,9 @@
 package compression.encoding;
 
 import compression.utility.BitBuffer.BitBuffer;
-import compression.utility.BitStream;
-import compression.utility.BitUtil;
+import compression.utility.BitStream.BitStream;
+import utility.BitPattern;
+import utility.BitUtil;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -38,20 +39,20 @@ class BucketEncodingTest {
         // We first expect the following pattern:
         // CB:      01
         // SIGNIF:  0 0000 0001
-        String expectedValue = removeSpace("01 0 0000 0001");
-        assertEquals(expectedValue, bitStream.getNBits(expectedValue.length()));
+        BitPattern bitPattern = new BitPattern("01 0 0000 0001");
+        assertEquals(bitPattern.getIntRepresentation(), bitStream.getNextNBitsAsInteger(bitPattern.getAmtBits()));
 
         // We then expect
         // CB:      01
         // SIGNIF:  0 0000 1111
-        expectedValue = removeSpace("01 0 0000 1111");
-        assertEquals(expectedValue, bitStream.getNBits(expectedValue.length()));
+        bitPattern = new BitPattern("01 0 0000 1111");
+        assertEquals(bitPattern.getIntRepresentation(), bitStream.getNextNBitsAsInteger(bitPattern.getAmtBits()));
 
         // We then expect
         // CB:      01
         // SIGNIF:  1 0000 0000
-        expectedValue = removeSpace("01 1 0000 0000");
-        assertEquals(expectedValue, bitStream.getNBits(expectedValue.length()));
+        bitPattern = new BitPattern("01 1 0000 0000");
+        assertEquals(bitPattern.getIntRepresentation(), bitStream.getNextNBitsAsInteger(bitPattern.getAmtBits()));
     }
 
     @Test
@@ -71,16 +72,17 @@ class BucketEncodingTest {
         // We first expect the following pattern:
         // CB:      10
         // SIGNIF:  0000 0011 0000 0000
-        String expectedValue = removeSpace("10 0000 0011 0000 0000");
-        assertEquals(expectedValue, bitStream.getNBits(expectedValue.length()));
+        BitPattern bitPattern = new BitPattern("10 0000 0011 0000 0000");
+        assertEquals(bitPattern.getIntRepresentation(), bitStream.getNextNBitsAsInteger(bitPattern.getAmtBits()));
 
         // We then expect
         // CB:      10
         // SIGNIF:  1111 1111 1111 1110
-        expectedValue = removeSpace("10 1111 1111 1111 1110");
-        assertEquals(expectedValue, bitStream.getNBits(expectedValue.length()));
+        bitPattern = new BitPattern("10 1111 1111 1111 1110");
+        assertEquals(bitPattern.getIntRepresentation(), bitStream.getNextNBitsAsInteger(bitPattern.getAmtBits()));
     }
 
+    // We have to split the patterns out here as the strings are longer than 32 bits
     @Test
     void encodeValuesInBucket3() {
         // Bucket 2 uses the CB 11 and have a size 17-31
@@ -98,14 +100,19 @@ class BucketEncodingTest {
         // We first expect the following pattern:
         // CB:      11
         // SIGNIF:  000 0000 0000 0001 0000 0000 0000 0000
-        String expectedValue = removeSpace("11 000 0000 0000 0001 0000 0000 0000 0000");
-        assertEquals(expectedValue, bitStream.getNBits(expectedValue.length()));
+        BitPattern bitPattern = new BitPattern("11");
+        assertEquals(bitPattern.getIntRepresentation(), bitStream.getNextNBitsAsInteger(bitPattern.getAmtBits()));
+        bitPattern = new BitPattern("000 0000 0000 0001 0000 0000 0000 0000");
+        assertEquals(bitPattern.getIntRepresentation(), bitStream.getNextNBitsAsInteger(bitPattern.getAmtBits()));
 
         // We then expect
         // CB:      11
         // SIGNIF:  111 1111 1111 1111 1111 1111 1111 1111
-        expectedValue = removeSpace("11 111 1111 1111 1111 1111 1111 1111 1111");
-        assertEquals(expectedValue, bitStream.getNBits(expectedValue.length()));
+        bitPattern = new BitPattern("11");
+        assertEquals(bitPattern.getIntRepresentation(), bitStream.getNextNBitsAsInteger(bitPattern.getAmtBits()));
+        bitPattern = new BitPattern("111 1111 1111 1111 1111 1111 1111 1111");
+        assertEquals(bitPattern.getIntRepresentation(), bitStream.getNextNBitsAsInteger(bitPattern.getAmtBits()));
+
     }
 
     @Test
@@ -124,13 +131,13 @@ class BucketEncodingTest {
         // We first expect the following pattern:
         // CB:      01
         // SIGNIF:  1 0000 0000
-        String expectedValue = removeSpace("01 1 0000 0000");
-        assertEquals(expectedValue, bitStream.getNBits(expectedValue.length()));
+        BitPattern bitPattern = new BitPattern("01 1 0000 0000");
+        assertEquals(bitPattern.getIntRepresentation(), bitStream.getNextNBitsAsInteger(bitPattern.getAmtBits()));
 
         // We then expect the following:
         // CB: 00
-        expectedValue = removeSpace("00");
-        assertEquals(expectedValue, bitStream.getNBits(expectedValue.length()));
+        bitPattern = new BitPattern("00");
+        assertEquals(bitPattern.getIntRepresentation(), bitStream.getNextNBitsAsInteger(bitPattern.getAmtBits()));
     }
 
     @Test

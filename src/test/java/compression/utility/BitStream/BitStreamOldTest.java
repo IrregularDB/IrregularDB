@@ -1,14 +1,17 @@
-package compression.utility;
+package compression.utility.BitStream;
 
+import compression.utility.BitStream.BitStream;
+import compression.utility.BitStream.BitStreamOld;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import utility.BitUtil;
 
 import java.nio.ByteBuffer;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class BitStreamTest {
+class BitStreamOldTest {
     BitStream bitStream;
 
     @BeforeEach
@@ -18,43 +21,43 @@ class BitStreamTest {
         byteBuffer.put(b); // We put 1111 1111
         b = 0;
         byteBuffer.put(b); // We put 0000 0000
-        bitStream = new BitStream(byteBuffer);
+        bitStream = new BitStreamOld(byteBuffer);
     }
 
 
     @Test
     void getNBits() {
-        String actualNbits = bitStream.getNBits(12);
+        int actualNbits = bitStream.getNextNBitsAsInteger(12);
 
-        assertEquals("111111110000", actualNbits);
+        assertEquals(BitUtil.bits2Int("111111110000"), actualNbits);
     }
 
     @Test
     void getNBitsTwice() {
-        String actualNbits = bitStream.getNBits(7);
+        int actualNbits = bitStream.getNextNBitsAsInteger(7);
 
-        assertEquals("1111111", actualNbits);
+        assertEquals(BitUtil.bits2Int("1111111"), actualNbits);
 
-        actualNbits = bitStream.getNBits(9);
+        actualNbits = bitStream.getNextNBitsAsInteger(9);
 
-        assertEquals("100000000", actualNbits);
+        assertEquals(BitUtil.bits2Int("100000000"), actualNbits);
     }
 
     @Test
     void getAll16Bits() {
-        String actualNbits = bitStream.getNBits(16);
+        int actualNbits = bitStream.getNextNBitsAsInteger(16);
 
-        assertEquals("1111111100000000", actualNbits);
+        assertEquals(BitUtil.bits2Int("1111111100000000"), actualNbits);
     }
 
     @Test
     void getTooManyBits() {
-        assertThrows(IndexOutOfBoundsException.class, () -> bitStream.getNBits(17));
+        assertThrows(IndexOutOfBoundsException.class, () -> bitStream.getNextNBitsAsInteger(17));
     }
 
     @Test
     void getIllegalAmountBits() {
-        assertThrows(IllegalArgumentException.class, () -> bitStream.getNBits(0));
+        assertThrows(IllegalArgumentException.class, () -> bitStream.getNextNBitsAsInteger(0));
     }
 
     @Test
@@ -66,7 +69,7 @@ class BitStreamTest {
 
     @Test
     void hasNNextAfterRemovingElements() {
-        bitStream.getNBits(4);
+        bitStream.getNextNBitsAsInteger(4);
 
         // We expect it to no longer have 16 bits:
         Assertions.assertFalse(bitStream.hasNNext(16));

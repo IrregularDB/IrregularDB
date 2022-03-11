@@ -95,7 +95,7 @@ public class BitBufferNew extends BitBuffer {
     }
 
     @Override
-    protected void handledUnfinishedByte() {
+    protected void handleUnfinishedByte() {
         while (this.bitsLeftInCurrentByte() != 0) {
             if (finishWithOnes) {
                 writeTrueBit();

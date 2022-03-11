@@ -1,9 +1,7 @@
 package compression.utility.BitBuffer;
 
 import compression.utility.BitStream.BitStreamNew;
-import jdk.jshell.spi.ExecutionControl;
 import compression.utility.BitStream.BitStream;
-import compression.utility.BitStream.BitStreamOld;
 
 import java.nio.ByteBuffer;
 
@@ -21,7 +19,7 @@ public abstract class BitBuffer {
     // Public non-abstract methods:
     public final ByteBuffer getFinishedByteBuffer() {
         if (bitsLeftInCurrentByte() != 0) { // We have an unfinished byte
-            handledUnfinishedByte();
+            handleUnfinishedByte();
         }
         if (this.getByteBuffer().hasRemaining()) { // We have allocated more bytes than needed
             shortenBufferToSizeN(this.getByteBuffer().position());
@@ -38,7 +36,7 @@ public abstract class BitBuffer {
 
     abstract protected void setByteBuffer(ByteBuffer byteBuffer);
 
-    abstract protected void handledUnfinishedByte();
+    abstract protected void handleUnfinishedByte();
 
     protected final void extendBufferWithNMoreBytes(int n) {
         ByteBuffer extendedBuffer = ByteBuffer.allocate(this.getByteBuffer().capacity() + n);

@@ -72,7 +72,7 @@ public class BitBufferOld extends BitBuffer {
     }
 
     @Override
-    protected void handledUnfinishedByte() {
+    protected void handleUnfinishedByte() {
         while (currByte.length() < Byte.SIZE) {
             currByte.append(valueUsedToFinishBitBuffer);
         }

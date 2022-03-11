@@ -63,6 +63,7 @@ class BitBufferNewTest {
         // We then expect it to have only 01 in the buffer, which is the filled out with 1's after it giving
         // 0111 1111 (which is equivalent to 127)
         ByteBuffer byteBuffer = bitBuffer.getFinishedByteBuffer();
+        Assertions.assertEquals(0b01111111, byteBuffer.get(0));
         Assertions.assertEquals(127, byteBuffer.get(0));
     }
 

@@ -12,12 +12,14 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class BucketEncodingTest {
 
+    BucketEncoding bucketEncoding = new BucketEncoding();
+
     String removeSpace(String string) {
         return string.replace(" ", "");
     }
 
     BitStream getBitStreamForReadings(List<Integer> readings) {
-        BitBuffer encoding = BucketEncoding.encode(readings);
+        BitBuffer encoding = bucketEncoding.encode(readings);
         return encoding.getBitStream();
     }
 
@@ -147,7 +149,7 @@ class BucketEncodingTest {
 
         List<Integer> readings = List.of(i1);
 
-        assertThrows(IllegalArgumentException.class, () -> BucketEncoding.encode(readings));
+        assertThrows(IllegalArgumentException.class, () -> bucketEncoding.encode(readings));
     }
 
     @Test

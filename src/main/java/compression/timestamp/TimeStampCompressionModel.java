@@ -1,8 +1,11 @@
 package compression.timestamp;
 
 import compression.BaseModel;
+import compression.encoding.BucketEncoding;
 
 public abstract class TimeStampCompressionModel extends BaseModel {
+
+    protected BucketEncoding bucketEncoding = new BucketEncoding();
 
     public TimeStampCompressionModel(Float errorBound, Integer lengthBound) {
         super(errorBound, lengthBound);

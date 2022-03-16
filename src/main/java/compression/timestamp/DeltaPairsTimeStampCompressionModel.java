@@ -11,7 +11,7 @@ import java.util.List;
 public class DeltaPairsTimeStampCompressionModel extends TimeStampCompressionModel {
 
     private Long prevTimeStamp;
-    List<Integer> deltaTimes;
+    private List<Integer> deltaTimes;
 
     public DeltaPairsTimeStampCompressionModel() {
         super(null, null);
@@ -40,7 +40,7 @@ public class DeltaPairsTimeStampCompressionModel extends TimeStampCompressionMod
 
     @Override
     protected ByteBuffer createByteBuffer() {
-        BitBuffer encode = BucketEncoding.encode(this.deltaTimes);
+        BitBuffer encode = bucketEncoding.encode(this.deltaTimes);
         return encode.getFinishedByteBuffer();
     }
 

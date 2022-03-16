@@ -4,5 +4,6 @@ public enum TimeStampCompressionModelType {
     REGULAR,
     BASEDELTA,
     DELTAPAIRS,
-    RECOMPUTESI
+    RECOMPUTESI,
+    DELTADELTA
 }

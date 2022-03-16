@@ -23,27 +23,27 @@ public class BucketEncoding {
     /**
      * @param readings we only support positive numbers
      */
-    public static BitBuffer encode(List<Integer> readings, boolean handleSignedValues) {
+    public BitBuffer encode(List<Integer> readings) {
         // We finish the byte with 1's as we can then in the decoding detect end of stream
         BitBuffer bitBuffer = new BitBufferNew(true);
         Integer previousReading = null;
         for (Integer reading : readings) {
-            encodeReading(bitBuffer, reading, previousReading, handleSignedValues);
+            encodeReading(bitBuffer, reading, previousReading);
             previousReading = reading;
         }
 
         return bitBuffer;
     }
 
-    private static void encodeReading(BitBuffer bitBuffer, Integer reading, Integer prevReading, boolean handleSignedValues) {
+    private void encodeReading(BitBuffer bitBuffer, Integer reading, Integer prevReading) {
         if (reading.equals(prevReading)) {
             writeControlBitsToBuffer(SAME_VALUE_ENCODING, bitBuffer);
         } else {
-            encodeNumber(reading, bitBuffer, handleSignedValues);
+            encodeNumber(reading, bitBuffer);
         }
     }
 
-    private static void encodeNumber(int reading, BitBuffer bitBuffer, boolean handleSignedValues) {
+    protected void encodeNumber(int reading, BitBuffer bitBuffer) {
         boolean negativeNumber = reading < 0;
         if (negativeNumber) {
             

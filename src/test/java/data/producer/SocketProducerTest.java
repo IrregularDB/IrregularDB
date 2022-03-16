@@ -1,5 +1,6 @@
 package data.producer;
 
+import config.ConfigProperties;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import records.DataPoint;
@@ -46,7 +47,7 @@ class SocketProducerTest {
 
 
         List<TimeSeriesReading> testData = getNTestDataForTag("key1", 10);
-        SocketProducer socketProducer = new SocketProducer(testData, "localhost", 4672);
+        SocketProducer socketProducer = new SocketProducer(testData, "localhost", ConfigProperties.INSTANCE.getSocketDataReceiverSpawnerPort());
         socketProducer.connectAndSendData();
 
         try {
@@ -74,7 +75,7 @@ class SocketProducerTest {
         List<TimeSeriesReading> testData2 = getNTestDataForTag("key2", 5);
         List<TimeSeriesReading> testData3 = getNTestDataForTag("key1", 5);
         List<TimeSeriesReading> allTestData = Stream.concat(Stream.concat(testData1.stream(), testData2.stream()), testData3.stream()).toList();
-        SocketProducer socketProducer = new SocketProducer(allTestData, "localhost", 4672);
+        SocketProducer socketProducer = new SocketProducer(allTestData, "localhost", ConfigProperties.INSTANCE.getSocketDataReceiverSpawnerPort());
         socketProducer.connectAndSendData();
 
         try {

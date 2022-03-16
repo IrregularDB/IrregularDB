@@ -1,6 +1,5 @@
 package storage;
 
-import compression.utility.BitUtil;
 import config.ConfigProperties;
 import records.Segment;
 

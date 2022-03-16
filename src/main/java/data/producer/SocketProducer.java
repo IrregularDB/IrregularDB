@@ -1,6 +1,8 @@
 package data.producer;
 
+import records.DataPoint;
 import records.TimeSeriesReading;
+import sources.SocketDataReceiver;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -24,20 +26,33 @@ public class SocketProducer {
         try {
             Socket socket = new Socket(serverIp, serverPort);
             this.dataOutputStream = new DataOutputStream(socket.getOutputStream());
+            String lastTag = null;
             for (TimeSeriesReading timeSeriesReading : timeSeriesReadings) {
-                writeTimeSeriesReadingToSocket(timeSeriesReading);
+                if (!timeSeriesReading.tag().equals(lastTag)) {
+                    lastTag = timeSeriesReading.tag();
+                    writeFullTimeSeriesReadingToSocket(timeSeriesReading);
+                } else {
+                    writeOnlyDataPointToSocket(timeSeriesReading.dataPoint());
+                }
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    private void writeTimeSeriesReadingToSocket(TimeSeriesReading timeSeriesReading) throws IOException {
-        dataOutputStream.writeLong(timeSeriesReading.dataPoint().timestamp());
-        dataOutputStream.writeFloat(timeSeriesReading.dataPoint().value());
-
-        byte[] timeSeriesTagAsBytes = timeSeriesReading.tag().getBytes(StandardCharsets.UTF_8);
+    private void writeFullTimeSeriesReadingToSocket(TimeSeriesReading reading) throws IOException {
+        dataOutputStream.write(SocketDataReceiver.INDICATES_NEW_TAG);
+        byte[] timeSeriesTagAsBytes = reading.tag().getBytes(StandardCharsets.UTF_8);
         dataOutputStream.writeInt(timeSeriesTagAsBytes.length);
         dataOutputStream.write(timeSeriesTagAsBytes);
+
+        dataOutputStream.writeLong(reading.dataPoint().timestamp());
+        dataOutputStream.writeFloat(reading.dataPoint().value());
+    }
+
+    private void writeOnlyDataPointToSocket(DataPoint dataPoint) throws IOException {
+        dataOutputStream.write(SocketDataReceiver.INDICATES_NO_NEW_TAG);
+        dataOutputStream.writeLong(dataPoint.timestamp());
+        dataOutputStream.writeFloat(dataPoint.value());
     }
 }

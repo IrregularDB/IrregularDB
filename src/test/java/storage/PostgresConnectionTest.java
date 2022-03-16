@@ -1,6 +1,5 @@
 package storage;
 
-import compression.utility.BitUtil;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import records.Segment;

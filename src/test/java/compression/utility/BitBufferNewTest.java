@@ -63,8 +63,18 @@ class BitBufferNewTest {
         // We then expect it to have only 01 in the buffer, which is the filled out with 1's after it giving
         // 0111 1111 (which is equivalent to 127)
         ByteBuffer byteBuffer = bitBuffer.getFinishedByteBuffer();
-        Assertions.assertEquals(0b01111111, byteBuffer.get(0));
+        Assertions.assertEquals((byte)0b01111111, byteBuffer.get(0));
         Assertions.assertEquals(127, byteBuffer.get(0));
+    }
+
+    @Test
+    void writeIntUsingNBitsWithOneFilledInteger(){
+        int integerToWrite = BitUtil.bits2Int(removeSpace("1100 1001"));
+        bitBuffer.writeIntUsingNBits(integerToWrite, 4);
+
+        ByteBuffer finishedByteBuffer = bitBuffer.getFinishedByteBuffer();
+
+        Assertions.assertEquals((byte)0b10011111, finishedByteBuffer.get(0));
     }
 
     @Test

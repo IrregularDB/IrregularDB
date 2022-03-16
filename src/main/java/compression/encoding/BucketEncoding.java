@@ -43,9 +43,12 @@ public class BucketEncoding {
         }
     }
 
-    private static void encodeNumber(Integer reading, BitBuffer bitBuffer, boolean handleSignedValues) {
-        boolean isNumberNegative = reading < 0;
-        
+    private static void encodeNumber(int reading, BitBuffer bitBuffer, boolean handleSignedValues) {
+        boolean negativeNumber = reading < 0;
+        if (negativeNumber) {
+            
+        }
+
         int amtSignificantBits = Integer.SIZE - Integer.numberOfLeadingZeros(reading);
 
         if (amtSignificantBits <= BUCKET_1_BIT_SIZE) {

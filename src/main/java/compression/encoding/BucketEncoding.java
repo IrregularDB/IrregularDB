@@ -10,14 +10,14 @@ import java.util.List;
 
 public class BucketEncoding {
 
-    protected static final byte SAME_VALUE_ENCODING = 0b00;
-    protected static final byte BUCKET_1_CONTROL_BITS = 0b01;
-    protected static final byte BUCKET_2_CONTROL_BITS = 0b10;
-    protected static final byte BUCKET_3_CONTROL_BITS = 0b11;
+    private static final byte SAME_VALUE_ENCODING = 0b00;
+    private static final byte BUCKET_1_CONTROL_BITS = 0b01;
+    private static final byte BUCKET_2_CONTROL_BITS = 0b10;
+    private static final byte BUCKET_3_CONTROL_BITS = 0b11;
 
-    protected static final int BUCKET_1_BIT_SIZE = 9;
-    protected static final int BUCKET_2_BIT_SIZE = 16;
-    protected static final int BUCKET_3_BIT_SIZE = 31;
+    private static final int BUCKET_1_BIT_SIZE = 9;
+    private static final int BUCKET_2_BIT_SIZE = 16;
+    private static final int BUCKET_3_BIT_SIZE = 31;
     protected static final int AMT_CONTROL_BITS = 2;
     protected final BitBuffer bitBuffer;
 
@@ -73,7 +73,7 @@ public class BucketEncoding {
     public static List<Integer> decode(BitStream bitStream) {
         ArrayList<Integer> integers = new ArrayList<>();
 
-        int lastInteger = -1;
+        int lastInteger = Integer.MIN_VALUE;
 
         while (bitStream.hasNNext(AMT_CONTROL_BITS)) {
             lastInteger = decodeInteger(lastInteger, bitStream);
@@ -90,7 +90,7 @@ public class BucketEncoding {
         byte controlBits = (byte) bitStream.getNextNBitsAsInteger(AMT_CONTROL_BITS);
 
         if (SAME_VALUE_ENCODING == controlBits) {
-            if (lastInteger == -1) {
+            if (lastInteger == Integer.MIN_VALUE) {
                 throw new IllegalStateException("BucketEncoding:decode: \"Error - first value cannot have control bit '00'\"");
             }
             return lastInteger;

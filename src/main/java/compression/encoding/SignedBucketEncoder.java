@@ -21,10 +21,13 @@ public class SignedBucketEncoder extends BucketEncoding{
 
     @Override
     protected void encodeNumber(int reading) {
+        if (reading == Integer.MIN_VALUE) {
+            throw new IllegalArgumentException("Integer.MIN_VALUE not allowed for signed bucked encoding");
+        }
+            super.encodeNumber(-reading);
         boolean negativeNumber = reading < 0;
         if (negativeNumber) {
             bitBuffer.writeIntUsingNBits(NEGATIVE_SIGNED_BIT, 1);
-            super.encodeNumber(-reading);
         } else {
             bitBuffer.writeIntUsingNBits(POSITIVE_SIGNED_BIT, 1);
             super.encodeNumber(reading);

@@ -1,5 +1,6 @@
 package compression.timestamp;
 
+import compression.encoding.SignedBucketEncoder;
 import records.DataPoint;
 
 import java.nio.ByteBuffer;
@@ -9,12 +10,14 @@ import java.util.List;
 
 public class DeltaDeltaTimeStampCompression extends TimeStampCompressionModel{
 
+    private final SignedBucketEncoder signedBucketEncoder;
     private List<Integer> deltaDeltaTimeStamps;
     private Long previousValue = null;
     private Integer previousDelta;
 
     public DeltaDeltaTimeStampCompression(Float errorBound, Integer lengthBound) {
         super(errorBound, lengthBound);
+        signedBucketEncoder = new SignedBucketEncoder();
         resetModel();
     }
 
@@ -54,7 +57,7 @@ public class DeltaDeltaTimeStampCompression extends TimeStampCompressionModel{
 
     @Override
     protected ByteBuffer createByteBuffer() {
-        return null;
+        return signedBucketEncoder.encode(this.deltaDeltaTimeStamps).getFinishedByteBuffer();
     }
 
     @Override

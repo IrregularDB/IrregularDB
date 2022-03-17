@@ -2,6 +2,7 @@ package compression;
 
 import compression.encoding.BucketEncoding;
 import compression.encoding.GorillaValueEncoding;
+import compression.encoding.SignedBucketEncoder;
 import compression.timestamp.TimeStampCompressionModelType;
 import compression.utility.BitStream.BitStream;
 import compression.utility.BitStream.BitStreamNew;
@@ -48,22 +49,6 @@ public class BlobDecompressor {
         return timeStamps;
     }
 
-    private static List<Long> decompressDeltaPairs(ByteBuffer timeStampBlob, long startTime) {
-        BitStream bitStream = new BitStreamNew(timeStampBlob);
-        BucketEncoding bucketEncoding = new BucketEncoding();
-        List<Integer> deltaTimes = bucketEncoding.decode(bitStream);
-
-        List<Long> timeStamps = new ArrayList<>();
-        timeStamps.add(startTime);
-
-        long prevValue = startTime;
-        for (Integer delta : deltaTimes) {
-            prevValue += delta;
-            timeStamps.add(prevValue);
-        }
-        return timeStamps;
-    }
-
     private static List<Long> decompressBaseDelta(ByteBuffer timeStampBlob, Long startTime) {
         LinkedList<Integer> deltaTimes = new LinkedList<>();
         deltaTimes.add(0); // Used to represent startTime
@@ -76,6 +61,50 @@ public class BlobDecompressor {
         return deltaTimes.stream()
                 .map(delta -> startTime + delta)
                 .collect(Collectors.toList());
+    }
+
+    private static List<Long> decompressDeltaPairs(ByteBuffer timeStampBlob, long startTime) {
+        BitStream bitStream = new BitStreamNew(timeStampBlob);
+        List<Integer> deltaTimes = BucketEncoding.decode(bitStream);
+
+        List<Long> timestamps = new ArrayList<>();
+        timestamps.add(startTime);
+
+        long prevValue = startTime;
+        for (Integer delta : deltaTimes) {
+            prevValue += delta;
+            timestamps.add(prevValue);
+        }
+        return timestamps;
+    }
+
+    private static List<Long> decompressDeltaDelta(ByteBuffer timestampBlob, long startTime){
+        BitStream bitStream = new BitStreamNew(timestampBlob);
+        SignedBucketEncoder signedBucketEncoder = new SignedBucketEncoder();
+        List<Integer> deltaDeltaTimes = signedBucketEncoder.decodeSigned(bitStream);
+
+        List<Long> originalTimestamps = new ArrayList<>();
+
+        // First value in deltaDelta encoding is a delta value from start time
+        Integer previousDelta = deltaDeltaTimes.get(0);
+        long previousTimestamp = startTime + previousDelta;
+
+        // Add start time
+        originalTimestamps.add(startTime);
+
+        // Add second time stamp as delta from start time and remove it
+        originalTimestamps.add(startTime + previousDelta);
+        deltaDeltaTimes.remove(0);
+
+        for (Integer deltaDelta : deltaDeltaTimes){
+            Long currentTimeStamp = previousTimestamp + deltaDelta + previousDelta;
+            originalTimestamps.add(currentTimeStamp);
+
+            previousDelta += deltaDelta;
+            previousTimestamp = currentTimeStamp;
+        }
+
+        return originalTimestamps;
     }
 
     private static List<Long> decompressRecomputeSI(ByteBuffer timeStampBlob) {

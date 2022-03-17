@@ -32,7 +32,6 @@ public class BlobDecompressor {
             case REGULAR -> decompressRegular(timeStampBlob, startTime, endTime);
             case DELTAPAIRS -> decompressDeltaPairs(timeStampBlob, startTime);
             case BASEDELTA -> decompressBaseDelta(timeStampBlob, startTime);
-            case RECOMPUTESI -> decompressRecomputeSI(timeStampBlob);
             case DELTADELTA -> decompressDeltaDelta(timeStampBlob, startTime);
             default -> throw new IllegalArgumentException("No decompression method has been implemented for the given Time Stamp Model Type");
         };
@@ -84,11 +83,11 @@ public class BlobDecompressor {
         SignedBucketEncoder signedBucketEncoder = new SignedBucketEncoder();
         List<Integer> deltaDeltaTimes = signedBucketEncoder.decodeSigned(bitStream);
 
-        List<Long> originalTimestamps = new ArrayList<>();
-
         // First value in deltaDelta encoding is a delta value from start time
         Integer previousDelta = deltaDeltaTimes.get(0);
         long previousTimestamp = startTime + previousDelta;
+
+        List<Long> originalTimestamps = new ArrayList<>();
 
         // Add start time
         originalTimestamps.add(startTime);
@@ -98,18 +97,13 @@ public class BlobDecompressor {
         deltaDeltaTimes.remove(0);
 
         for (Integer deltaDelta : deltaDeltaTimes){
-            Long currentTimeStamp = previousTimestamp + deltaDelta + previousDelta;
-            originalTimestamps.add(currentTimeStamp);
-
+            previousTimestamp += previousDelta + deltaDelta;
             previousDelta += deltaDelta;
-            previousTimestamp = currentTimeStamp;
+
+            originalTimestamps.add(previousTimestamp);
         }
 
         return originalTimestamps;
-    }
-
-    private static List<Long> decompressRecomputeSI(ByteBuffer timeStampBlob) {
-        throw new RuntimeException("Not implemented");
     }
 
     static List<DataPoint> createDataPointsByDecompressingValues(ValueCompressionModelType valueModelType, ByteBuffer valueBlob, List<Long> timeStamps) {

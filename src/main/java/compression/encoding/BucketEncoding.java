@@ -10,44 +10,45 @@ import java.util.List;
 
 public class BucketEncoding {
 
-    private static final byte SAME_VALUE_ENCODING = 0b00;
-    private static final byte BUCKET_1_CONTROL_BITS = 0b01;
-    private static final byte BUCKET_2_CONTROL_BITS = 0b10;
-    private static final byte BUCKET_3_CONTROL_BITS = 0b11;
+    protected static final byte SAME_VALUE_ENCODING = 0b00;
+    protected static final byte BUCKET_1_CONTROL_BITS = 0b01;
+    protected static final byte BUCKET_2_CONTROL_BITS = 0b10;
+    protected static final byte BUCKET_3_CONTROL_BITS = 0b11;
 
-    private static final int BUCKET_1_BIT_SIZE = 9;
-    private static final int BUCKET_2_BIT_SIZE = 16;
-    private static final int BUCKET_3_BIT_SIZE = 31;
-    private static final int AMT_CONTROL_BITS = 2;
+    protected static final int BUCKET_1_BIT_SIZE = 9;
+    protected static final int BUCKET_2_BIT_SIZE = 16;
+    protected static final int BUCKET_3_BIT_SIZE = 31;
+    protected static final int AMT_CONTROL_BITS = 2;
+    protected final BitBuffer bitBuffer;
+
+
+    public BucketEncoding(){
+        bitBuffer = new BitBufferNew(true);
+    }
 
     /**
      * @param readings we only support positive numbers
      */
     public BitBuffer encode(List<Integer> readings) {
         // We finish the byte with 1's as we can then in the decoding detect end of stream
-        BitBuffer bitBuffer = new BitBufferNew(true);
         Integer previousReading = null;
         for (Integer reading : readings) {
-            encodeReading(bitBuffer, reading, previousReading);
+            encodeReading(reading, previousReading);
             previousReading = reading;
         }
 
         return bitBuffer;
     }
 
-    private void encodeReading(BitBuffer bitBuffer, Integer reading, Integer prevReading) {
+    private void encodeReading(Integer reading, Integer prevReading) {
         if (reading.equals(prevReading)) {
             writeControlBitsToBuffer(SAME_VALUE_ENCODING, bitBuffer);
         } else {
-            encodeNumber(reading, bitBuffer);
+            encodeNumber(reading);
         }
     }
 
-    protected void encodeNumber(int reading, BitBuffer bitBuffer) {
-        boolean negativeNumber = reading < 0;
-        if (negativeNumber) {
-            
-        }
+    protected void encodeNumber(int reading) {
 
         int amtSignificantBits = Integer.SIZE - Integer.numberOfLeadingZeros(reading);
 
@@ -72,32 +73,39 @@ public class BucketEncoding {
     public static List<Integer> decode(BitStream bitStream) {
         ArrayList<Integer> integers = new ArrayList<>();
 
-        byte controlBits;
         int lastInteger = -1;
 
         while (bitStream.hasNNext(AMT_CONTROL_BITS)) {
-            controlBits = (byte) bitStream.getNextNBitsAsInteger(AMT_CONTROL_BITS);
+            lastInteger = decodeInteger(lastInteger, bitStream);
 
-            if (SAME_VALUE_ENCODING == controlBits) {
-                if (lastInteger == -1) {
-                    throw new IllegalStateException("BucketEncoding:decode: \"Error - first value cannot have control bit '00'\"");
-                }
-                integers.add(lastInteger);
-            } else {
-                int amtBitsInBucket = controlBitsToLength(controlBits);
-                if (bitStream.hasNNext(amtBitsInBucket)) {
-                    lastInteger = bitStream.getNextNBitsAsInteger(amtBitsInBucket);
-                    integers.add(lastInteger);
-                } else {
-                    //this indicates end of stream, and remaining bits of stream are without significance
-                    break;
-                }
+            if (lastInteger == Integer.MIN_VALUE){
+                //this indicates end of stream, and remaining bits of stream are without significance
+                break;
             }
         }
         return integers;
     }
 
-    private static int controlBitsToLength(byte controlBits) {
+    protected static Integer decodeInteger(int lastInteger, BitStream bitStream){
+        byte controlBits = (byte) bitStream.getNextNBitsAsInteger(AMT_CONTROL_BITS);
+
+        if (SAME_VALUE_ENCODING == controlBits) {
+            if (lastInteger == -1) {
+                throw new IllegalStateException("BucketEncoding:decode: \"Error - first value cannot have control bit '00'\"");
+            }
+            return lastInteger;
+        } else {
+            int amtBitsInBucket = controlBitsToLength(controlBits);
+            if (bitStream.hasNNext(amtBitsInBucket)) {
+                return bitStream.getNextNBitsAsInteger(amtBitsInBucket);
+            } else {
+                //this indicates end of stream, and remaining bits of stream are without significance
+                return Integer.MIN_VALUE;
+            }
+        }
+    }
+
+    protected static int controlBitsToLength(byte controlBits) {
         switch (controlBits) {
             case BUCKET_1_CONTROL_BITS -> {
                 return BUCKET_1_BIT_SIZE;

@@ -50,7 +50,8 @@ public class BlobDecompressor {
 
     private static List<Long> decompressDeltaPairs(ByteBuffer timeStampBlob, long startTime) {
         BitStream bitStream = new BitStreamNew(timeStampBlob);
-        List<Integer> deltaTimes = BucketEncoding.decode(bitStream);
+        BucketEncoding bucketEncoding = new BucketEncoding();
+        List<Integer> deltaTimes = bucketEncoding.decode(bitStream);
 
         List<Long> timeStamps = new ArrayList<>();
         timeStamps.add(startTime);

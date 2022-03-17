@@ -121,7 +121,7 @@ public class RegularTimeStampCompressionModel extends TimeStampCompressionModel 
         int actualDifference = calculateDifference(timeStamp, nextExpectedTimestamp);
         double percentageError = actualDifference / ((double)si);
         // TODO: add something where you use the actual error-bound for now we enforce error-bound = 0;
-        return percentageError < errorBound;
+        return percentageError <= errorBound;
     }
 
     private static int calculateDifference(long timestamp1, long timeStamp2) {

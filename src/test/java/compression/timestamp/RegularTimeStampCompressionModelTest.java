@@ -145,4 +145,31 @@ class RegularTimeStampCompressionModelTest {
         regularModel.resetAndAppendAll(createDataPointsFromTimeStamps(timeStamps));
         Assertions.assertThrows(IllegalArgumentException.class, () ->  regularModel.reduceToSizeN(5));
     }
+
+
+    @Test
+    void sunshineErrorBoundTest(){
+
+        float errorBound = 0.1F;
+
+        List<Long> integers = List.of(100L, 205L, 300L);
+
+        this.regularModel = new RegularTimeStampCompressionModel(errorBound);
+        boolean success = regularModel.resetAndAppendAll(createDataPointsFromTimeStamps(integers));
+
+        Assertions.assertTrue(success);
+    }
+
+    @Test
+    void sunshineErrorTest(){
+
+        float errorBound = 0.1F;
+
+        List<Long> integers = List.of(100L, 205L, 310L, 390L);
+
+        this.regularModel = new RegularTimeStampCompressionModel(errorBound);
+        boolean success = regularModel.resetAndAppendAll(createDataPointsFromTimeStamps(integers));
+
+        Assertions.assertFalse(success);
+    }
 }

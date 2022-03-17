@@ -26,13 +26,14 @@ public class BlobDecompressor {
         return createDataPointsByDecompressingValues(valueModelType, valueBlob, timeStamps);
     }
 
-    static List<Long> decompressTimeStamps(TimeStampCompressionModelType timeStampModelType, ByteBuffer timeStampBlob,
+    public static List<Long> decompressTimeStamps(TimeStampCompressionModelType timeStampModelType, ByteBuffer timeStampBlob,
                                             Long startTime, Long endTime) {
         return switch (timeStampModelType) {
             case REGULAR -> decompressRegular(timeStampBlob, startTime, endTime);
             case DELTAPAIRS -> decompressDeltaPairs(timeStampBlob, startTime);
             case BASEDELTA -> decompressBaseDelta(timeStampBlob, startTime);
             case RECOMPUTESI -> decompressRecomputeSI(timeStampBlob);
+            case DELTADELTA -> decompressDeltaDelta(timeStampBlob, startTime);
             default -> throw new IllegalArgumentException("No decompression method has been implemented for the given Time Stamp Model Type");
         };
     }

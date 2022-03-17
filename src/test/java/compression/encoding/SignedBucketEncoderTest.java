@@ -84,6 +84,7 @@ class SignedBucketEncoderTest {
         expectedBitPatterns.add(new BitPattern("0 01 0 0110 0100"));
         expectedBitPatterns.add(new BitPattern("0 10 0000 0011 1110 1000"));
         expectedBitPatterns.add(new BitPattern("0 10 0010 0111 0001 0000"));
+        //The blow two rows represent a single value, the split is nessesarry as this uses 34 bits.
         expectedBitPatterns.add(new BitPattern("0 11"));
         expectedBitPatterns.add(new BitPattern("000 0000 0000 0001 1000 0110 1010 0000"));
 

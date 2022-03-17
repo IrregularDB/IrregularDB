@@ -24,7 +24,7 @@ class DeltaDeltaTimeStampCompressionTest {
 
     @BeforeEach
     void beforeEach(){
-        deltaDeltaTimeStampCompression = new DeltaDeltaTimeStampCompression(null, null);
+        deltaDeltaTimeStampCompression = new DeltaDeltaTimeStampCompression();
     }
 
     @Test

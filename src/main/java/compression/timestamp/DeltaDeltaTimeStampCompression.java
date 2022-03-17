@@ -15,8 +15,8 @@ public class DeltaDeltaTimeStampCompression extends TimeStampCompressionModel{
     private Long previousValue = null;
     private Integer previousDelta;
 
-    public DeltaDeltaTimeStampCompression(Float errorBound, Integer lengthBound) {
-        super(errorBound, lengthBound);
+    public DeltaDeltaTimeStampCompression() {
+        super(null, null);
         signedBucketEncoder = new SignedBucketEncoder();
         resetModel();
     }

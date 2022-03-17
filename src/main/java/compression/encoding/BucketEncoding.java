@@ -73,7 +73,7 @@ public class BucketEncoding {
     public static List<Integer> decode(BitStream bitStream) {
         ArrayList<Integer> integers = new ArrayList<>();
 
-        int lastInteger = Integer.MIN_VALUE;
+        int lastInteger = -1;
 
         while (bitStream.hasNNext(AMT_CONTROL_BITS)) {
             lastInteger = decodeInteger(lastInteger, bitStream);
@@ -82,6 +82,7 @@ public class BucketEncoding {
                 //this indicates end of stream, and remaining bits of stream are without significance
                 break;
             }
+            integers.add(lastInteger);
         }
         return integers;
     }

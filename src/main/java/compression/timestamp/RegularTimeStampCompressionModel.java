@@ -5,15 +5,18 @@ import records.DataPoint;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.OptionalDouble;
 
 public class RegularTimeStampCompressionModel extends TimeStampCompressionModel {
     private int si;
     private boolean earlierAppendFailed;
     private List<Long> timeStamps;
+    private long nextExpectedTimestamp;
 
     // TODO: update this constructor when adding error-bound
-    public RegularTimeStampCompressionModel(double errorBound) {
-        super(null, null);
+    public RegularTimeStampCompressionModel(float errorBound) {
+        super(errorBound, null);
         this.resetModel();
     }
 
@@ -22,6 +25,7 @@ public class RegularTimeStampCompressionModel extends TimeStampCompressionModel 
         this.si = -1; // We use -1 to represent that no SI has been calculated yet.
         this.earlierAppendFailed = false;
         this.timeStamps = new ArrayList<>();
+        this.nextExpectedTimestamp = Long.MIN_VALUE;
     }
 
     @Override
@@ -47,12 +51,19 @@ public class RegularTimeStampCompressionModel extends TimeStampCompressionModel 
                 handleFirstTwoDataPoints(timeStamp);
                 withinErrorBound = true;
             } else {
-                withinErrorBound = isTimeStampWithinErrorBound(timeStamp);
+                withinErrorBound = isTimeStampWithinErrorBound(timeStamp, nextExpectedTimestamp, this.si, getErrorBound());
                 if (withinErrorBound) {
                     timeStamps.add(timeStamp);
                 } else {
-                    earlierAppendFailed = true;
+                    Optional<Integer> newSI = attemptNewSI(timeStamp);
+                    if (newSI.isPresent()) {
+                        this.si = newSI.get();
+                        withinErrorBound = true;
+                    } else {
+                        earlierAppendFailed = true;
+                    }
                 }
+                this.nextExpectedTimestamp += si;
             }
             return withinErrorBound;
         } catch (SiConversionException e) {
@@ -65,25 +76,61 @@ public class RegularTimeStampCompressionModel extends TimeStampCompressionModel 
         if (timeStamps.size() == 0) {
             timeStamps.add(timeStamp);
         } else {
-            si = calculateSI(timeStamps.get(timeStamps.size() - 1), timeStamp);
+            si = calculateDifference(timeStamps.get(timeStamps.size() - 1), timeStamp);
             timeStamps.add(timeStamp);
+            nextExpectedTimestamp = timeStamp + si;
         }
     }
 
+    private Optional<Integer> attemptNewSI(long timestamp) {
+        ArrayList<Long> allTimestamps = new ArrayList<>(this.timeStamps);
+        allTimestamps.add(timestamp);
 
-    private boolean isTimeStampWithinErrorBound(long timeStamp) {
-        int actualSi = calculateSI(timeStamps.get(timeStamps.size() - 1), timeStamp);
+        ArrayList<Long> deltas = new ArrayList<>();
+        for (int i = 1; i < allTimestamps.size(); i++) {
+            deltas.add(allTimestamps.get(i) - allTimestamps.get(i -1));
+        }
+
+        OptionalDouble average = deltas.stream()
+                .mapToLong(item -> item)
+                .average();
+
+        int candidateSI = (int) Math.round(average.getAsDouble());
+        if (doesCandidateSIFit(allTimestamps, candidateSI)) {
+            return Optional.of(candidateSI);
+        } else {
+            return Optional.empty();
+        }
+    }
+
+    private boolean doesCandidateSIFit(ArrayList<Long> allTimestamps, int candidateSI) {
+        long startTime = allTimestamps.get(0);
+        long localNextExpectedTimestamp = startTime + candidateSI;
+
+        for (int i = 1; i < allTimestamps.size(); i++) {
+            boolean timeStampWithinErrorBound = isTimeStampWithinErrorBound(allTimestamps.get(i), localNextExpectedTimestamp, candidateSI, getErrorBound());
+            if (!timeStampWithinErrorBound) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+
+    private static boolean isTimeStampWithinErrorBound(long timeStamp, long nextExpectedTimestamp,int si, float errorBound) {
+        int actualDifference = calculateDifference(timeStamp, nextExpectedTimestamp);
+        double percentageError = actualDifference / ((double)si);
         // TODO: add something where you use the actual error-bound for now we enforce error-bound = 0;
-        return si == actualSi;
+        return percentageError < errorBound;
     }
 
-    private int calculateSI(long previousTimeStamp, long timeStamp) {
-        long si = timeStamp - previousTimeStamp;
+    private static int calculateDifference(long timestamp1, long timeStamp2) {
+        long difference = Math.abs(timeStamp2 - timestamp1);
 
-        if (si < Integer.MIN_VALUE || si > Integer.MAX_VALUE) {
-            throw new SiConversionException(si  + " the difference in timestamps cannot be cast to int without changing its value.");
+        if (difference < Integer.MIN_VALUE || difference > Integer.MAX_VALUE) {
+            throw new SiConversionException(difference  + " the difference in timestamps cannot be cast to int without changing its value.");
         }
-        return (int) si;
+        return (int) difference;
     }
 
     @Override

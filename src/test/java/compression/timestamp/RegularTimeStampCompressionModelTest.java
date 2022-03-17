@@ -33,7 +33,7 @@ class RegularTimeStampCompressionModelTest {
 
     @BeforeEach
     void init() {
-        double errorBound = 0;
+        float errorBound = 0;
         regularModel = new RegularTimeStampCompressionModel(errorBound);
     }
 

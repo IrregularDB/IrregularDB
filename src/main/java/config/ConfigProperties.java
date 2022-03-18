@@ -62,8 +62,8 @@ public class ConfigProperties extends Properties{
                 .collect(Collectors.toList());
     }
 
-    public double getTimeStampModelErrorBound(){
-        return Double.parseDouble(getProperty("model.timestamp.errorbound"));
+    public float getTimeStampModelErrorBound(){
+        return Float.parseFloat(getProperty("model.timestamp.errorbound"));
     }
 
     public float getValueModelErrorBound(){

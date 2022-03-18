@@ -22,7 +22,7 @@ public class CompressionModelFactory {
 
     public static List<TimeStampCompressionModel> getTimestampCompressionModels(){
         List<TimeStampCompressionModelType> timeStampModelTypes =  config.getTimeStampModels();
-        final double timestampModelErrorBound = config.getTimeStampModelErrorBound();
+        final float timestampModelErrorBound = config.getTimeStampModelErrorBound();
 
         return getCompressionModels(timeStampModelTypes, (modelType) -> getTimestampCompressionModelByType(modelType, timestampModelErrorBound));
     }
@@ -57,7 +57,7 @@ public class CompressionModelFactory {
     }
 
 
-    private static TimeStampCompressionModel getTimestampCompressionModelByType(TimeStampCompressionModelType timeStampCompressionModelType, double errorBound) {
+    private static TimeStampCompressionModel getTimestampCompressionModelByType(TimeStampCompressionModelType timeStampCompressionModelType, float errorBound) {
         switch (timeStampCompressionModelType){
             case REGULAR:
                 return new RegularTimeStampCompressionModel(errorBound);

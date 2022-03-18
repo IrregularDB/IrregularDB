@@ -17,14 +17,12 @@ public class SwingValueCompressionModel extends ValueCompressionModel {
     private boolean earlierAppendFailed;
     private LinearFunction upperBound;
     private LinearFunction lowerBound;
-    private final float errorBoundAsDecimal;
 
     public SwingValueCompressionModel(float errorBound) {
         super(errorBound, null);
         // The error bound provided is in percentage, so we first transform it to a decimal number
         // NOTE: due to the same reason as in ModelarDB we here choose to divide with 100.1 instead of 100
         // as we otherwise would allow data points slightly above the error bound.
-        this.errorBoundAsDecimal = super.getErrorBound() / 100.1F;
         this.resetModel();
     }
 
@@ -46,7 +44,7 @@ public class SwingValueCompressionModel extends ValueCompressionModel {
             throw new IllegalArgumentException("You tried to append to the SWING-model after it failed an earlier append");
         }
         boolean withinErrorBound;
-        float allowedDerivation = Math.abs(dataPoint.value() * errorBoundAsDecimal);
+        float allowedDerivation = Math.abs(dataPoint.value() * getErrorBound());
 
         if (this.getLength() < 2) {
             handleFirstTwoDataPoints(dataPoint, allowedDerivation);  // LINE 2-4: makes a recording and upper+lower bound

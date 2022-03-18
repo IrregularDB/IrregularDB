@@ -11,6 +11,10 @@ public abstract class BaseModel {
     private final Integer lengthBound;
     private ByteBuffer byteBuffer; //Used as a cache for a blob
 
+    /**
+     * @param errorBound this value must be given as a percentage e.g. 10 not 0.1 for 10%;
+     * @param lengthBound
+     */
     public BaseModel(Float errorBound, Integer lengthBound) {
         // This small hack is added because floating point imprecision can lead to error-bound
         // of zero not really working.
@@ -18,7 +22,7 @@ public abstract class BaseModel {
             if (errorBound == 0) {
                 this.errorBound = 0.00001F;
             } else {
-                this.errorBound = errorBound;
+                this.errorBound = errorBound / 100;
             }
         } else {
             this.errorBound = null;

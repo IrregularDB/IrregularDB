@@ -150,7 +150,7 @@ class RegularTimeStampCompressionModelTest {
     @Test
     void sunshineErrorBoundTest(){
 
-        float errorBound = 0.1F;
+        float errorBound = 0.1F * 100;
 
         List<Long> integers = List.of(100L, 205L, 300L);
 
@@ -163,7 +163,7 @@ class RegularTimeStampCompressionModelTest {
     @Test
     void sunshineErrorTest(){
 
-        float errorBound = 0.1F;
+        float errorBound = 0.1F * 100; // errorbound is given as a percentage
 
         List<Long> integers = List.of(100L, 205L, 310L, 390L);
 

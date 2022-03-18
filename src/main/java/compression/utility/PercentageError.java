@@ -14,7 +14,7 @@ public class PercentageError {
         }
 
         float difference = approximation - realValue;
-        return Math.abs(difference / realValue) * 100;
+        return Math.abs(difference / realValue);
     }
 
 

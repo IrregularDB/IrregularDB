@@ -5,7 +5,6 @@ import records.DataPoint;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.OptionalDouble;
 
 public class RegularTimeStampCompressionModel extends TimeStampCompressionModel {
@@ -35,7 +34,6 @@ public class RegularTimeStampCompressionModel extends TimeStampCompressionModel 
         return timeStamps.size();
     }
 
-
     @Override
     protected boolean appendDataPoint(DataPoint dataPoint) {
         return appendTimeStamp(dataPoint.timestamp());
@@ -54,6 +52,8 @@ public class RegularTimeStampCompressionModel extends TimeStampCompressionModel 
                 withinErrorBound = true;
             } else {
                 withinErrorBound = handleOtherDataPoints(timeStamp);
+                if (withinErrorBound)
+                    this.nextExpectedTimestamp += si;
             }
             return withinErrorBound;
         } catch (SiConversionException e) {
@@ -63,30 +63,32 @@ public class RegularTimeStampCompressionModel extends TimeStampCompressionModel 
     }
 
     private boolean handleOtherDataPoints(long timeStamp) {
-        boolean withinErrorBound;
-        withinErrorBound = isTimeStampWithinErrorBound(timeStamp, nextExpectedTimestamp, this.si, getErrorBound());
+        boolean withinErrorBound = isTimeStampWithinErrorBound(timeStamp, nextExpectedTimestamp, this.si, getErrorBound());
         if (withinErrorBound) {
             timeStamps.add(timeStamp);
             deltas.add((int)(timeStamp - timeStamps.get(timeStamps.size() - 2)));
         } else {
             withinErrorBound = handleDataPointNotWithinErrorBound(timeStamp);
         }
-        this.nextExpectedTimestamp += si;
         return withinErrorBound;
     }
 
-    private boolean handleDataPointNotWithinErrorBound(long timeStamp) {
-        boolean withinErrorBound = false;
-        Optional<Integer> newSI = calculateAndTestNewSI(timeStamp);
-        if (newSI.isPresent()) {
-            this.si = newSI.get();
-            withinErrorBound = true;
-            this.timeStamps.add(timeStamp);
-            this.deltas.add((int) (timeStamp - timeStamps.get(timeStamps.size() - 2)));
+    private boolean handleDataPointNotWithinErrorBound(long timestamp) {
+        boolean fitNewSI = false;
+        ArrayList<Long> allTimestamps = new ArrayList<>(this.timeStamps);
+        allTimestamps.add(timestamp);
+
+        Integer candidateSI = calculateCandidateSI(allTimestamps);
+
+        if (doesCandidateSIFit(allTimestamps, candidateSI)) {
+            this.si = candidateSI;
+            fitNewSI = true;
+            this.timeStamps.add(timestamp);
+            this.deltas.add((int) (timestamp - timeStamps.get(timeStamps.size() - 2)));
         } else {
             earlierAppendFailed = true;
         }
-        return withinErrorBound;
+        return fitNewSI;
     }
 
     private void handleFirstTwoDataPoints(long timeStamp) {
@@ -100,23 +102,15 @@ public class RegularTimeStampCompressionModel extends TimeStampCompressionModel 
         }
     }
 
-    private Optional<Integer> calculateAndTestNewSI(long timestamp) {
-        ArrayList<Long> allTimestamps = new ArrayList<>(this.timeStamps);
-        allTimestamps.add(timestamp);
-
+    private Integer calculateCandidateSI(List<Long> timestamps) {
         ArrayList<Integer> deltas = new ArrayList<>(this.deltas);
-        deltas.add((int) (timestamp - allTimestamps.get(allTimestamps.size() - 2)));
+        deltas.add((int) (timestamps.get(timestamps.size() - 1) - timestamps.get(timestamps.size() - 2)));
 
         OptionalDouble average = deltas.stream()
                 .mapToLong(item -> item)
                 .average();
 
-        int candidateSI = (int) Math.round(average.getAsDouble());
-        if (doesCandidateSIFit(allTimestamps, candidateSI)) {
-            return Optional.of(candidateSI);
-        } else {
-            return Optional.empty();
-        }
+        return (int) Math.round(average.orElseThrow());
     }
 
     private boolean doesCandidateSIFit(ArrayList<Long> allTimestamps, int candidateSI) {
@@ -132,11 +126,9 @@ public class RegularTimeStampCompressionModel extends TimeStampCompressionModel 
         return true;
     }
 
-
-    private static boolean isTimeStampWithinErrorBound(long timeStamp, long nextExpectedTimestamp,int si, float errorBound) {
+    private static boolean isTimeStampWithinErrorBound(long timeStamp, long nextExpectedTimestamp, int si, float errorBound) {
         int actualDifference = calculateDifference(timeStamp, nextExpectedTimestamp);
         double percentageError = actualDifference / ((double)si);
-        // TODO: add something where you use the actual error-bound for now we enforce error-bound = 0;
         return percentageError <= errorBound;
     }
 

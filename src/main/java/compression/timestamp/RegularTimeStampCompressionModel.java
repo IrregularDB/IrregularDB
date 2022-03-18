@@ -13,6 +13,7 @@ public class RegularTimeStampCompressionModel extends TimeStampCompressionModel 
     private boolean earlierAppendFailed;
     private List<Long> timeStamps;
     private long nextExpectedTimestamp;
+    private List<Integer> deltas;
 
     // TODO: update this constructor when adding error-bound
     public RegularTimeStampCompressionModel(float errorBound) {
@@ -26,6 +27,7 @@ public class RegularTimeStampCompressionModel extends TimeStampCompressionModel 
         this.earlierAppendFailed = false;
         this.timeStamps = new ArrayList<>();
         this.nextExpectedTimestamp = Long.MIN_VALUE;
+        this.deltas = new ArrayList<>();
     }
 
     @Override
@@ -45,31 +47,46 @@ public class RegularTimeStampCompressionModel extends TimeStampCompressionModel 
                 throw new IllegalArgumentException("You tried to append to a model that had failed an earlier append");
             }
             boolean withinErrorBound;
-            // Special handling for first two time stamps:
 
+            // Special handling for first two time stamps:
             if (this.getLength() < 2) {
                 handleFirstTwoDataPoints(timeStamp);
                 withinErrorBound = true;
             } else {
-                withinErrorBound = isTimeStampWithinErrorBound(timeStamp, nextExpectedTimestamp, this.si, getErrorBound());
-                if (withinErrorBound) {
-                    timeStamps.add(timeStamp);
-                } else {
-                    Optional<Integer> newSI = attemptNewSI(timeStamp);
-                    if (newSI.isPresent()) {
-                        this.si = newSI.get();
-                        withinErrorBound = true;
-                    } else {
-                        earlierAppendFailed = true;
-                    }
-                }
-                this.nextExpectedTimestamp += si;
+                withinErrorBound = handleOtherDataPoints(timeStamp);
             }
             return withinErrorBound;
         } catch (SiConversionException e) {
             earlierAppendFailed = true;
             return false;
         }
+    }
+
+    private boolean handleOtherDataPoints(long timeStamp) {
+        boolean withinErrorBound;
+        withinErrorBound = isTimeStampWithinErrorBound(timeStamp, nextExpectedTimestamp, this.si, getErrorBound());
+        if (withinErrorBound) {
+            timeStamps.add(timeStamp);
+            deltas.add((int)(timeStamp - timeStamps.get(timeStamps.size() - 2)));
+        } else {
+            withinErrorBound = handleDataPointNotWithinErrorBound(timeStamp);
+        }
+        this.nextExpectedTimestamp += si;
+        return withinErrorBound;
+    }
+
+    private boolean handleDataPointNotWithinErrorBound(long timeStamp) {
+        boolean withinErrorBound = false;
+        Optional<Integer> newSI = calculateAndTestNewSI(timeStamp);
+        if (newSI.isPresent()) {
+            this.si = newSI.get();
+            withinErrorBound = true;
+            this.timeStamps.add(timeStamp);
+            this.deltas.add((int) (timeStamp - timeStamps.get(timeStamps.size() - 2)));
+        } else {
+            earlierAppendFailed = true;
+        }
+        return withinErrorBound;
     }
 
     private void handleFirstTwoDataPoints(long timeStamp) {
@@ -79,17 +96,16 @@ public class RegularTimeStampCompressionModel extends TimeStampCompressionModel 
             si = calculateDifference(timeStamps.get(timeStamps.size() - 1), timeStamp);
             timeStamps.add(timeStamp);
             nextExpectedTimestamp = timeStamp + si;
+            deltas.add(si);
         }
     }
 
-    private Optional<Integer> attemptNewSI(long timestamp) {
+    private Optional<Integer> calculateAndTestNewSI(long timestamp) {
         ArrayList<Long> allTimestamps = new ArrayList<>(this.timeStamps);
         allTimestamps.add(timestamp);
 
-        ArrayList<Long> deltas = new ArrayList<>();
-        for (int i = 1; i < allTimestamps.size(); i++) {
-            deltas.add(allTimestamps.get(i) - allTimestamps.get(i -1));
-        }
+        ArrayList<Integer> deltas = new ArrayList<>(this.deltas);
+        deltas.add((int) (timestamp - allTimestamps.get(allTimestamps.size() - 2)));
 
         OptionalDouble average = deltas.stream()
                 .mapToLong(item -> item)

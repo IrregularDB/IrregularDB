@@ -65,8 +65,6 @@ public class CompressionModelFactory {
                 //TODO
             case DELTAPAIRS:
                 //TODO
-            case RECOMPUTESI:
-                //TODO
             default:
                 throw new RuntimeException("Type not defined");
         }

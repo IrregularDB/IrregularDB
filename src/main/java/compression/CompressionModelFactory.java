@@ -1,12 +1,7 @@
 package compression;
 
-import compression.timestamp.RegularTimeStampCompressionModel;
-import compression.timestamp.TimeStampCompressionModel;
-import compression.timestamp.TimeStampCompressionModelType;
-import compression.value.PMCMeanValueCompressionModel;
-import compression.value.SwingValueCompressionModel;
-import compression.value.ValueCompressionModel;
-import compression.value.ValueCompressionModelType;
+import compression.timestamp.*;
+import compression.value.*;
 import config.ConfigProperties;
 
 import java.util.ArrayList;
@@ -48,7 +43,7 @@ public class CompressionModelFactory {
             case PMC_MEAN:
                 return new PMCMeanValueCompressionModel(errorBound);
             case GORILLA:
-                //TODO
+                return new GorillaValueCompressionModel(ConfigProperties.INSTANCE.getValueModelLengthBound());
             case SWING:
                 return new SwingValueCompressionModel(errorBound);
             default:
@@ -61,10 +56,10 @@ public class CompressionModelFactory {
         switch (timeStampCompressionModelType){
             case REGULAR:
                 return new RegularTimeStampCompressionModel(errorBound);
-            case BASEDELTA:
-                //TODO
             case DELTAPAIRS:
-                //TODO
+                return new DeltaPairsTimeStampCompressionModel();
+            case DELTADELTA:
+                return new DeltaDeltaTimeStampCompression();
             default:
                 throw new RuntimeException("Type not defined");
         }

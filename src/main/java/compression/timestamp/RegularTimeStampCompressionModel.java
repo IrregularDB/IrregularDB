@@ -12,7 +12,6 @@ public class RegularTimeStampCompressionModel extends TimeStampCompressionModel 
     private boolean earlierAppendFailed;
     private List<Long> timeStamps;
     private long nextExpectedTimestamp;
-    private List<Integer> deltas;
 
     // TODO: update this constructor when adding error-bound
     public RegularTimeStampCompressionModel(float errorBound) {
@@ -26,7 +25,6 @@ public class RegularTimeStampCompressionModel extends TimeStampCompressionModel 
         this.earlierAppendFailed = false;
         this.timeStamps = new ArrayList<>();
         this.nextExpectedTimestamp = Long.MIN_VALUE;
-        this.deltas = new ArrayList<>();
     }
 
     @Override
@@ -66,7 +64,6 @@ public class RegularTimeStampCompressionModel extends TimeStampCompressionModel 
         boolean withinErrorBound = isTimeStampWithinErrorBound(timeStamp, nextExpectedTimestamp, this.si, getErrorBound());
         if (withinErrorBound) {
             timeStamps.add(timeStamp);
-            deltas.add((int)(timeStamp - timeStamps.get(timeStamps.size() - 2)));
         } else {
             withinErrorBound = handleDataPointNotWithinErrorBound(timeStamp);
         }
@@ -84,7 +81,6 @@ public class RegularTimeStampCompressionModel extends TimeStampCompressionModel 
             this.si = candidateSI;
             fitNewSI = true;
             this.timeStamps.add(timestamp);
-            this.deltas.add((int) (timestamp - timeStamps.get(timeStamps.size() - 2)));
         } else {
             earlierAppendFailed = true;
         }
@@ -98,19 +94,12 @@ public class RegularTimeStampCompressionModel extends TimeStampCompressionModel 
             si = calculateDifference(timeStamps.get(timeStamps.size() - 1), timeStamp);
             timeStamps.add(timeStamp);
             nextExpectedTimestamp = timeStamp + si;
-            deltas.add(si);
         }
     }
 
     private Integer calculateCandidateSI(List<Long> timestamps) {
-        ArrayList<Integer> deltas = new ArrayList<>(this.deltas);
-        deltas.add((int) (timestamps.get(timestamps.size() - 1) - timestamps.get(timestamps.size() - 2)));
-
-        OptionalDouble average = deltas.stream()
-                .mapToLong(item -> item)
-                .average();
-
-        return (int) Math.round(average.orElseThrow());
+        long duration = timestamps.get(timestamps.size() - 1) - timestamps.get(0);
+        return Math.round((float)duration / (timestamps.size() - 1));
     }
 
     private boolean doesCandidateSIFit(ArrayList<Long> allTimestamps, int candidateSI) {

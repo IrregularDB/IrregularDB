@@ -22,7 +22,6 @@ public class TimeSeries {
     }
 
     public void processDataPoint(DataPoint dataPoint) {
-
         if (!segmentGenerator.acceptDataPoint(dataPoint)) {
             Segment segment = segmentGenerator.constructSegmentFromBuffer();
             sendToDb(segment);

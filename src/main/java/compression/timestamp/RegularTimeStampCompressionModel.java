@@ -1,5 +1,6 @@
 package compression.timestamp;
 
+import compression.encoding.SingleIntEncoding;
 import records.DataPoint;
 
 import java.nio.ByteBuffer;
@@ -135,7 +136,7 @@ public class RegularTimeStampCompressionModel extends TimeStampCompressionModel 
         if (this.getLength() < 2) {
             throw new UnsupportedOperationException("Regular time stamp model needs at least two data points before you are able to get the time stamp blob");
         }
-        return ByteBuffer.allocate(4).putInt(si);
+        return SingleIntEncoding.encode(si);
     }
 
     @Override

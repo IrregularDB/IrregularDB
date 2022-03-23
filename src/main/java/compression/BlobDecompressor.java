@@ -3,6 +3,7 @@ package compression;
 import compression.encoding.BucketEncoding;
 import compression.encoding.GorillaValueEncoding;
 import compression.encoding.SignedBucketEncoder;
+import compression.encoding.SingleIntEncoding;
 import compression.timestamp.TimeStampCompressionModelType;
 import compression.utility.BitStream.BitStream;
 import compression.utility.BitStream.BitStreamNew;
@@ -38,7 +39,7 @@ public class BlobDecompressor {
     }
 
     private static List<Long> decompressRegular(ByteBuffer timeStampBlob, Long startTime, Long endTime) {
-        int si = timeStampBlob.getInt(0);
+        int si = SingleIntEncoding.decode(timeStampBlob);
         long currTime = startTime;
 
         List<Long> timeStamps = new ArrayList<>();

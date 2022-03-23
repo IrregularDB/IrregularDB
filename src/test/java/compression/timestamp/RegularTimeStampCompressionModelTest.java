@@ -1,5 +1,6 @@
 package compression.timestamp;
 
+import compression.encoding.SingleIntEncoding;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -113,7 +114,7 @@ class RegularTimeStampCompressionModelTest {
         regularModel.resetAndAppendAll(createDataPointsFromTimeStamps(timeStamps));
 
         ByteBuffer timeStampBlob = regularModel.getBlobRepresentation();
-        int si = timeStampBlob.getInt(0);
+        int si = SingleIntEncoding.decode(timeStampBlob);
         assertEquals(100, si);
     }
 
@@ -127,8 +128,8 @@ class RegularTimeStampCompressionModelTest {
     void getAmountOfBytesUsed() {
         List<Long> timeStamps = Arrays.asList(0L, 100L);
         regularModel.resetAndAppendAll(createDataPointsFromTimeStamps(timeStamps));
-        // We expect that we use 4 bytes
-        Assertions.assertEquals(4, regularModel.getAmountBytesUsed());
+        // We expect that we use 1 byte to store 100
+        Assertions.assertEquals(1, regularModel.getAmountBytesUsed());
     }
 
     @Test

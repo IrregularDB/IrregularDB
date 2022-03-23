@@ -21,7 +21,7 @@ class SingleIntEncodingTest {
 
         BitPattern expectedBitPattern = new BitPattern("0000 0001 1111 1111");
 
-        assertEquals(expectedBitPattern.getIntRepresentation(), bitStream.getNextNBitsAsInteger(expectedBitPattern.getAmtBits()));
+        assertEquals(expectedBitPattern.getIntRepresentation(), bitStream.getNextNBitsAsInteger(bitStream.getSize()));
     }
 
     @Test

@@ -9,16 +9,15 @@ import java.nio.ByteBuffer;
 import java.util.List;
 
 public class SingleIntEncoding {
-    public static ByteBuffer encode(Integer integer) {
+    public static ByteBuffer encode(int integer) {
         BitBuffer bitBuffer = new BitBufferNew(true);
 
         int amtLeadingZeroes = Integer.numberOfLeadingZeros(integer);
         int length = Integer.SIZE - amtLeadingZeroes;
 
         int amtZeroesToPad = amtLeadingZeroes % Byte.SIZE;
-        for (int i = 0; i < amtZeroesToPad; i++) {
-            bitBuffer.writeFalseBit();
-        }
+        bitBuffer.writeIntUsingNBits(0, amtZeroesToPad);
+
         bitBuffer.writeIntUsingNBits(integer, length);
         return bitBuffer.getFinishedByteBuffer();
     }

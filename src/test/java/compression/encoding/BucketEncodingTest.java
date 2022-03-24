@@ -24,6 +24,13 @@ class BucketEncodingTest {
     }
 
     @Test
+    void getMaxValues() {
+        List<Integer> expectedValues = List.of(0, 511, 65535);
+
+        assertEquals(expectedValues, bucketEncoding.getAbsoluteMaxValuesOfResizeableBuckets());
+    }
+
+    @Test
     void encodeValuesInBucket1() {
         // Bucket 1 uses the CB 01 and have a max size of 9
         int i1 = BitUtil.bits2Int(removeSpace("          1"));

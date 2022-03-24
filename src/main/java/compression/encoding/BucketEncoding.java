@@ -26,6 +26,18 @@ public class BucketEncoding {
         bitBuffer = new BitBufferNew(true);
     }
 
+    public List<Integer> getAbsoluteMaxValuesOfResizeableBuckets() {
+        List<Integer> maxValues = new ArrayList<>();
+
+        // We have bucket_0, which is same value
+        maxValues.add(0);
+
+        maxValues.add((int)((long) Math.pow(2, BUCKET_1_BIT_SIZE)) - 1);
+        maxValues.add((int)((long) Math.pow(2, BUCKET_2_BIT_SIZE)) - 1);
+        // we don't add the last bucket as it is the largest bucket
+        return maxValues;
+    }
+
     /**
      * @param readings we only support positive numbers
      */

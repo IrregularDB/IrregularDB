@@ -6,7 +6,6 @@ import records.DataPoint;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.OptionalDouble;
 
 public class RegularTimeStampCompressionModel extends TimeStampCompressionModel {
     private int si;
@@ -61,17 +60,30 @@ public class RegularTimeStampCompressionModel extends TimeStampCompressionModel 
         }
     }
 
+    private void handleFirstTwoDataPoints(long timeStamp) {
+        if (timeStamps.size() == 0) {
+            timeStamps.add(timeStamp);
+        } else {
+            si = calculateDifference(timeStamps.get(timeStamps.size() - 1), timeStamp);
+            timeStamps.add(timeStamp);
+            nextExpectedTimestamp = timeStamp + si;
+        }
+    }
+
     private boolean handleOtherDataPoints(long timeStamp) {
         boolean withinErrorBound = isTimeStampWithinErrorBound(timeStamp, nextExpectedTimestamp, this.si, getErrorBound());
         if (withinErrorBound) {
             timeStamps.add(timeStamp);
         } else {
-            withinErrorBound = handleDataPointNotWithinErrorBound(timeStamp);
+            withinErrorBound = testNewCandidateSI(timeStamp);
+            if (withinErrorBound) {
+                timeStamps.add(timeStamp);
+            }
         }
         return withinErrorBound;
     }
 
-    private boolean handleDataPointNotWithinErrorBound(long timestamp) {
+    private boolean testNewCandidateSI(long timestamp) {
         boolean fitNewSI = false;
         ArrayList<Long> allTimestamps = new ArrayList<>(this.timeStamps);
         allTimestamps.add(timestamp);
@@ -81,21 +93,10 @@ public class RegularTimeStampCompressionModel extends TimeStampCompressionModel 
         if (doesCandidateSIFit(allTimestamps, candidateSI)) {
             this.si = candidateSI;
             fitNewSI = true;
-            this.timeStamps.add(timestamp);
         } else {
             earlierAppendFailed = true;
         }
         return fitNewSI;
-    }
-
-    private void handleFirstTwoDataPoints(long timeStamp) {
-        if (timeStamps.size() == 0) {
-            timeStamps.add(timeStamp);
-        } else {
-            si = calculateDifference(timeStamps.get(timeStamps.size() - 1), timeStamp);
-            timeStamps.add(timeStamp);
-            nextExpectedTimestamp = timeStamp + si;
-        }
     }
 
     private Integer calculateCandidateSI(List<Long> timestamps) {
@@ -112,6 +113,7 @@ public class RegularTimeStampCompressionModel extends TimeStampCompressionModel 
             if (!timeStampWithinErrorBound) {
                 return false;
             }
+            localNextExpectedTimestamp += candidateSI;
         }
         return true;
     }

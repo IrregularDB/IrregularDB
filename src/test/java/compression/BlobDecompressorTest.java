@@ -1,8 +1,6 @@
 package compression;
 
-import compression.timestamp.BaseDeltaTimeStampCompressionModel;
-import compression.timestamp.DeltaPairsTimeStampCompressionModel;
-import compression.timestamp.TimeStampCompressionModelType;
+import compression.timestamp.*;
 import compression.value.GorillaValueCompressionModel;
 import compression.value.ValueCompressionModel;
 import compression.value.ValueCompressionModelType;
@@ -321,4 +319,34 @@ class BlobDecompressorTest {
             Assertions.assertEquals(expectedTimestamps.get(i), decompressedTimeStamps.get(i));
         }
     }
+
+    /**
+     * DeltaDelta timestamp compression
+     */
+
+    @Test
+    public void testDeltaDeltaTimeStampCompression(){
+        TimeStampCompressionModel deltaDeltaTimeStampCompression = new DeltaDeltaTimeStampCompression();
+
+        List<DataPoint> dataPoints = new ArrayList<>();
+        dataPoints.add(new DataPoint(0, 5.0F));
+        dataPoints.add(new DataPoint(100, 5.0F));
+        dataPoints.add(new DataPoint(2000, 5.0F));
+        dataPoints.add(new DataPoint(4000, 5.0F));
+        dataPoints.add(new DataPoint(6000, 5.0F));
+        dataPoints.add(new DataPoint(27000, 5.0F));
+        dataPoints.add(new DataPoint(Integer.MAX_VALUE, 5.0F));
+
+        dataPoints.forEach(dp -> deltaDeltaTimeStampCompression.append(dp));
+
+        var blobRepresentation = deltaDeltaTimeStampCompression.getBlobRepresentation();
+
+        var decodedTimestamps = BlobDecompressor.decompressTimeStamps(TimeStampCompressionModelType.DELTADELTA,
+                blobRepresentation, dataPoints.get(0).timestamp(), dataPoints.get(dataPoints.size() - 1).timestamp());
+
+        for (int i = 0; i < decodedTimestamps.size(); i++){
+            Assertions.assertEquals(dataPoints.get(i).timestamp(), decodedTimestamps.get(i));
+        }
+    }
+
 }

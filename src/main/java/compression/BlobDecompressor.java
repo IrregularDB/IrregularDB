@@ -7,7 +7,6 @@ import compression.encoding.SingleIntEncoding;
 import compression.timestamp.TimeStampCompressionModelType;
 import compression.utility.BitStream.BitStream;
 import compression.utility.BitStream.BitStreamNew;
-import compression.utility.BitStream.BitStreamOld;
 import compression.value.ValueCompressionModelType;
 import records.DataPoint;
 
@@ -34,6 +33,7 @@ public class BlobDecompressor {
             case DELTAPAIRS -> decompressDeltaPairs(timeStampBlob, startTime);
             case BASEDELTA -> decompressBaseDelta(timeStampBlob, startTime);
             case DELTADELTA -> decompressDeltaDelta(timeStampBlob, startTime);
+            case SIDIFF -> decompressSIDiff(timeStampBlob, startTime);
             default -> throw new IllegalArgumentException("No decompression method has been implemented for the given Time Stamp Model Type");
         };
     }
@@ -106,6 +106,26 @@ public class BlobDecompressor {
 
         return originalTimestamps;
     }
+
+    private static List<Long> decompressSIDiff(ByteBuffer timestampBlob, long startTime){
+        BitStream bitStream = new BitStreamNew(timestampBlob);
+        SignedBucketEncoder signedBucketEncoder = new SignedBucketEncoder();
+
+        List<Integer> decodedValues = signedBucketEncoder.decodeSigned(bitStream);
+
+        int si = decodedValues.get(0);
+        List<Long> timestamps = new ArrayList<>();
+        timestamps.add(startTime);
+
+        for (int i = 1; i < decodedValues.size(); i++) {
+            int difference = decodedValues.get(i);
+            long expectedTimestamp = startTime + (long) si * i;
+            timestamps.add(expectedTimestamp + difference);
+        }
+
+        return timestamps;
+    }
+
 
     static List<DataPoint> createDataPointsByDecompressingValues(ValueCompressionModelType valueModelType, ByteBuffer valueBlob, List<Long> timeStamps) {
         return switch (valueModelType) {

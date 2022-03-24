@@ -100,6 +100,11 @@ public abstract class BaseModel {
      *  by reducing the longest of the two down to the length of the other one
      */
     public final void reduceToSizeN(int n) {
+        if (n <= 0){
+            throw new IllegalArgumentException("n cannot be 0 or lower");
+        } else if (n > this.getLength()){
+            throw new IllegalArgumentException("n cannot bigger than amount of elements represented by model");
+        }
         this.byteBuffer = null;
         reduceToSize(n);
     }

@@ -46,12 +46,6 @@ public class BaseDeltaTimeStampCompressionModel extends TimeStampCompressionMode
 
     @Override
     protected void reduceToSize(int n) {
-        if (n <= 0){
-            throw new IllegalArgumentException("n cannot be 0 or lower");
-        } else if (n > this.deltaTimes.size()){
-            throw new IllegalArgumentException("n cannot bigger than list size");
-        }
-
         this.deltaTimes.subList(n, deltaTimes.size()).clear();
     }
 

@@ -48,10 +48,6 @@ public class GorillaValueCompressionModel extends ValueCompressionModel {
 
     @Override
     protected void reduceToSize(int n) {
-        int length = this.getLength();
-        if (length < n) {
-            throw new IllegalArgumentException("You tried to reduce this size of a model to something smaller than its current size");
-        }
         values.subList(n, this.getLength()).clear();
     }
 

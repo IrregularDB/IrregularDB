@@ -47,7 +47,7 @@ class DeltaDeltaTimeStampCompressionTest {
         int actualLength = deltaDeltaTimeStampCompression.getLength();
 
         Assertions.assertTrue(success);
-        Assertions.assertEquals(9, actualLength);
+        Assertions.assertEquals(10, actualLength);
     }
 
     @Test
@@ -63,10 +63,10 @@ class DeltaDeltaTimeStampCompressionTest {
     @Test
     public void testReduceSizeWithNumberOfTimeStamps(){
         dataPoints.forEach(dp -> deltaDeltaTimeStampCompression.append(dp));
-        deltaDeltaTimeStampCompression.reduceToSizeN(9);
-        int actualAmountOfTimeStamps = deltaDeltaTimeStampCompression.getLength();
+        int expectedAmountTimestamps = dataPoints.size();
+        deltaDeltaTimeStampCompression.reduceToSizeN(expectedAmountTimestamps);
 
-        assertEquals(9, actualAmountOfTimeStamps);
+        assertEquals(expectedAmountTimestamps, deltaDeltaTimeStampCompression.getLength());
     }
 
     @Test
@@ -80,21 +80,6 @@ class DeltaDeltaTimeStampCompressionTest {
         dataPoints.forEach(dp -> deltaDeltaTimeStampCompression.append(dp));
         assertThrows(IllegalArgumentException.class, () -> deltaDeltaTimeStampCompression.reduceToSizeN(20));
     }
-
-    @Test
-    public void testBlobRepresentation1(){
-        dataPoints.forEach(dp -> deltaDeltaTimeStampCompression.append(dp));
-
-        var blobRepresentation = deltaDeltaTimeStampCompression.getBlobRepresentation();
-
-        var decodedValues = BlobDecompressor.decompressTimeStamps(TimeStampCompressionModelType.DELTADELTA,
-                blobRepresentation, dataPoints.get(0).timestamp(), dataPoints.get(dataPoints.size() - 1).timestamp());
-
-        for (int i = 0; i < decodedValues.size(); i++){
-            Assertions.assertEquals(dataPoints.get(i).timestamp(), decodedValues.get(i));
-        }
-    }
-
 
     // Helper that creates random data points in increasing order
     private DataPoint createDataPoint(){

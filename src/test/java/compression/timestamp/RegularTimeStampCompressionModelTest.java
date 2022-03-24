@@ -13,8 +13,6 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-// TODO: add tests with error-bound different than ZERO for regular time stamp compression
-
 class RegularTimeStampCompressionModelTest {
     RegularTimeStampCompressionModel regularModel;
 
@@ -163,8 +161,7 @@ class RegularTimeStampCompressionModelTest {
 
     @Test
     void sunshineErrorTest(){
-
-        float errorBound = 0.1F * 100; // errorbound is given as a percentage
+        float errorBound = 0.10F * 100; // errorbound is given as a percentage i.e. 10% here
 
         List<Long> integers = List.of(100L, 205L, 310L, 390L);
 
@@ -172,5 +169,16 @@ class RegularTimeStampCompressionModelTest {
         boolean success = regularModel.resetAndAppendAll(createDataPointsFromTimeStamps(integers));
 
         Assertions.assertFalse(success);
+    }
+
+    @Test
+    void sunshineErrorTestWithHigherErrorBound(){
+        float errorBound = 0.2F * 100; //with a higher error-bound our candidate si = 97 should work
+        List<Long> integers = List.of(100L, 205L, 310L, 390L);
+
+        this.regularModel = new RegularTimeStampCompressionModel(errorBound);
+        boolean success = regularModel.resetAndAppendAll(createDataPointsFromTimeStamps(integers));
+
+        Assertions.assertTrue(success);
     }
 }

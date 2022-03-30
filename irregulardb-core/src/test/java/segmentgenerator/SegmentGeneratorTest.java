@@ -4,7 +4,9 @@ import compression.timestamp.RegularTimeStampCompressionModel;
 import compression.timestamp.TimeStampCompressionModelType;
 import compression.value.PMCMeanValueCompressionModel;
 import compression.value.ValueCompressionModelType;
+import config.ConfigProperties;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import records.DataPoint;
 import records.Segment;
@@ -14,6 +16,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 class SegmentGeneratorTest {
+    @BeforeAll
+    public static void setupConfig(){
+        ConfigProperties.isTest = true;
+    }
 
     @Test
     public void testSegmentGeneratorAcceptsPmcMeanDataPoints() {

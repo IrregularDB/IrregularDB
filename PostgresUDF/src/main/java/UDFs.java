@@ -1,5 +1,10 @@
+import compression.BlobDecompressor;
+import compression.timestamp.TimeStampCompressionModelType;
+import compression.utility.ModelTypeUtil;
+import compression.value.ValueCompressionModelType;
 import org.postgresql.pljava.annotation.Function;
-import records.Segment;
+import org.postgresql.pljava.annotation.SQLType;
+import records.DataPoint;
 
 import javax.sql.rowset.CachedRowSet;
 import java.nio.ByteBuffer;

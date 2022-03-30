@@ -32,10 +32,14 @@ public class SocketProducer {
                     lastTag = timeSeriesReading.getTag();
                     writeFullTimeSeriesReadingToSocket(timeSeriesReading);
                 } else {
-                    writeOnlyDataPointToSocket(timeSeriesReading.dataPoint());
+                    writeOnlyDataPointToSocket(timeSeriesReading.getDataPoint());
                 }
             }
+            Thread.sleep(100);
+            dataOutputStream.close();
         } catch (IOException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
             e.printStackTrace();
         }
     }
@@ -46,8 +50,8 @@ public class SocketProducer {
         dataOutputStream.writeInt(timeSeriesTagAsBytes.length);
         dataOutputStream.write(timeSeriesTagAsBytes);
 
-        dataOutputStream.writeLong(reading.dataPoint().timestamp());
-        dataOutputStream.writeFloat(reading.dataPoint().value());
+        dataOutputStream.writeLong(reading.getDataPoint().timestamp());
+        dataOutputStream.writeFloat(reading.getDataPoint().value());
     }
 
     private void writeOnlyDataPointToSocket(DataPoint dataPoint) throws IOException {

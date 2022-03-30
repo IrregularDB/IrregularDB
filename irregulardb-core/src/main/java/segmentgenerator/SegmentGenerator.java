@@ -1,6 +1,7 @@
 package segmentgenerator;
 
 import compression.CompressionModel;
+import records.FinalizeTimeSeriesReading;
 import records.Segment;
 import compression.timestamp.TimeStampCompressionModel;
 import compression.value.ValueCompressionModel;
@@ -27,6 +28,10 @@ public class SegmentGenerator {
     }
 
     public Segment constructSegmentFromBuffer() {
+        if (this.notYetEmitted.size() == 0) {
+            return null;
+        }
+
         CompressionModel bestCompressionModel = this.compressionModelManager.getBestCompressionModel();
 
         //find size of each model and reduce the largest down to the size of the smallest

@@ -1,6 +1,8 @@
 package scheduling;
 
+import config.ConfigProperties;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import records.DataPoint;
 import records.TimeSeriesReading;
@@ -13,6 +15,10 @@ import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 class WorkingSetTest {
+    @BeforeAll
+    public static void setupConfig(){
+        ConfigProperties.isTest = true;
+    }
 
     @Test
     public void testOfWorkingSet() throws InterruptedException {

@@ -1,8 +1,11 @@
 package sources;
 
+import config.ConfigProperties;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import records.DataPoint;
+import records.FinalizeTimeSeriesReading;
 import records.TimeSeriesReading;
 import scheduling.WorkingSet;
 import segmentgenerator.TimeSeriesFactory;
@@ -11,6 +14,10 @@ import storage.TestDatabaseConnectionFactory;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 class CSVDataReceiverTest {
+    @BeforeAll
+    public static void setupConfig(){
+        ConfigProperties.isTest = true;
+    }
 
     @Test
     public void csvReceiverTest(){
@@ -35,6 +42,15 @@ class CSVDataReceiverTest {
         Assertions.assertEquals(timeSeriesReadingExpected1, buffer.poll());
         Assertions.assertEquals(timeSeriesReadingExpected2, buffer.poll());
         // Hehe
+
+        TimeSeriesReading finalize1 = buffer.poll();
+        Assertions.assertTrue(finalize1 instanceof FinalizeTimeSeriesReading);
+        Assertions.assertEquals(timeSeriesReadingExpected1.getTag(), finalize1.getTag());
+
+        TimeSeriesReading finalize2 = buffer.poll();
+        Assertions.assertTrue(finalize2 instanceof FinalizeTimeSeriesReading);
+        Assertions.assertEquals(timeSeriesReadingExpected2.getTag(), finalize2.getTag());
+
         Assertions.assertNull(buffer.poll());
     }
 

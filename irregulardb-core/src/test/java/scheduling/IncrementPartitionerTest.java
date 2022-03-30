@@ -1,10 +1,16 @@
 package scheduling;
 
+import config.ConfigProperties;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class IncrementPartitionerTest {
+    @BeforeAll
+    public static void setupConfig(){
+        ConfigProperties.isTest = true;
+    }
 
     @Test
     void testIncrementPartitioningReturnsWorkingSetsCorrectly() {

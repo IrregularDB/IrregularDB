@@ -3,26 +3,16 @@ SET pljava.libjvm_location TO '/usr/lib/jvm/java-17-openjdk-amd64/lib/server/lib
 ALTER DATABASE postgres SET pljava.libjvm_location FROM CURRENT;
 
 SELECT sqlj.remove_jar(
-               'myjar', true);
-
+    'decompressudf', true);
 SELECT sqlj.install_jar(
-               'file:/home/simon/Development/IrregularDB/PostgresUDF/target/PostgresUDF-1.0-SNAPSHOT-jar-with-dependencies.jar', 'myjar', true);
+    'file:/home/simon/Development/IrregularDB/PostgresUDF/target/PostgresUDF-1.0-SNAPSHOT-jar-with-dependencies.jar', 'myjar', true
 );
-
-SELECT sqlj.install_jar(
-               'file:/home/simon/Development/IrregularDB/Compression/target/Compression-1.0-SNAPSHOT.jar', 'compressionJar', true);
+select sqlj.set_classpath(
+    'public', 'DecompressUDF'
 );
-
-
-select sqlj.set_classpath('public', 'myjar');
-
 select sqlj.get_classpath('public');
 
-select test(0);
-
-select hellos('some inpiut');
-
-
+DROP TYPE sqlDataPoint;
 CREATE TYPE sqlDataPoint AS(timeSeriesId integer, timestamp BigInt, value float);
 
 CREATE FUNCTION useComplexTest()
@@ -33,20 +23,24 @@ CREATE FUNCTION useComplexTest()
 CREATE FUNCTION useSetOfComplexTest(timeSeriesId int, startTime bigint, endTime int, valueTimestampModelType smallint,
                                     valueModelBlob bytea, timestampModelBlob bytea)
     RETURNS Setof sqlDataPoint
-    AS 'SetOfComplexTypeUDF.listComplexTest'
+    AS 'SegmentDecompressor.decompressSegment'
     IMMUTABLE LANGUAGE java;
 
-DROP TYPE sqlDataPoint;
 
-select (useComplexTest());
+--example query
+select (decompressSegment(segment)).* from segment
+    where time_series_id = 1
+;
 
-select hellos(colA), hellos(colA) from kenneth;
+-- example of using query as a view
+create view datapointview as
+    select (decompressSegment(segment)).*
+    from segment
+    where time_series_id = 1
+;
 
-select * from decompress();
-
-select c.* from (select useComplexTest() from kenneth) c;
-
-select * from useComplexTest();
-
-select useSetOfComplexTest(time_series_id, start_time, end_time, value_timestamp_model_type, value_model_blob, timestamp_model_blob) from segment where time_series_id = 1;
-
+-- example of selecting from view
+select * from datapointview dp
+    join timeseries ts
+        on dp.timeseriesid = ts.id
+;

@@ -39,12 +39,11 @@ class SocketProducerTest {
 
     @Test
     void connectAndSendData() {
-        int serverSocketPort = ConfigProperties.INSTANCE.getSocketDataReceiverSpawnerPort();
+        int serverSocketPort = ConfigProperties.getInstance().getSocketDataReceiverSpawnerPort();
         Queue<TimeSeriesReading> workingSetBuffer = new ConcurrentLinkedQueue<>();
         TestPartitioner testPartitioner = new TestPartitioner(workingSetBuffer);
         SocketDataReceiverSpawner socketDataReceiverSpawner = new SocketDataReceiverSpawner(testPartitioner, serverSocketPort);
         socketDataReceiverSpawner.spawn();
-
 
         List<TimeSeriesReading> testData = getNTestDataForTag("key1", 10);
         SocketProducer socketProducer = new SocketProducer(testData, "localhost", serverSocketPort);
@@ -65,12 +64,11 @@ class SocketProducerTest {
 
     @Test
     void connectAndSendDataSeveralTagsInOneStream() {
-        int serverSocketPort = ConfigProperties.INSTANCE.getSocketDataReceiverSpawnerPort() + 1;
+        int serverSocketPort = ConfigProperties.getInstance().getSocketDataReceiverSpawnerPort() + 1;
         Queue<TimeSeriesReading> workingSetBuffer = new ConcurrentLinkedQueue<>();
         TestPartitioner testPartitioner = new TestPartitioner(workingSetBuffer);
         SocketDataReceiverSpawner socketDataReceiverSpawner = new SocketDataReceiverSpawner(testPartitioner, serverSocketPort);
         socketDataReceiverSpawner.spawn();
-
 
         List<TimeSeriesReading> testData1 = getNTestDataForTag("key1", 5);
         List<TimeSeriesReading> testData2 = getNTestDataForTag("key2", 5);

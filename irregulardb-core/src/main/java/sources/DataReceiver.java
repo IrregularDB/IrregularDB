@@ -15,4 +15,10 @@ public abstract class DataReceiver {
     }
 
     public abstract void receiveData();
+
+    public void close(){
+        for (String tag : timeSeriesTagsEmitted) {
+            this.workingSet.accept(new FinalizeTimeSeriesReading(tag, null));
+        }
+    }
 }

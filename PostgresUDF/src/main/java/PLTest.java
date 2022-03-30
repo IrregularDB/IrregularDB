@@ -2,7 +2,6 @@ import org.postgresql.pljava.annotation.Function;
 
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 
 public class PLTest {
 

@@ -45,9 +45,9 @@ class WorkingSetTest {
         Assertions.assertEquals("key1", timeSeries1.getTimeSeriesTag());
         Assertions.assertEquals("key2", timeSeries2.getTimeSeriesTag());
 
-        Assertions.assertEquals(timeSeriesReading1.dataPoint(), timeSeries1.getReceivedDataPoints().get(0));
-        Assertions.assertEquals(timeSeriesReading3.dataPoint(), timeSeries1.getReceivedDataPoints().get(1));
-        Assertions.assertEquals(timeSeriesReading2.dataPoint(), timeSeries2.getReceivedDataPoints().get(0));
+        Assertions.assertEquals(timeSeriesReading1.getDataPoint(), timeSeries1.getReceivedDataPoints().get(0));
+        Assertions.assertEquals(timeSeriesReading3.getDataPoint(), timeSeries1.getReceivedDataPoints().get(1));
+        Assertions.assertEquals(timeSeriesReading2.getDataPoint(), timeSeries2.getReceivedDataPoints().get(0));
     }
 
 }

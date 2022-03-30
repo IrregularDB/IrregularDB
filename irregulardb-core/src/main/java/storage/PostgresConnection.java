@@ -7,7 +7,7 @@ import java.sql.*;
 
 public class PostgresConnection implements DatabaseConnection {
 
-    private static final String INSERT_SEGMENT_STATEMENT = "INSERT INTO Segment(time_series_id, start_time, end_time, value_model_type, value_model_blob, timestamp_model_type, timestamp_model_blob) VALUES (?,?,?,?,?,?,?)";
+    private static final String INSERT_SEGMENT_STATEMENT = "INSERT INTO Segment(time_series_id, start_time, end_time, value_timestamp_model_type, value_model_blob, timestamp_model_blob) VALUES (?,?,?,?,?,?)";
 
     private static final String INSERT_TIME_SERIES_ID = "INSERT INTO TimeSeries (tag) VALUES (?)";
     private static final String GET_TIME_SERIES_BY_TAG = "SELECT * FROM TimeSeries where tag = ?";
@@ -18,7 +18,7 @@ public class PostgresConnection implements DatabaseConnection {
         try {
             // Instantiate database connection
             // jdbc:postgresql://localhost/test?user=fred&password=secret
-            ConfigProperties configProperties = ConfigProperties.INSTANCE;
+            ConfigProperties configProperties = ConfigProperties.getInstance();
             this.connection = DriverManager.getConnection(configProperties.getJDBConnectionString());
         } catch (SQLException e) {
             throw new RuntimeException(e.getMessage());

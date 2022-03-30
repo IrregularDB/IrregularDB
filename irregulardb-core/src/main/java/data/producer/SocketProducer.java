@@ -28,8 +28,8 @@ public class SocketProducer {
             this.dataOutputStream = new DataOutputStream(socket.getOutputStream());
             String lastTag = null;
             for (TimeSeriesReading timeSeriesReading : timeSeriesReadings) {
-                if (!timeSeriesReading.tag().equals(lastTag)) {
-                    lastTag = timeSeriesReading.tag();
+                if (!timeSeriesReading.getTag().equals(lastTag)) {
+                    lastTag = timeSeriesReading.getTag();
                     writeFullTimeSeriesReadingToSocket(timeSeriesReading);
                 } else {
                     writeOnlyDataPointToSocket(timeSeriesReading.dataPoint());
@@ -42,7 +42,7 @@ public class SocketProducer {
 
     private void writeFullTimeSeriesReadingToSocket(TimeSeriesReading reading) throws IOException {
         dataOutputStream.write(SocketDataReceiver.INDICATES_NEW_TAG);
-        byte[] timeSeriesTagAsBytes = reading.tag().getBytes(StandardCharsets.UTF_8);
+        byte[] timeSeriesTagAsBytes = reading.getTag().getBytes(StandardCharsets.UTF_8);
         dataOutputStream.writeInt(timeSeriesTagAsBytes.length);
         dataOutputStream.write(timeSeriesTagAsBytes);
 

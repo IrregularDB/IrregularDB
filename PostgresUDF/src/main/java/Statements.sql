@@ -1,5 +1,5 @@
+--ONE TIME SETUP
 SET pljava.libjvm_location TO '/usr/lib/jvm/java-17-openjdk-amd64/lib/server/libjvm.so';
-
 ALTER DATABASE postgres SET pljava.libjvm_location FROM CURRENT;
 
 SELECT sqlj.remove_jar(
@@ -15,13 +15,8 @@ select sqlj.get_classpath('public');
 DROP TYPE sqlDataPoint;
 CREATE TYPE sqlDataPoint AS(timeSeriesId integer, timestamp BigInt, value float);
 
-CREATE FUNCTION useComplexTest()
-    RETURNS sqlDataPoint
-    AS 'UDFs.decompress'
-    IMMUTABLE LANGUAGE java;
-
-CREATE FUNCTION useSetOfComplexTest(timeSeriesId int, startTime bigint, endTime int, valueTimestampModelType smallint,
-                                    valueModelBlob bytea, timestampModelBlob bytea)
+DROP FUNCTION decompressSegment;
+CREATE FUNCTION decompressSegment(segment)
     RETURNS Setof sqlDataPoint
     AS 'SegmentDecompressor.decompressSegment'
     IMMUTABLE LANGUAGE java;

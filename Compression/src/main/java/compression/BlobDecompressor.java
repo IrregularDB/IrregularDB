@@ -31,6 +31,7 @@ public class BlobDecompressor {
         return switch (timeStampModelType) {
             case REGULAR -> decompressRegular(timeStampBlob, startTime, endTime);
             case DELTADELTA -> decompressDeltaDelta(timeStampBlob, startTime);
+            case SIDIFF -> decompressSIDiff(timeStampBlob, startTime);
             default -> throw new IllegalArgumentException("No decompression method has been implemented for the given Time Stamp Model Type");
         };
     }
@@ -73,6 +74,25 @@ public class BlobDecompressor {
         }
 
         return originalTimestamps;
+    }
+
+    private static List<Long> decompressSIDiff(ByteBuffer timestampBlob, long startTime){
+        List<Long> timestamps = new ArrayList<>();
+        timestamps.add(startTime);
+
+        BitStream bitStream = new BitStreamNew(timestampBlob);
+        SignedBucketEncoder signedBucketEncoder = new SignedBucketEncoder();
+        List<Integer> decodedValues = signedBucketEncoder.decodeSigned(bitStream);
+
+        int si = decodedValues.get(0);
+        long expectedTimestamp = startTime + si;
+        for (int i = 1; i < decodedValues.size(); i++) {
+            int difference = decodedValues.get(i);
+            timestamps.add(expectedTimestamp + difference);
+            expectedTimestamp += si;
+        }
+
+        return timestamps;
     }
 
     static List<DataPoint> createDataPointsByDecompressingValues(ValueCompressionModelType valueModelType, ByteBuffer valueBlob, List<Long> timeStamps) {

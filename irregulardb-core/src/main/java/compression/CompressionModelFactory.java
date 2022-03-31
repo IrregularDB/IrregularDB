@@ -58,10 +58,10 @@ public class CompressionModelFactory {
         switch (timeStampCompressionModelType){
             case REGULAR:
                 return new RegularTimeStampCompressionModel(errorBound);
-            case DELTAPAIRS:
-                return new DeltaPairsTimeStampCompressionModel();
             case DELTADELTA:
                 return new DeltaDeltaTimeStampCompression();
+            case SIDIFF:
+                return new SIDiffTimeStampCompressionModel(errorBound);
             default:
                 throw new RuntimeException("Type not defined");
         }

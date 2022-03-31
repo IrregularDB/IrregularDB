@@ -39,6 +39,20 @@ public class BucketEncoding {
         return bitBuffer;
     }
 
+    /**
+     * we don't add the last bucket as it is the largest bucket
+     */
+    public List<Integer> getMaxAbsoluteValuesOfResizeableBuckets() {
+        List<Integer> maxValues = new ArrayList<>();
+
+        // We have bucket_0, which is same value
+        maxValues.add(0);
+
+        maxValues.add((int)((long) Math.pow(2, BUCKET_1_BIT_SIZE)) - 1);
+        maxValues.add((int)((long) Math.pow(2, BUCKET_2_BIT_SIZE)) - 1);
+        return maxValues;
+    }
+
     private void encodeReading(Integer reading, Integer prevReading) {
         if (reading.equals(prevReading)) {
             writeControlBitsToBuffer(SAME_VALUE_ENCODING, bitBuffer);

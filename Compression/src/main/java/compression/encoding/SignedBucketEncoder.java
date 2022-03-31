@@ -11,6 +11,7 @@ public class SignedBucketEncoder extends BucketEncoding{
     public static final int NEGATIVE_SIGNED_BIT = 0;
     public static final int POSITIVE_SIGNED_BIT = 1;
 
+    // We unfortunately can't make this static as we use overriding
     @Override
     public BitBuffer encode(List<Integer> readings) {
         for (int reading : readings){

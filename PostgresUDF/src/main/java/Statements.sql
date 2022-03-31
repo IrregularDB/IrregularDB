@@ -8,12 +8,8 @@ SELECT sqlj.remove_jar(
     'DecompressUDF', true);
 
 SELECT sqlj.install_jar(
-    'file:/home/simon/Development/IrregularDB/PostgresUDF/target/PostgresUDF-1.0-SNAPSHOT-jar-with-dependencies.jar', 'DecompressUDF', true
-);
-
-SELECT sqlj.replace_jar(
                'file:/home/simon/Development/IrregularDB/PostgresUDF/target/PostgresUDF-1.0-SNAPSHOT-jar-with-dependencies.jar', 'DecompressUDF', true
-           );
+);
 
 INSERT INTO sqlj.jar_entry(entryname, jarid, entryimage) VALUES ('hej', 1, E'CC');
 
@@ -25,7 +21,7 @@ select sqlj.get_classpath('public');
 DROP TYPE sqlDataPoint;
 CREATE TYPE sqlDataPoint AS(timeSeriesId integer, timestamp BigInt, value float);
 
-DROP FUNCTION decompressSegment;
+
 CREATE FUNCTION decompressSegment(segment)
     RETURNS Setof sqlDataPoint
     AS 'SegmentDecompressor.decompressSegment'

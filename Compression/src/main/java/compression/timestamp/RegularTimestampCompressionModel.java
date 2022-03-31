@@ -70,7 +70,7 @@ public class RegularTimestampCompressionModel extends TimestampCompressionModel 
     }
 
     private boolean handleOtherDataPoints(long timeStamp) {
-        boolean withinThreshold = isTimeStampWithinThreshold(timeStamp, nextExpectedTimestamp, getThreshold());
+        boolean withinThreshold = isTimestampWithinThreshold(timeStamp, nextExpectedTimestamp, getThreshold());
         if (withinThreshold) {
             timeStamps.add(timeStamp);
         } else {
@@ -108,7 +108,7 @@ public class RegularTimestampCompressionModel extends TimestampCompressionModel 
         long localNextExpectedTimestamp = startTime + candidateSI;
 
         for (int i = 1; i < allTimestamps.size(); i++) {
-            boolean timeStampWithinThreshold = isTimeStampWithinThreshold(allTimestamps.get(i), localNextExpectedTimestamp, getThreshold());
+            boolean timeStampWithinThreshold = isTimestampWithinThreshold(allTimestamps.get(i), localNextExpectedTimestamp, getThreshold());
             if (!timeStampWithinThreshold) {
                 return false;
             }
@@ -117,7 +117,7 @@ public class RegularTimestampCompressionModel extends TimestampCompressionModel 
         return true;
     }
 
-    private static boolean isTimeStampWithinThreshold(long timestamp, long nextExpectedTimestamp, Integer threshold) {
+    private static boolean isTimestampWithinThreshold(long timestamp, long nextExpectedTimestamp, Integer threshold) {
         int actualDifference = calculateDifference(timestamp, nextExpectedTimestamp);
         return actualDifference <= threshold;
     }

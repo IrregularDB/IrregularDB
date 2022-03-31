@@ -80,8 +80,8 @@ public class ConfigProperties extends Properties{
                 .collect(Collectors.toList());
     }
 
-    public float getTimeStampModelErrorBound(){
-        return Float.parseFloat(getProperty("model.timestamp.errorbound"));
+    public Integer getTimestampModelErrorBound(){
+        return Integer.parseInt(getProperty("model.timestamp.errorbound"));
     }
 
     public float getValueModelErrorBound(){

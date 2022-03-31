@@ -49,8 +49,10 @@ public class RegularTimestampCompressionModel extends TimestampCompressionModel 
                 withinThreshold = true;
             } else {
                 withinThreshold = handleOtherDataPoints(timeStamp);
-                if (withinThreshold)
-                    this.nextExpectedTimestamp += si;
+
+                this.nextExpectedTimestamp += si;
+                if (!withinThreshold)
+                    earlierAppendFailed = true;
             }
             return withinThreshold;
         } catch (SiConversionException e) {
@@ -71,6 +73,7 @@ public class RegularTimestampCompressionModel extends TimestampCompressionModel 
 
     private boolean handleOtherDataPoints(long timeStamp) {
         boolean withinThreshold = isTimestampWithinThreshold(timeStamp, nextExpectedTimestamp, getThreshold());
+
         if (withinThreshold) {
             timeStamps.add(timeStamp);
         } else {
@@ -92,8 +95,6 @@ public class RegularTimestampCompressionModel extends TimestampCompressionModel 
         if (doesCandidateSIFit(allTimestamps, candidateSI)) {
             this.si = candidateSI;
             fitNewSI = true;
-        } else {
-            earlierAppendFailed = true;
         }
         return fitNewSI;
     }

@@ -367,17 +367,9 @@ class BlobDecompressorTest {
         }
     }
 
-    private boolean isTimestampWithinErrorBound(long actualTimestamp, long recreatedTimestamp, int si, float errorBound) {
-        long difference = Math.abs(actualTimestamp - recreatedTimestamp);
-        if (difference < Integer.MIN_VALUE || difference > Integer.MAX_VALUE) {
-            throw new SiConversionException(difference  + " the difference in timestamps cannot be cast to int without changing its value.");
-        }
-        double percentageError = difference / ((double)si);
-        return percentageError <= errorBound;
-    }
-
-    private int calculateSI(List<DataPoint> dataPoints) {
-        return Math.round((float) (dataPoints.get(dataPoints.size() - 1).timestamp() - dataPoints.get(0).timestamp()) / (dataPoints.size() - 1));
+    private boolean isTimestampWithinThreshold(long actualTimestamp, long recreatedTimestamp, int threshold) {
+        long difference = Math.abs(Math.toIntExact(actualTimestamp - recreatedTimestamp));
+        return difference <= threshold;
     }
 
     @Test
@@ -393,10 +385,9 @@ class BlobDecompressorTest {
         var decodedTimestamps = BlobDecompressor.decompressTimestamps(TimestampCompressionModelType.SIDIFF,
                 blobRepresentation, dataPoints.get(0).timestamp(), dataPoints.get(dataPoints.size() - 1).timestamp());
 
-        int si = calculateSI(dataPoints);
 
         for (int i = 0; i < decodedTimestamps.size(); i++){
-            Assertions.assertTrue(isTimestampWithinErrorBound(dataPoints.get(i).timestamp(), decodedTimestamps.get(i), si, threshold));
+            Assertions.assertTrue(isTimestampWithinThreshold(dataPoints.get(i).timestamp(), decodedTimestamps.get(i), threshold));
         }
     }
 
@@ -420,10 +411,8 @@ class BlobDecompressorTest {
         var decodedTimestamps = BlobDecompressor.decompressTimestamps(TimestampCompressionModelType.SIDIFF,
                 blobRepresentation, dataPoints.get(0).timestamp(), dataPoints.get(dataPoints.size() - 1).timestamp());
 
-        int si = calculateSI(dataPoints);
-
         for (int i = 0; i < decodedTimestamps.size(); i++){
-            Assertions.assertTrue(isTimestampWithinErrorBound(dataPoints.get(i).timestamp(), decodedTimestamps.get(i), si, threshold));
+            Assertions.assertTrue(isTimestampWithinThreshold(dataPoints.get(i).timestamp(), decodedTimestamps.get(i), threshold));
         }
     }
 

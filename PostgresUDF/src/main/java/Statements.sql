@@ -4,14 +4,21 @@ ALTER DATABASE postgres SET pljava.libjvm_location FROM CURRENT;
 
 CREATE EXTENSION pljava;
 
+truncate table sqlj.classpath_entry;
+truncate table sqlj.jar_descriptor;
+truncate table sqlj.typemap_entry;
+truncate table sqlj.jar_repository cascade ;
+truncate table sqlj.jar_entry CASCADE ;
+
+
+DROP FUNCTION decompressSegment;
+DROP FUNCTION hello;
 SELECT sqlj.remove_jar(
     'DecompressUDF', true);
 
 SELECT sqlj.install_jar(
                'file:/home/simon/Development/IrregularDB/PostgresUDF/target/PostgresUDF-1.0-SNAPSHOT-jar-with-dependencies.jar', 'DecompressUDF', true
 );
-
-INSERT INTO sqlj.jar_entry(entryname, jarid, entryimage) VALUES ('hej', 1, E'CC');
 
 select sqlj.set_classpath(
     'public', 'DecompressUDF'

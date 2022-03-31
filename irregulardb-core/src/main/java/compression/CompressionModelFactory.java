@@ -14,7 +14,7 @@ import static compression.value.ValueCompressionModelType.PMC_MEAN;
 
 public class CompressionModelFactory {
 
-    static ConfigProperties config = ConfigProperties.INSTANCE;
+    static ConfigProperties config = ConfigProperties.getInstance();
 
 
     public static List<TimeStampCompressionModel> getTimestampCompressionModels(){
@@ -45,7 +45,7 @@ public class CompressionModelFactory {
             case PMC_MEAN:
                 return new PMCMeanValueCompressionModel(errorBound);
             case GORILLA:
-                return new GorillaValueCompressionModel(ConfigProperties.INSTANCE.getValueModelLengthBound());
+                return new GorillaValueCompressionModel(ConfigProperties.getInstance().getValueModelLengthBound());
             case SWING:
                 return new SwingValueCompressionModel(errorBound);
             default:

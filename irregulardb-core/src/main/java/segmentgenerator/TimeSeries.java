@@ -28,6 +28,17 @@ public class TimeSeries {
         }
     }
 
+    public void close(){
+        while (true) {
+            Segment segment = segmentGenerator.constructSegmentFromBuffer();
+            if (segment == null) {
+                break;
+            } else {
+                sendToDb(segment);
+            }
+        }
+    }
+
     public String getTimeSeriesTag() {
         return timeSeriesTag;
     }

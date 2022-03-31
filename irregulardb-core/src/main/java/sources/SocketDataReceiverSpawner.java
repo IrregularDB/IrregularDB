@@ -19,7 +19,7 @@ public class SocketDataReceiverSpawner extends DataReceiverSpawner {
 
     public SocketDataReceiverSpawner(Partitioner partitioner) {
         super(partitioner);
-        this.serverSocketPort = ConfigProperties.INSTANCE.getSocketDataReceiverSpawnerPort();
+        this.serverSocketPort = ConfigProperties.getInstance().getSocketDataReceiverSpawnerPort();
     }
 
     @Override

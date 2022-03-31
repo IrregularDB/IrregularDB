@@ -14,6 +14,7 @@ public class SocketDataReceiver extends DataReceiver {
 
     public static final byte INDICATES_NEW_TAG = 0b00000001;
     public static final byte INDICATES_NO_NEW_TAG = 0b00000000;
+    public static final byte INDICATE_END_OF_STREAM = 0b01010101;
 
 
     private DataInputStream clientInputStream;
@@ -30,26 +31,35 @@ public class SocketDataReceiver extends DataReceiver {
 
     @Override
     public void receiveData() {
-        while (true) {
-            sendTimeSeriesReadingToBuffer(getTimeSeriesReadingFromSocket());
-        }
-    }
-
-    private TimeSeriesReading getTimeSeriesReadingFromSocket() {
         try {
-            if (streamReadingContainsANewTag()) {
-                this.currentInUseTag = readTagFromStream();
+            while (true) {
+
+                TimeSeriesReading timeSeriesReadingFromSocket = getTimeSeriesReadingFromSocket();
+                if (timeSeriesReadingFromSocket != null) {
+                    sendTimeSeriesReadingToBuffer(timeSeriesReadingFromSocket);
+                } else {
+                    break;
+                }
             }
-            return new TimeSeriesReading(this.currentInUseTag, readDataPointFromStream());
         } catch (IOException e) {
-            e.printStackTrace();
+//            e.printStackTrace();
         }
-        throw new RuntimeException("Exception while reading from socket");
+
+        close();
     }
 
-    private boolean streamReadingContainsANewTag() throws IOException {
-            return clientInputStream.readByte() == INDICATES_NEW_TAG;
+    private TimeSeriesReading getTimeSeriesReadingFromSocket() throws IOException {
+        byte controlByte = clientInputStream.readByte();
+
+        if (controlByte == INDICATE_END_OF_STREAM) {
+            return null;
+        }
+        if (controlByte == INDICATES_NEW_TAG) {
+            this.currentInUseTag = readTagFromStream();
+        }
+        return new TimeSeriesReading(this.currentInUseTag, readDataPointFromStream());
     }
+
 
     private String readTagFromStream() throws IOException {
         int amountOfBytesToReadAsTag = clientInputStream.readInt();
@@ -58,8 +68,8 @@ public class SocketDataReceiver extends DataReceiver {
     }
 
     private DataPoint readDataPointFromStream() throws IOException {
-            long timestamp = clientInputStream.readLong();
-            float value = clientInputStream.readFloat();
-            return new DataPoint(timestamp, value);
+        long timestamp = clientInputStream.readLong();
+        float value = clientInputStream.readFloat();
+        return new DataPoint(timestamp, value);
     }
 }

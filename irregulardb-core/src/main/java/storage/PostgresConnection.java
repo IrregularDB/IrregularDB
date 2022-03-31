@@ -1,5 +1,6 @@
 package storage;
 
+import compression.utility.ModelTypeUtil;
 import config.ConfigProperties;
 import records.Segment;
 
@@ -7,7 +8,7 @@ import java.sql.*;
 
 public class PostgresConnection implements DatabaseConnection {
 
-    private static final String INSERT_SEGMENT_STATEMENT = "INSERT INTO Segment(time_series_id, start_time, end_time, value_model_type, value_model_blob, timestamp_model_type, timestamp_model_blob) VALUES (?,?,?,?,?,?,?)";
+    private static final String INSERT_SEGMENT_STATEMENT = "INSERT INTO Segment(time_series_id, start_time, end_time, value_timestamp_model_type, value_model_blob, timestamp_model_blob) VALUES (?,?,?,?,?,?)";
 
     private static final String INSERT_TIME_SERIES_ID = "INSERT INTO TimeSeries (tag) VALUES (?)";
     private static final String GET_TIME_SERIES_BY_TAG = "SELECT * FROM TimeSeries where tag = ?";
@@ -18,7 +19,7 @@ public class PostgresConnection implements DatabaseConnection {
         try {
             // Instantiate database connection
             // jdbc:postgresql://localhost/test?user=fred&password=secret
-            ConfigProperties configProperties = ConfigProperties.INSTANCE;
+            ConfigProperties configProperties = ConfigProperties.getInstance();
             this.connection = DriverManager.getConnection(configProperties.getJDBConnectionString());
         } catch (SQLException e) {
             throw new RuntimeException(e.getMessage());
@@ -32,7 +33,7 @@ public class PostgresConnection implements DatabaseConnection {
             preparedStatement.setInt(1, segment.timeSeriesId());
             preparedStatement.setLong(2, segment.startTime());
             preparedStatement.setInt(3, (int) (segment.endTime() - segment.startTime()));
-            preparedStatement.setShort(4, combineTwoModelTypes(segment.valueModelType(), segment.timestampModelType())); // we are now combining the two model types
+            preparedStatement.setShort(4, ModelTypeUtil.combineTwoModelTypes(segment.valueModelType(), segment.timestampModelType())); // we are now combining the two model types
             preparedStatement.setBytes(5, segment.valueBlob().array());
             preparedStatement.setBytes(6, segment.timestampBlob().array());
 
@@ -73,18 +74,4 @@ public class PostgresConnection implements DatabaseConnection {
         return -1;
     }
 
-
-    public static short combineTwoModelTypes(byte valueModelType, byte timestampModelType){
-        if (valueModelType < 0 || timestampModelType < 0) {
-            throw new IllegalArgumentException("The model types ids must be positive");
-        }
-        return (short) ((valueModelType << 8) | timestampModelType);
-    }
-
-    public static ValueTimeStampModelPair combinedModelTypesToIndividual(short combined) {
-        final short leastSignificantByteMask = 0b0000000011111111;
-        return new ValueTimeStampModelPair(combined >> 8, combined & leastSignificantByteMask);
-    }
-
-    public static record ValueTimeStampModelPair(int valueModelType, int  timeStampModelType) {}
 }

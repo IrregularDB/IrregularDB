@@ -12,12 +12,28 @@ import java.util.stream.Collectors;
 
 public class ConfigProperties extends Properties{
 
-    public static final ConfigProperties INSTANCE = new ConfigProperties();
+    public static boolean isTest = false;
+    private static ConfigProperties INSTANCE;
+
     private final Map<String, Integer> timestampErrorBounds = new HashMap<>();
     private final Map<String, Float> valueErrorBounds = new HashMap<>();
 
-    private ConfigProperties(){
-        File file = new File("src/main/resources/config.properties");
+    public static ConfigProperties getInstance() {
+        if (INSTANCE != null) {
+            return INSTANCE;
+        }
+
+        if (!isTest) {
+            INSTANCE = new ConfigProperties("irregulardb-core/src/main/resources/config.properties");
+        } else {
+            INSTANCE = new ConfigProperties("src/test/resources/config.properties");
+        }
+        return INSTANCE;
+    }
+
+    private ConfigProperties(String path){
+        String property = System.getProperty("user.dir");
+        File file = new File(path);
         try {
             FileReader fileReader = new FileReader(file);
             load(fileReader);
@@ -47,7 +63,6 @@ public class ConfigProperties extends Properties{
                 .map(String::trim)
                 .collect(Collectors.toList());
     }
-
 
     public List<ValueCompressionModelType> getValueModels(){
         return Arrays.stream(getProperty("model.value.types").split(","))

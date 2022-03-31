@@ -9,13 +9,13 @@ public class Main {
 
     public static void main(String[] args) {
         // TODO: Should be configurable which partitioner should be used
-        Partitioner partitioner = new IncrementPartitioner(new WorkingSetFactory(), ConfigProperties.INSTANCE.getConfiguredNumberOfWorkingSets());
+        Partitioner partitioner = new IncrementPartitioner(new WorkingSetFactory(), ConfigProperties.getInstance().getConfiguredNumberOfWorkingSets());
 
         initializeDataReceiverSpawners(partitioner);
     }
 
     private static void initializeDataReceiverSpawners(Partitioner partitioner) {
-        DataReceiverSpawner dataReceiverSpawner = new CSVDataReceiverSpawner(partitioner, ConfigProperties.INSTANCE.getCsvSources());
+        DataReceiverSpawner dataReceiverSpawner = new CSVDataReceiverSpawner(partitioner, ConfigProperties.getInstance().getCsvSources());
         dataReceiverSpawner.spawn();
     }
 }

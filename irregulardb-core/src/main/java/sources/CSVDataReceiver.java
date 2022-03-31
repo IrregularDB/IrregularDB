@@ -23,8 +23,10 @@ public class CSVDataReceiver extends DataReceiver {
             File file = new File(absoluteFilePath);
             FileReader fileReader = new FileReader(file);
             BufferedReader bufferedReader = new BufferedReader(fileReader);
+
             readFile(bufferedReader);
 
+            close();
             System.out.println("CSVReceiver for " + absoluteFilePath + " has completed delivering its data");
         } catch (IOException e) {
             e.printStackTrace();

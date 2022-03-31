@@ -45,9 +45,9 @@ public class CSVDataReceiver extends DataReceiver {
         String[] split = line.split(this.elementDelimiter);
 
         String id = split[0].trim();
-        long timeStamp = Long.parseLong(split[1].trim());
+        long timestamp = Long.parseLong(split[1].trim());
         float value = Float.parseFloat(split[2].trim());
 
-        return new TimeSeriesReading(id, new DataPoint(timeStamp, value));
+        return new TimeSeriesReading(id, new DataPoint(timestamp, value));
     }
 }

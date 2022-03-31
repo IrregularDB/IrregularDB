@@ -14,14 +14,14 @@ import java.util.stream.Stream;
 public class CompressionModelManager {
 
     private List<ValueCompressionModel> activeValueModels;
-    private List<TimestampCompressionModel> activeTimeStampModels;
+    private List<TimestampCompressionModel> activeTimestampModels;
 
     private List<ValueCompressionModel> inactiveValueModels;
     private List<TimestampCompressionModel> inactiveTimestampModels;
 
     public CompressionModelManager(List<ValueCompressionModel> valueCompressionModels, List<TimestampCompressionModel> timestampCompressionModels) {
         this.activeValueModels = new ArrayList<>(valueCompressionModels);
-        this.activeTimeStampModels = new ArrayList<>(timestampCompressionModels);
+        this.activeTimestampModels = new ArrayList<>(timestampCompressionModels);
 
         this.inactiveValueModels = new ArrayList<>();
         this.inactiveTimestampModels = new ArrayList<>();
@@ -37,18 +37,18 @@ public class CompressionModelManager {
         this.inactiveValueModels.addAll(valueModelsAppended.get(false));
 
         // Same for time stamp models
-        Map<Boolean, List<TimestampCompressionModel>> timeStampModelAppended = activeTimeStampModels.stream()
-                .collect(Collectors.partitioningBy(timeStampModel -> timeStampModel.append(dataPoint)));
+        Map<Boolean, List<TimestampCompressionModel>> timestampModelAppended = activeTimestampModels.stream()
+                .collect(Collectors.partitioningBy(timestampModel -> timestampModel.append(dataPoint)));
 
-        this.activeTimeStampModels = timeStampModelAppended.get(true);
-        this.inactiveTimestampModels.addAll(timeStampModelAppended.get(false));
+        this.activeTimestampModels = timestampModelAppended.get(true);
+        this.inactiveTimestampModels.addAll(timestampModelAppended.get(false));
 
-        return (!this.activeValueModels.isEmpty()) && (!this.activeTimeStampModels.isEmpty());
+        return (!this.activeValueModels.isEmpty()) && (!this.activeTimestampModels.isEmpty());
     }
 
     public boolean resetAndTryAppendBuffer(List<DataPoint> notYetEmitted) {
         this.activeValueModels.addAll(inactiveValueModels);
-        this.activeTimeStampModels.addAll(inactiveTimestampModels);
+        this.activeTimestampModels.addAll(inactiveTimestampModels);
 
         Map<Boolean, List<ValueCompressionModel>> valueModelsAppended = activeValueModels.stream()
                 .collect(Collectors.partitioningBy(valueModel -> valueModel.resetAndAppendAll(notYetEmitted)));
@@ -57,19 +57,19 @@ public class CompressionModelManager {
         this.inactiveValueModels = valueModelsAppended.get(false);
 
         // Same for time stamp models
-        Map<Boolean, List<TimestampCompressionModel>> timeStampModelAppended = activeTimeStampModels.stream()
-                .collect(Collectors.partitioningBy(timeStampModel -> timeStampModel.resetAndAppendAll(notYetEmitted)));
+        Map<Boolean, List<TimestampCompressionModel>> timestampModelAppended = activeTimestampModels.stream()
+                .collect(Collectors.partitioningBy(timestampModel -> timestampModel.resetAndAppendAll(notYetEmitted)));
 
-        this.activeTimeStampModels = timeStampModelAppended.get(true);
-        this.inactiveTimestampModels = timeStampModelAppended.get(false);
+        this.activeTimestampModels = timestampModelAppended.get(true);
+        this.inactiveTimestampModels = timestampModelAppended.get(false);
 
-        return !activeValueModels.isEmpty() && !activeTimeStampModels.isEmpty();
+        return !activeValueModels.isEmpty() && !activeTimestampModels.isEmpty();
     }
 
 
     public CompressionModel getBestCompressionModel() {
         List<ValueCompressionModel> valueModels = Stream.concat(activeValueModels.stream(), inactiveValueModels.stream()).toList();
-        List<TimestampCompressionModel> timeStampModels = Stream.concat(activeTimeStampModels.stream(), inactiveTimestampModels.stream()).toList();
+        List<TimestampCompressionModel> timeStampModels = Stream.concat(activeTimestampModels.stream(), inactiveTimestampModels.stream()).toList();
         return ModelPicker.findBestCompressionModel(valueModels, timeStampModels);
     }
 }

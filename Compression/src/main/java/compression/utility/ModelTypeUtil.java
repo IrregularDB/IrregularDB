@@ -1,6 +1,6 @@
 package compression.utility;
 
-import records.ValueTimeStampModelPair;
+import records.ValueTimestampModelPair;
 
 public class ModelTypeUtil {
     public static short combineTwoModelTypes(byte valueModelType, byte timestampModelType){
@@ -10,9 +10,9 @@ public class ModelTypeUtil {
         return (short) ((valueModelType << 8) | timestampModelType);
     }
 
-    public static ValueTimeStampModelPair combinedModelTypesToIndividual(short combined) {
+    public static ValueTimestampModelPair combinedModelTypesToIndividual(short combined) {
         final short leastSignificantByteMask = 0b0000000011111111;
-        return new ValueTimeStampModelPair(combined >> 8, combined & leastSignificantByteMask);
+        return new ValueTimestampModelPair(combined >> 8, combined & leastSignificantByteMask);
     }
 
 

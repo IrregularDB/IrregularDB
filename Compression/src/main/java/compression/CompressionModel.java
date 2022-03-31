@@ -38,7 +38,7 @@ public class CompressionModel {
     }
 
     public TimestampCompressionModelType getTimestampCompressionModelType() {
-        return timestampCompressionModel.getTimeStampCompressionModelType();
+        return timestampCompressionModel.getTimestampCompressionModelType();
     }
 
     public boolean resetModel(List<DataPoint> dataPoints){

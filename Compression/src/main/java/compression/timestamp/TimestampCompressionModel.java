@@ -14,7 +14,7 @@ public abstract class TimestampCompressionModel extends BaseModel {
      * Used to identify which type of model is used when writing to the DB
      * @return enum for the value compression model types
      */
-    public abstract TimestampCompressionModelType getTimeStampCompressionModelType();
+    public abstract TimestampCompressionModelType getTimestampCompressionModelType();
 
     public Integer getThreshold() {
         if (threshold == null) {

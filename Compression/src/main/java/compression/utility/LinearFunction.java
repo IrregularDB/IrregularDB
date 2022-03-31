@@ -17,8 +17,8 @@ public class LinearFunction {
         this.intercept = p1.value() - this.slope * p1.timestamp();
     }
 
-    public float getValue(Long timeStamp) {
-        return this.slope * timeStamp + this.intercept;
+    public float getValue(Long timestamp) {
+        return this.slope * timestamp + this.intercept;
     }
 
     public float getSlope() {

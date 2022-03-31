@@ -67,7 +67,7 @@ public class DeltaDeltaTimestampCompressionModel extends TimestampCompressionMod
     }
 
     @Override
-    public TimestampCompressionModelType getTimeStampCompressionModelType() {
+    public TimestampCompressionModelType getTimestampCompressionModelType() {
         return TimestampCompressionModelType.DELTADELTA;
     }
 }

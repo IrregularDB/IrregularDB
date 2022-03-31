@@ -57,7 +57,7 @@ public class TestCompressionModelManagerRegularPMCMean extends CompressionModelM
 
     @Override
     public CompressionModel getBestCompressionModel() {
-        if (timestampCompressionModels.get(0).getTimeStampCompressionModelType() == TimestampCompressionModelType.REGULAR &&
+        if (timestampCompressionModels.get(0).getTimestampCompressionModelType() == TimestampCompressionModelType.REGULAR &&
                 valueCompressionModels.get(0).getValueCompressionModelType() == ValueCompressionModelType.PMC_MEAN) {
 
             float errorBound = 0;

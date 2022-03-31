@@ -5,7 +5,6 @@ import compression.value.*;
 import config.ConfigProperties;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -16,19 +15,16 @@ public class CompressionModelFactory {
 
 
     public static List<TimestampCompressionModel> getTimestampCompressionModels(String tag){
-        List<TimestampCompressionModelType> timeStampModelTypes =  config.getTimeStampModels();
+        List<TimestampCompressionModelType> timestampModelTypes =  config.getTimestampModels();
+        final Integer timestampModelThreshold = config.getTimeStampThresholdForTimeSeriesTag(tag);
 
-        final Optional<Integer> timestampModelThresholdOptional = config.getTimeStampThresholdForTimeSeriesTagIfExists(tag);
-        int timestampModelThreshold = timestampModelThresholdOptional.orElseGet(() -> config.getTimestampModelThreshold());
-
-        return getCompressionModels(timeStampModelTypes, (modelType) -> getTimestampCompressionModelByType(modelType, timestampModelThreshold));
+        return getCompressionModels(timestampModelTypes, (modelType) -> getTimestampCompressionModelByType(modelType, timestampModelThreshold));
     }
 
 
     public static List<ValueCompressionModel> getValueCompressionModels(String tag) {
         List<ValueCompressionModelType> valueModelTypes =  config.getValueModels();
-        final Optional<Float> valueModelErrorBoundOptional = config.getValueErrorBoundForTimeSeriesTagIfExists(tag);
-        float valueModelErrorBound = valueModelErrorBoundOptional.orElseGet(() -> config.getValueModelErrorBound());
+        final Float valueModelErrorBound = config.getValueErrorBoundForTimeSeriesTag(tag);
 
         return getCompressionModels(valueModelTypes, (modelType) -> CompressionModelFactory.getValueCompressionModelByType(modelType, valueModelErrorBound));
     }

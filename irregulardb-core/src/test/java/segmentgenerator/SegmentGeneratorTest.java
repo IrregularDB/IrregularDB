@@ -64,8 +64,8 @@ class SegmentGeneratorTest {
     }
 
     private ByteBuffer constructTimestampDataBlob(List<DataPoint> dataPoints) {
-        RegularTimestampCompressionModel regularTimeStampCompressionModel = new RegularTimestampCompressionModel(0);
-        regularTimeStampCompressionModel.resetAndAppendAll(dataPoints);
-        return regularTimeStampCompressionModel.getBlobRepresentation();
+        RegularTimestampCompressionModel regularTimestampCompressionModel = new RegularTimestampCompressionModel(0);
+        regularTimestampCompressionModel.resetAndAppendAll(dataPoints);
+        return regularTimestampCompressionModel.getBlobRepresentation();
     }
 }

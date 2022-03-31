@@ -4,7 +4,7 @@ import compression.utility.ModelTypeUtil;
 import compression.value.ValueCompressionModelType;
 import org.postgresql.pljava.ResultSetProvider;
 import records.DataPoint;
-import records.ValueTimeStampModelPair;
+import records.ValueTimestampModelPair;
 
 import java.nio.ByteBuffer;
 import java.sql.ResultSet;
@@ -19,11 +19,11 @@ public class SegmentDecompressor implements ResultSetProvider {
     public SegmentDecompressor(int timeSeriesId, long startTime, int endTime, short valueTimestampModelType,
                                byte[] valueModelBlob, byte[] timestampModelBlob) {
 
-        ValueTimeStampModelPair valueTimeStampModelPair = ModelTypeUtil.combinedModelTypesToIndividual(valueTimestampModelType);
+        ValueTimestampModelPair valueTimeStampModelPair = ModelTypeUtil.combinedModelTypesToIndividual(valueTimestampModelType);
 
         this.timeSeriesId = timeSeriesId;
         this.readings = BlobDecompressor.decompressBlobs(
-                TimestampCompressionModelType.values()[valueTimeStampModelPair.timeStampModelType()],
+                TimestampCompressionModelType.values()[valueTimeStampModelPair.timestampModelType()],
                 ByteBuffer.wrap(timestampModelBlob),
                 ValueCompressionModelType.values()[valueTimeStampModelPair.valueModelType()],
                 ByteBuffer.wrap(valueModelBlob),

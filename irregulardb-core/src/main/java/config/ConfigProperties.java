@@ -15,7 +15,7 @@ public class ConfigProperties extends Properties{
     public static boolean isTest = false;
     private static ConfigProperties INSTANCE;
 
-    private final Map<String, Integer> timestampThreshold = new HashMap<>();
+    private final Map<String, Integer> timestampThresholds = new HashMap<>();
     private final Map<String, Float> valueErrorBounds = new HashMap<>();
 
     public static ConfigProperties getInstance() {
@@ -40,7 +40,7 @@ public class ConfigProperties extends Properties{
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        parseAllTimeStampThresholds();
+        parseAllTimestampThresholds();
         parseAllValueErrorBounds();
     }
 
@@ -72,7 +72,7 @@ public class ConfigProperties extends Properties{
                 .collect(Collectors.toList());
     }
 
-    public List<TimestampCompressionModelType> getTimeStampModels(){
+    public List<TimestampCompressionModelType> getTimestampModels(){
         return Arrays.stream(getProperty("model.timestamp.types").split(","))
                 .map(String::trim)
                 .filter(Predicate.not(String::isEmpty))
@@ -100,30 +100,30 @@ public class ConfigProperties extends Properties{
         return Integer.parseInt(getProperty("model.value.length_bound"));
     }
 
-    public Optional<Integer> getTimeStampThresholdForTimeSeriesTagIfExists(String tag){
-        if (this.timestampThreshold.containsKey(tag)){
-            return Optional.of(this.timestampThreshold.get(tag));
+    public Integer getTimeStampThresholdForTimeSeriesTag(String tag){
+        if (this.timestampThresholds.containsKey(tag)){
+            return this.timestampThresholds.get(tag);
         } else {
-            return Optional.empty();
+            return this.getTimestampModelThreshold();
         }
     }
 
-    public Optional<Float> getValueErrorBoundForTimeSeriesTagIfExists(String tag){
-        if (this.timestampThreshold.containsKey(tag)){
-            return Optional.of(this.valueErrorBounds.get(tag));
+    public Float getValueErrorBoundForTimeSeriesTag(String tag){
+        if (this.timestampThresholds.containsKey(tag)){
+            return this.valueErrorBounds.get(tag);
         } else {
-            return Optional.empty();
+            return this.getValueModelErrorBound();
         }
     }
 
     /* Private methods */
-    private void parseAllTimeStampThresholds(){
+    private void parseAllTimestampThresholds(){
         for (Enumeration<?> e = propertyNames(); e.hasMoreElements(); ) {
             String name = (String)e.nextElement();
 
             if (name.startsWith("model.timestamp.threshold.")) {
                 String value = getProperty(name);
-                this.timestampThreshold.put(name, Integer.parseInt(value));
+                this.timestampThresholds.put(name, Integer.parseInt(value));
             }
         }
     }

@@ -83,7 +83,7 @@ public class SIDiffTimestampCompressionModel extends TimestampCompressionModel {
     }
 
     @Override
-    public TimestampCompressionModelType getTimeStampCompressionModelType() {
+    public TimestampCompressionModelType getTimestampCompressionModelType() {
         return TimestampCompressionModelType.SIDIFF;
     }
 }

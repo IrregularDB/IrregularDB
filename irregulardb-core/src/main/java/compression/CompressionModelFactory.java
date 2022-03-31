@@ -19,7 +19,7 @@ public class CompressionModelFactory {
         List<TimeStampCompressionModelType> timeStampModelTypes =  config.getTimeStampModels();
 
         final Optional<Integer> timestampModelErrorBound = config.getTimeStampErrorBoundForTimeSeriesTagIfExists(tag);
-        int timestampModelThreshold = timestampModelErrorBound.orElseGet(() -> config.getTimeStampModelErrorBound());
+        int timestampModelThreshold = timestampModelErrorBound.orElseGet(() -> config.getTimestampModelErrorBound());
 
         return getCompressionModels(timeStampModelTypes, (modelType) -> getTimestampCompressionModelByType(modelType, timestampModelThreshold));
     }

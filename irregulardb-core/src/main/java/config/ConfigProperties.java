@@ -6,15 +6,15 @@ import compression.value.ValueCompressionModelType;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Properties;
+import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class ConfigProperties extends Properties{
 
     public static final ConfigProperties INSTANCE = new ConfigProperties();
+    private final Map<String, Integer> timestampErrorBounds = new HashMap<>();
+    private final Map<String, Float> valueErrorBounds = new HashMap<>();
 
     private ConfigProperties(){
         File file = new File("src/main/resources/config.properties");
@@ -24,6 +24,8 @@ public class ConfigProperties extends Properties{
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+        parseAllTimeStampErrorBounds();
+        parseAllValueErrorBounds();
     }
 
     public int getConfiguredNumberOfWorkingSets(){
@@ -45,6 +47,7 @@ public class ConfigProperties extends Properties{
                 .map(String::trim)
                 .collect(Collectors.toList());
     }
+
 
     public List<ValueCompressionModelType> getValueModels(){
         return Arrays.stream(getProperty("model.value.types").split(","))
@@ -80,5 +83,43 @@ public class ConfigProperties extends Properties{
 
     public int getValueModelLengthBound(){
         return Integer.parseInt(getProperty("model.value.length_bound"));
+    }
+
+    public Optional<Integer> getTimeStampErrorBoundForTimeSeriesTagIfExists(String tag){
+        if (this.timestampErrorBounds.containsKey(tag)){
+            return Optional.of(this.timestampErrorBounds.get(tag));
+        } else {
+            return Optional.empty();
+        }
+    }
+
+    public Optional<Float> getValueErrorBoundForTimeSeriesTagIfExists(String tag){
+        if (this.timestampErrorBounds.containsKey(tag)){
+            return Optional.of(this.valueErrorBounds.get(tag));
+        } else {
+            return Optional.empty();
+        }
+    }
+
+    /* Private methods */
+    private void parseAllTimeStampErrorBounds(){
+        for (Enumeration<?> e = propertyNames(); e.hasMoreElements(); ) {
+            String name = (String)e.nextElement();
+
+            if (name.startsWith("model.timestamp.errorbound.")) {
+                String value = getProperty(name);
+                this.timestampErrorBounds.put(name, Integer.parseInt(value));
+            }
+        }
+    }
+
+    private void parseAllValueErrorBounds(){
+        for (Enumeration<?> e = propertyNames(); e.hasMoreElements(); ) {
+            String name = (String)e.nextElement();
+            if (name.startsWith("model.value.errorbound.")) {
+                String value = getProperty(name);
+                this.valueErrorBounds.put(name, Float.parseFloat(value));
+            }
+        }
     }
 }

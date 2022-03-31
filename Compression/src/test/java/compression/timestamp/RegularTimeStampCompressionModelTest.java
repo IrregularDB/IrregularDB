@@ -30,8 +30,7 @@ class RegularTimeStampCompressionModelTest {
 
     @BeforeEach
     void init() {
-        Integer errorBound = 0;
-        regularModel = new RegularTimestampCompressionModel(errorBound);
+        regularModel = new RegularTimestampCompressionModel(0);
     }
 
     // We expect to be able to append any two data points no matter how different as then we have not SI
@@ -145,13 +144,10 @@ class RegularTimeStampCompressionModelTest {
 
 
     @Test
-    void sunshineErrorBoundTest(){
-
-        int errorBound = 10;
-
+    void sunshineThresholdTest(){
         List<Long> integers = List.of(100L, 205L, 300L);
 
-        this.regularModel = new RegularTimestampCompressionModel(errorBound);
+        this.regularModel = new RegularTimestampCompressionModel(10);
         boolean success = regularModel.resetAndAppendAll(createDataPointsFromTimeStamps(integers));
 
         Assertions.assertTrue(success);
@@ -159,22 +155,19 @@ class RegularTimeStampCompressionModelTest {
 
     @Test
     void sunshineErrorTest(){
-        int errorBound = 10;
-
         List<Long> integers = List.of(100L, 205L, 310L, 1000L);
 
-        this.regularModel = new RegularTimestampCompressionModel(errorBound);
+        this.regularModel = new RegularTimestampCompressionModel(10);
         boolean success = regularModel.resetAndAppendAll(createDataPointsFromTimeStamps(integers));
 
         Assertions.assertFalse(success);
     }
 
     @Test
-    void sunshineErrorTestWithHigherErrorBound(){
-        int errorBound = 10000; //with a higher error-bound our candidate si = 97 should work
+    void sunshineErrorTestWithHigherThreshold(){
         List<Long> integers = List.of(100L, 205L, 310L, 1000L);
 
-        this.regularModel = new RegularTimestampCompressionModel(errorBound);
+        this.regularModel = new RegularTimestampCompressionModel(10000);
         boolean success = regularModel.resetAndAppendAll(createDataPointsFromTimeStamps(integers));
 
         Assertions.assertTrue(success);

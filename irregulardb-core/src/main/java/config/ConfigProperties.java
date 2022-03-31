@@ -15,7 +15,7 @@ public class ConfigProperties extends Properties{
     public static boolean isTest = false;
     private static ConfigProperties INSTANCE;
 
-    private final Map<String, Integer> timestampErrorBounds = new HashMap<>();
+    private final Map<String, Integer> timestampThreshold = new HashMap<>();
     private final Map<String, Float> valueErrorBounds = new HashMap<>();
 
     public static ConfigProperties getInstance() {
@@ -40,7 +40,7 @@ public class ConfigProperties extends Properties{
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        parseAllTimeStampErrorBounds();
+        parseAllTimeStampThresholds();
         parseAllValueErrorBounds();
     }
 
@@ -80,7 +80,7 @@ public class ConfigProperties extends Properties{
                 .collect(Collectors.toList());
     }
 
-    public Integer getTimestampModelErrorBound(){
+    public Integer getTimestampModelThreshold(){
         return Integer.parseInt(getProperty("model.timestamp.threshold"));
     }
 
@@ -100,16 +100,16 @@ public class ConfigProperties extends Properties{
         return Integer.parseInt(getProperty("model.value.length_bound"));
     }
 
-    public Optional<Integer> getTimeStampErrorBoundForTimeSeriesTagIfExists(String tag){
-        if (this.timestampErrorBounds.containsKey(tag)){
-            return Optional.of(this.timestampErrorBounds.get(tag));
+    public Optional<Integer> getTimeStampThresholdForTimeSeriesTagIfExists(String tag){
+        if (this.timestampThreshold.containsKey(tag)){
+            return Optional.of(this.timestampThreshold.get(tag));
         } else {
             return Optional.empty();
         }
     }
 
     public Optional<Float> getValueErrorBoundForTimeSeriesTagIfExists(String tag){
-        if (this.timestampErrorBounds.containsKey(tag)){
+        if (this.timestampThreshold.containsKey(tag)){
             return Optional.of(this.valueErrorBounds.get(tag));
         } else {
             return Optional.empty();
@@ -117,13 +117,13 @@ public class ConfigProperties extends Properties{
     }
 
     /* Private methods */
-    private void parseAllTimeStampErrorBounds(){
+    private void parseAllTimeStampThresholds(){
         for (Enumeration<?> e = propertyNames(); e.hasMoreElements(); ) {
             String name = (String)e.nextElement();
 
             if (name.startsWith("model.timestamp.threshold.")) {
                 String value = getProperty(name);
-                this.timestampErrorBounds.put(name, Integer.parseInt(value));
+                this.timestampThreshold.put(name, Integer.parseInt(value));
             }
         }
     }

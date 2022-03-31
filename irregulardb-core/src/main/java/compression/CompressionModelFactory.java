@@ -18,8 +18,8 @@ public class CompressionModelFactory {
     public static List<TimestampCompressionModel> getTimestampCompressionModels(String tag){
         List<TimestampCompressionModelType> timeStampModelTypes =  config.getTimeStampModels();
 
-        final Optional<Integer> timestampModelErrorBound = config.getTimeStampErrorBoundForTimeSeriesTagIfExists(tag);
-        int timestampModelThreshold = timestampModelErrorBound.orElseGet(() -> config.getTimestampModelErrorBound());
+        final Optional<Integer> timestampModelThresholdOptional = config.getTimeStampThresholdForTimeSeriesTagIfExists(tag);
+        int timestampModelThreshold = timestampModelThresholdOptional.orElseGet(() -> config.getTimestampModelThreshold());
 
         return getCompressionModels(timeStampModelTypes, (modelType) -> getTimestampCompressionModelByType(modelType, timestampModelThreshold));
     }
@@ -27,8 +27,8 @@ public class CompressionModelFactory {
 
     public static List<ValueCompressionModel> getValueCompressionModels(String tag) {
         List<ValueCompressionModelType> valueModelTypes =  config.getValueModels();
-        final Optional<Float> timestampModelErrorBound = config.getValueErrorBoundForTimeSeriesTagIfExists(tag);
-        float valueModelErrorBound = timestampModelErrorBound.orElseGet(() -> config.getValueModelErrorBound());
+        final Optional<Float> valueModelErrorBoundOptional = config.getValueErrorBoundForTimeSeriesTagIfExists(tag);
+        float valueModelErrorBound = valueModelErrorBoundOptional.orElseGet(() -> config.getValueModelErrorBound());
 
         return getCompressionModels(valueModelTypes, (modelType) -> CompressionModelFactory.getValueCompressionModelByType(modelType, valueModelErrorBound));
     }
@@ -55,14 +55,14 @@ public class CompressionModelFactory {
     }
 
 
-    private static TimestampCompressionModel getTimestampCompressionModelByType(TimestampCompressionModelType timestampCompressionModelType, Integer errorBound) {
+    private static TimestampCompressionModel getTimestampCompressionModelByType(TimestampCompressionModelType timestampCompressionModelType, Integer threshold) {
         switch (timestampCompressionModelType){
             case REGULAR:
-                return new RegularTimestampCompressionModel(errorBound);
+                return new RegularTimestampCompressionModel(threshold);
             case DELTADELTA:
-                return new DeltaDeltaTimestampCompressionModel(errorBound);
+                return new DeltaDeltaTimestampCompressionModel(threshold);
             case SIDIFF:
-                return new SIDiffTimestampCompressionModel(errorBound);
+                return new SIDiffTimestampCompressionModel(threshold);
             default:
                 throw new RuntimeException("Type not defined");
         }

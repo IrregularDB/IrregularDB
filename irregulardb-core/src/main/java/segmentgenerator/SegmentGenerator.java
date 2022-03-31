@@ -63,7 +63,7 @@ public class SegmentGenerator {
         ValueCompressionModel valueCompressionModel = bestCompressionModel.getValueCompressionModel();
         int valueCompressionModelLength = valueCompressionModel.getLength();
 
-        TimestampCompressionModel timeStampCompressionModel = bestCompressionModel.getTimeStampCompressionModel();
+        TimestampCompressionModel timeStampCompressionModel = bestCompressionModel.getTimestampCompressionModel();
         int timestampCompressionModelLength = timeStampCompressionModel.getLength();
 
         if (timestampCompressionModelLength > valueCompressionModelLength) {
@@ -76,7 +76,7 @@ public class SegmentGenerator {
 
     private Segment generateSegment(CompressionModel compressionModel, long startTime, long endTime) {
         ValueCompressionModel valueModel = compressionModel.getValueCompressionModel();
-        TimestampCompressionModel timeStampModel = compressionModel.getTimeStampCompressionModel();
+        TimestampCompressionModel timeStampModel = compressionModel.getTimestampCompressionModel();
 
         return new Segment(this.timeSeriesId, startTime, endTime, (byte) valueModel.getValueCompressionModelType().ordinal(), valueModel.getBlobRepresentation(), (byte) timeStampModel.getTimeStampCompressionModelType().ordinal(), timeStampModel.getBlobRepresentation());
     }

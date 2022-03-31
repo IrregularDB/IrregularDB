@@ -11,46 +11,46 @@ import java.util.List;
 
 public class CompressionModel {
     private final ValueCompressionModel valueCompressionModel;
-    private final TimestampCompressionModel timeStampCompressionModel;
+    private final TimestampCompressionModel timestampCompressionModel;
 
     public CompressionModel(ValueCompressionModel valueCompressionModel, TimestampCompressionModel timeStampCompressionModel) {
         this.valueCompressionModel = valueCompressionModel;
-        this.timeStampCompressionModel = timeStampCompressionModel;
+        this.timestampCompressionModel = timeStampCompressionModel;
     }
 
     public boolean appendDataPoint(DataPoint dataPoint) {
         boolean valueAppendSucceeded = this.valueCompressionModel.append(dataPoint);
-        boolean timeStampAppendSucceeded = this.timeStampCompressionModel.append(dataPoint);
+        boolean timestampAppendSucceeded = this.timestampCompressionModel.append(dataPoint);
 
-        return valueAppendSucceeded && timeStampAppendSucceeded;
+        return valueAppendSucceeded && timestampAppendSucceeded;
     }
 
     public ByteBuffer getValueBlob() {
         return valueCompressionModel.getBlobRepresentation();
     }
 
-    public ByteBuffer getTimeStampBlob() {
-        return timeStampCompressionModel.getBlobRepresentation();
+    public ByteBuffer getTimestampBlob() {
+        return timestampCompressionModel.getBlobRepresentation();
     }
 
     public ValueCompressionModelType getValueCompressionModelType() {
         return valueCompressionModel.getValueCompressionModelType();
     }
 
-    public TimestampCompressionModelType getTimeStampCompressionModelType() {
-        return timeStampCompressionModel.getTimeStampCompressionModelType();
+    public TimestampCompressionModelType getTimestampCompressionModelType() {
+        return timestampCompressionModel.getTimeStampCompressionModelType();
     }
 
     public boolean resetModel(List<DataPoint> dataPoints){
         return this.valueCompressionModel.resetAndAppendAll(dataPoints) &&
-                this.timeStampCompressionModel.resetAndAppendAll(dataPoints);
+                this.timestampCompressionModel.resetAndAppendAll(dataPoints);
     }
 
     public ValueCompressionModel getValueCompressionModel() {
         return valueCompressionModel;
     }
 
-    public TimestampCompressionModel getTimeStampCompressionModel() {
-        return timeStampCompressionModel;
+    public TimestampCompressionModel getTimestampCompressionModel() {
+        return timestampCompressionModel;
     }
 }

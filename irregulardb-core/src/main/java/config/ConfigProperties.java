@@ -96,4 +96,8 @@ public class ConfigProperties extends Properties{
     public int getValueModelLengthBound(){
         return Integer.parseInt(getProperty("model.value.length_bound"));
     }
+
+    public boolean populateSegmentSummary(){
+        return Boolean.parseBoolean(getProperty("model.segment.compute.summary", "true"));
+    }
 }

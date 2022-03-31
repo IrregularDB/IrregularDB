@@ -1,20 +1,25 @@
 package segmentgenerator;
 
 import compression.CompressionModelFactory;
+import config.ConfigProperties;
 import records.DataPoint;
 import records.Segment;
+import records.SegmentAndDataPointsUsed;
+import records.SegmentSummary;
 import storage.DatabaseConnection;
 
 public class TimeSeries {
     private final String timeSeriesTag;
     private final DatabaseConnection databaseConnection;
     private final SegmentGenerator segmentGenerator;
+    private final boolean computeSegmentSummary;
 
     public TimeSeries(String timeSeriesTag, DatabaseConnection dbConnection) {
         this.timeSeriesTag = timeSeriesTag;
         this.databaseConnection = dbConnection;
         int timeSeriesId = getTimeSeriesIdFromDb();
         this.segmentGenerator = new SegmentGenerator(new CompressionModelManager(CompressionModelFactory.getValueCompressionModels(), CompressionModelFactory.getTimestampCompressionModels()), timeSeriesId);
+        this.computeSegmentSummary = ConfigProperties.getInstance().populateSegmentSummary();
     }
 
     private int getTimeSeriesIdFromDb() {
@@ -23,19 +28,25 @@ public class TimeSeries {
 
     public void processDataPoint(DataPoint dataPoint) {
         if (!segmentGenerator.acceptDataPoint(dataPoint)) {
-            Segment segment = segmentGenerator.constructSegmentFromBuffer();
-            sendToDb(segment);
+            getSegmentAndSendToDB();
         }
     }
 
     public void close(){
-        while (true) {
-            Segment segment = segmentGenerator.constructSegmentFromBuffer();
-            if (segment == null) {
-                break;
-            } else {
-                sendToDb(segment);
+        while (getSegmentAndSendToDB()) {}
+    }
+
+    private boolean getSegmentAndSendToDB(){
+        SegmentAndDataPointsUsed segmentAndDataPointsUsed = segmentGenerator.constructSegmentFromBuffer();
+        if (segmentAndDataPointsUsed == null) {
+            return false;
+        } else {
+            SegmentSummary segmentSummary = null;
+            if (computeSegmentSummary) {
+                 segmentSummary = new SegmentSummary(segmentAndDataPointsUsed.dataPointsUsed());
             }
+            sendToDb(segmentAndDataPointsUsed.segment(), segmentSummary);
+            return true;
         }
     }
 
@@ -43,7 +54,7 @@ public class TimeSeries {
         return timeSeriesTag;
     }
 
-    private void sendToDb(Segment segment) {
-        this.databaseConnection.insertSegment(segment);
+    private void sendToDb(Segment segment, SegmentSummary segmentSummary) {
+        this.databaseConnection.insertSegment(segment, segmentSummary);
     }
 }

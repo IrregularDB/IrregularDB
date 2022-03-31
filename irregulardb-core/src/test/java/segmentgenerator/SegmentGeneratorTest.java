@@ -10,6 +10,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import records.DataPoint;
 import records.Segment;
+import records.SegmentAndDataPointsUsed;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -51,11 +52,18 @@ class SegmentGeneratorTest {
 
         boolean isLastDataPointAccepted = segmentGenerator.acceptDataPoint(lastDataPoint);
 
-        Segment actualSegment = segmentGenerator.constructSegmentFromBuffer();
+        SegmentAndDataPointsUsed segmentAndDataPointsUsed = segmentGenerator.constructSegmentFromBuffer();
+        Segment actualSegment = segmentAndDataPointsUsed.segment();
+        List<DataPoint> dataPointsUsedForSegment = segmentAndDataPointsUsed.dataPointsUsed();
+
 
         Assertions.assertEquals(dataPoints.size(), amountSuccess);
         Assertions.assertFalse(isLastDataPointAccepted);
         Assertions.assertEquals(expectedSegment, actualSegment);
+
+        for (int i = 0; i < dataPoints.size(); i++) {
+            Assertions.assertEquals(dataPoints.get(i), dataPointsUsedForSegment.get(i));
+        }
     }
 
     private ByteBuffer constructValueDataBlob(List<DataPoint> dataPoints){

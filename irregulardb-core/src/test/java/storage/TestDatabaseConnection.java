@@ -1,11 +1,12 @@
 package storage;
 
 import records.Segment;
+import records.SegmentSummary;
 
 public class TestDatabaseConnection implements DatabaseConnection{
 
     @Override
-    public void insertSegment(Segment segment) {
+    public void insertSegment(Segment segment, SegmentSummary segmentSummary) {
     }
 
     @Override

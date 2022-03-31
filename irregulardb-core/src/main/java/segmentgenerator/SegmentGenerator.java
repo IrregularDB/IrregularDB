@@ -6,6 +6,7 @@ import records.Segment;
 import compression.timestamp.TimeStampCompressionModel;
 import compression.value.ValueCompressionModel;
 import records.DataPoint;
+import records.SegmentAndDataPointsUsed;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,7 +28,7 @@ public class SegmentGenerator {
         return compressionModelManager.tryAppendDataPointToAllModels(dataPoint);
     }
 
-    public Segment constructSegmentFromBuffer() {
+    public SegmentAndDataPointsUsed constructSegmentFromBuffer() {
         if (this.notYetEmitted.size() == 0) {
             return null;
         }
@@ -41,23 +42,24 @@ public class SegmentGenerator {
         }
 
         Segment segment = generateSegment(bestCompressionModel, notYetEmitted.get(0).timestamp(), notYetEmitted.get(amountOfDataPoints - 1).timestamp());
+        List<DataPoint> dataPointsUsedForSegment = popNFromBuffer(amountOfDataPoints);
 
-        prepareForNextSegment(amountOfDataPoints);
+        prepareForNextSegment();
 
-        return segment;
+        return new SegmentAndDataPointsUsed(segment, dataPointsUsedForSegment);
     }
 
-    private void prepareForNextSegment(int dataPointsUsedForPrevSegment) {
-        popNFromBuffer(dataPointsUsedForPrevSegment);
-
+    private void prepareForNextSegment() {
         boolean success = compressionModelManager.resetAndTryAppendBuffer(notYetEmitted);
         if (!success) {
             throw new RuntimeException("We have hit an edge case where more than one segment must be generated to accommodate the new data point");
         }
     }
 
-    private void popNFromBuffer(int n) {
-        this.notYetEmitted = notYetEmitted.subList(n, notYetEmitted.size());
+    private List<DataPoint> popNFromBuffer(int dataPointsUsedForPrevSegment) {
+        List<DataPoint> popped = notYetEmitted.subList(0, dataPointsUsedForPrevSegment);
+        this.notYetEmitted = notYetEmitted.subList(dataPointsUsedForPrevSegment, notYetEmitted.size());
+        return popped;
     }
 
     private int syncValueAndTimeStampModelLength(CompressionModel bestCompressionModel) {

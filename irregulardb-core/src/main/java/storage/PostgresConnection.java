@@ -3,19 +3,16 @@ package storage;
 import compression.utility.ModelTypeUtil;
 import config.ConfigProperties;
 import records.Segment;
+import records.SegmentSummary;
 
 import java.sql.*;
 
 public class PostgresConnection implements DatabaseConnection {
 
-    private static final String INSERT_SEGMENT_STATEMENT = "INSERT INTO Segment(time_series_id, start_time, end_time, value_timestamp_model_type, value_model_blob, timestamp_model_blob) VALUES (?,?,?,?,?,?)";
-
-    private static final String INSERT_TIME_SERIES_ID = "INSERT INTO TimeSeries (tag) VALUES (?)";
-    private static final String GET_TIME_SERIES_BY_TAG = "SELECT * FROM TimeSeries where tag = ?";
 
     private final Connection connection;
 
-    public PostgresConnection(){
+    public PostgresConnection() {
         try {
             // Instantiate database connection
             // jdbc:postgresql://localhost/test?user=fred&password=secret
@@ -27,27 +24,58 @@ public class PostgresConnection implements DatabaseConnection {
     }
 
     @Override
-    public void insertSegment(Segment segment) {
+    public void insertSegment(Segment segment, SegmentSummary segmentSummary) {
         try {
-            PreparedStatement preparedStatement = connection.prepareStatement(INSERT_SEGMENT_STATEMENT);
-            preparedStatement.setInt(1, segment.timeSeriesId());
-            preparedStatement.setLong(2, segment.startTime());
-            preparedStatement.setInt(3, (int) (segment.endTime() - segment.startTime()));
-            preparedStatement.setShort(4, ModelTypeUtil.combineTwoModelTypes(segment.valueModelType(), segment.timestampModelType())); // we are now combining the two model types
-            preparedStatement.setBytes(5, segment.valueBlob().array());
-            preparedStatement.setBytes(6, segment.timestampBlob().array());
+            PreparedStatement insertSegmentStatement = getPreparedStatementForInsertSegment(segment);
+            insertSegmentStatement.execute();
 
-            preparedStatement.execute();
+            insertSegmentSummary(segmentSummary, insertSegmentStatement.getGeneratedKeys());
 
-            preparedStatement.close();
         } catch (SQLException e) {
             System.out.println("Couldn't insert segment: " + segment.toString() + "\n\n" + e.getMessage());
         }
     }
 
+    private void insertSegmentSummary(SegmentSummary segmentSummary, ResultSet generatedKeys) throws SQLException {
+        if (segmentSummary == null) {
+            return;
+        }
+
+        if (generatedKeys.next()) {
+            int time_series_id = generatedKeys.getInt("time_series_id");
+            long start_time = generatedKeys.getLong("start_time");
+
+            PreparedStatement preparedStatementForInsertSegmentSummary = getPreparedStatementForInsertSegmentSummary(time_series_id, start_time, segmentSummary);
+            preparedStatementForInsertSegmentSummary.execute();
+        }
+    }
+
+    private PreparedStatement getPreparedStatementForInsertSegmentSummary(int timeSeriedId, long startTime, SegmentSummary segmentSummary) throws SQLException {
+        final String INSERT_SEGMENT_SUMMARY_STATEMENT = "INSERT INTO SegmentSummary(time_series_id, start_time, average) VALUES (?,?,?)";
+        PreparedStatement preparedStatement = connection.prepareStatement(INSERT_SEGMENT_SUMMARY_STATEMENT);
+        preparedStatement.setInt(1, timeSeriedId);
+        preparedStatement.setLong(2, startTime);
+        preparedStatement.setFloat(3, segmentSummary.getAverage());
+        return preparedStatement;
+    }
+
+    private PreparedStatement getPreparedStatementForInsertSegment(Segment segment) throws SQLException {
+        final String INSERT_SEGMENT_STATEMENT = "INSERT INTO Segment(time_series_id, start_time, end_time, value_timestamp_model_type, value_model_blob, timestamp_model_blob) VALUES (?,?,?,?,?,?)";
+        PreparedStatement preparedStatement = connection.prepareStatement(INSERT_SEGMENT_STATEMENT, Statement.RETURN_GENERATED_KEYS);
+        preparedStatement.setInt(1, segment.timeSeriesId());
+        preparedStatement.setLong(2, segment.startTime());
+        preparedStatement.setInt(3, (int) (segment.endTime() - segment.startTime()));
+        preparedStatement.setShort(4, ModelTypeUtil.combineTwoModelTypes(segment.valueModelType(), segment.timestampModelType())); // we are now combining the two model types
+        preparedStatement.setBytes(5, segment.valueBlob().array());
+        preparedStatement.setBytes(6, segment.timestampBlob().array());
+        return preparedStatement;
+    }
+
 
     @Override
     public int getTimeSeriesId(String timeSeriesTag) {
+        final String GET_TIME_SERIES_BY_TAG = "SELECT * FROM TimeSeries where tag = ?";
+        final String INSERT_TIME_SERIES_ID = "INSERT INTO TimeSeries (tag) VALUES (?)";
 
         try {
             PreparedStatement preparedStatement = connection.prepareStatement(GET_TIME_SERIES_BY_TAG);

@@ -61,6 +61,8 @@ public class CompressionModelFactory {
                 return new RegularTimestampCompressionModel(errorBound);
             case DELTADELTA:
                 return new DeltaDeltaTimestampCompressionModel(errorBound);
+            case SIDIFF:
+                return new SIDiffTimestampCompressionModel(errorBound);
             default:
                 throw new RuntimeException("Type not defined");
         }

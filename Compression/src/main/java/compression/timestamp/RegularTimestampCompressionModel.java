@@ -36,7 +36,7 @@ public class RegularTimestampCompressionModel extends TimestampCompressionModel 
         return appendTimestamp(dataPoint.timestamp());
     }
 
-    private boolean appendTimestamp(long timestamp) {
+    private boolean appendTimestamp(long timeStamp) {
         try {
             if (earlierAppendFailed) { // Security added so that if you try to append after an earlier append failed
                 throw new IllegalArgumentException("You tried to append to a model that had failed an earlier append");
@@ -45,12 +45,14 @@ public class RegularTimestampCompressionModel extends TimestampCompressionModel 
 
             // Special handling for first two time stamps:
             if (this.getLength() < 2) {
-                handleFirstTwoDataPoints(timestamp);
+                handleFirstTwoDataPoints(timeStamp);
                 withinThreshold = true;
             } else {
-                withinThreshold = handleOtherDataPoints(timestamp);
-                if (withinThreshold)
-                    this.nextExpectedTimestamp += si;
+                withinThreshold = handleOtherDataPoints(timeStamp);
+
+                this.nextExpectedTimestamp += si;
+                if (!withinThreshold)
+                    earlierAppendFailed = true;
             }
             return withinThreshold;
         } catch (SiConversionException e) {
@@ -92,8 +94,6 @@ public class RegularTimestampCompressionModel extends TimestampCompressionModel 
         if (doesCandidateSIFit(allTimestamps, candidateSI)) {
             this.si = candidateSI;
             fitNewSI = true;
-        } else {
-            earlierAppendFailed = true;
         }
         return fitNewSI;
     }

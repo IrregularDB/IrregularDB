@@ -10,7 +10,6 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import records.DataPoint;
 import records.Segment;
-import records.SegmentAndDataPointsUsed;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -38,7 +37,7 @@ class SegmentGeneratorTest {
 
         List<DataPoint> allDataPoints = new ArrayList<>(dataPoints);
         allDataPoints.add(lastDataPoint);
-        Segment expectedSegment = new Segment(1, 1, 6, (byte) ValueCompressionModelType.PMC_MEAN.ordinal(), constructValueDataBlob(allDataPoints), (byte) TimeStampCompressionModelType.REGULAR.ordinal(), constructTimestampDataBlob(allDataPoints));
+        Segment expectedSegment = new Segment(1, 1, 6, (byte) ValueCompressionModelType.PMC_MEAN.ordinal(), constructValueDataBlob(allDataPoints), (byte) TimeStampCompressionModelType.REGULAR.ordinal(), constructTimestampDataBlob(allDataPoints), dataPoints);
 
         float errorBound = 0;
         TestCompressionModelManagerRegularPMCMean testCompressionModelManagerRegularPMCMean = new TestCompressionModelManagerRegularPMCMean(List.of(new PMCMeanValueCompressionModel(errorBound)), List.of(new RegularTimeStampCompressionModel(errorBound)));
@@ -52,14 +51,13 @@ class SegmentGeneratorTest {
 
         boolean isLastDataPointAccepted = segmentGenerator.acceptDataPoint(lastDataPoint);
 
-        SegmentAndDataPointsUsed segmentAndDataPointsUsed = segmentGenerator.constructSegmentFromBuffer();
-        Segment actualSegment = segmentAndDataPointsUsed.segment();
-        List<DataPoint> dataPointsUsedForSegment = segmentAndDataPointsUsed.dataPointsUsed();
+        Segment segment = segmentGenerator.constructSegmentFromBuffer();
+        List<DataPoint> dataPointsUsedForSegment = segment.dataPointsUsed();
 
 
         Assertions.assertEquals(dataPoints.size(), amountSuccess);
         Assertions.assertFalse(isLastDataPointAccepted);
-        Assertions.assertEquals(expectedSegment, actualSegment);
+        Assertions.assertEquals(expectedSegment, segment);
 
         for (int i = 0; i < dataPoints.size(); i++) {
             Assertions.assertEquals(dataPoints.get(i), dataPointsUsedForSegment.get(i));

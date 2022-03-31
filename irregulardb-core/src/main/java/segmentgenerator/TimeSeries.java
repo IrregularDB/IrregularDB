@@ -4,7 +4,6 @@ import compression.CompressionModelFactory;
 import config.ConfigProperties;
 import records.DataPoint;
 import records.Segment;
-import records.SegmentAndDataPointsUsed;
 import records.SegmentSummary;
 import storage.DatabaseConnection;
 
@@ -37,15 +36,15 @@ public class TimeSeries {
     }
 
     private boolean getSegmentAndSendToDB(){
-        SegmentAndDataPointsUsed segmentAndDataPointsUsed = segmentGenerator.constructSegmentFromBuffer();
-        if (segmentAndDataPointsUsed == null) {
+        Segment segment = segmentGenerator.constructSegmentFromBuffer();
+        if (segment == null) {
             return false;
         } else {
             SegmentSummary segmentSummary = null;
             if (computeSegmentSummary) {
-                 segmentSummary = new SegmentSummary(segmentAndDataPointsUsed.dataPointsUsed());
+                 segmentSummary = new SegmentSummary(segment.dataPointsUsed());
             }
-            sendToDb(segmentAndDataPointsUsed.segment(), segmentSummary);
+            sendToDb(segment, segmentSummary);
             return true;
         }
     }

@@ -37,8 +37,8 @@ public class SocketProducer {
                     writeOnlyDataPointToSocket(timeSeriesReading.getDataPoint());
                 }
             }
-            Thread.sleep(100);
             dataOutputStream.writeByte(INDICATE_END_OF_STREAM);
+            Thread.sleep(100);
             dataOutputStream.close();
         } catch (IOException e) {
             e.printStackTrace();

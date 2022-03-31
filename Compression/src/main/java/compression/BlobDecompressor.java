@@ -77,19 +77,19 @@ public class BlobDecompressor {
     }
 
     private static List<Long> decompressSIDiff(ByteBuffer timestampBlob, long startTime){
-        BitStream bitStream = new BitStreamNew(timestampBlob);
-        SignedBucketEncoder signedBucketEncoder = new SignedBucketEncoder();
-
-        List<Integer> decodedValues = signedBucketEncoder.decodeSigned(bitStream);
-
-        int si = decodedValues.get(0);
         List<Long> timestamps = new ArrayList<>();
         timestamps.add(startTime);
 
+        BitStream bitStream = new BitStreamNew(timestampBlob);
+        SignedBucketEncoder signedBucketEncoder = new SignedBucketEncoder();
+        List<Integer> decodedValues = signedBucketEncoder.decodeSigned(bitStream);
+
+        int si = decodedValues.get(0);
+        long expectedTimestamp = startTime + si;
         for (int i = 1; i < decodedValues.size(); i++) {
             int difference = decodedValues.get(i);
-            long expectedTimestamp = startTime + (long) si * i;
             timestamps.add(expectedTimestamp + difference);
+            expectedTimestamp += si;
         }
 
         return timestamps;

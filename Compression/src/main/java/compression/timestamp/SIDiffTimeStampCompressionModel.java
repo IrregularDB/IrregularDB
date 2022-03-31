@@ -37,24 +37,25 @@ public class SIDiffTimeStampCompressionModel extends TimeStampCompressionModel {
     @Override
     protected ByteBuffer createByteBuffer() {
         List<Integer> readings = new ArrayList<>();
-
-        long firstTimestamp = timestamps.get(0);
-        int si = calculateSI(firstTimestamp);
+        int si = calculateSI();
         readings.add(si);
 
-        int allowedDerivation = (int)(si * getErrorBound());
-        List<Integer> maxValuesOfBuckets = signedBucketEncoder.getAbsoluteMaxValuesOfResizeableBuckets();
+        long firstTimestamp = timestamps.get(0);
+        int allowedDerivation = (int)(si * getErrorBound());//TODO replace with threshold
+        List<Integer> maxValuesOfBuckets = signedBucketEncoder.getMaxAbsoluteValuesOfResizeableBuckets();
 
+        long approximation = firstTimestamp + (long) si;
         // We skip the first timestamp as it is stored on the segment
         for (int i = 1; i < timestamps.size(); i++) {
-            long approximation = firstTimestamp + (long) si * i;
             int difference = calculateDifference(timestamps.get(i), approximation, maxValuesOfBuckets, allowedDerivation);
             readings.add(difference);
+            approximation += si;
         }
         return signedBucketEncoder.encode(readings).getFinishedByteBuffer();
     }
 
-    private int calculateSI(long firstTimestamp) {
+    private int calculateSI() {
+        long firstTimestamp = timestamps.get(0);
         long lastTimestamp = timestamps.get(timestamps.size() - 1);
 
         long duration = lastTimestamp - firstTimestamp;
@@ -63,11 +64,11 @@ public class SIDiffTimeStampCompressionModel extends TimeStampCompressionModel {
 
     private int calculateDifference(long currentTimestamp, long approximation, List<Integer> maxValuesOfBuckets, int allowedDerivation) {
         int difference = Math.toIntExact(currentTimestamp - approximation);
-        int absoluteValueOfDifference = Math.abs(difference);
+        int absoluteDifference = Math.abs(difference);
 
-        for (var maxValue : maxValuesOfBuckets) {
-            // We look for values that are between max value and max value + allowed derivation
-            if (maxValue <= absoluteValueOfDifference && absoluteValueOfDifference <= (maxValue + allowedDerivation)) {
+        // We look for values that are between max value and max value + allowed derivation
+        for (int maxValue : maxValuesOfBuckets) {
+            if (maxValue <= absoluteDifference && absoluteDifference <= (maxValue + allowedDerivation)) {
                 boolean isNegativeNumber = difference < 0;
                 difference = isNegativeNumber ? -1 * maxValue : maxValue;
                 break;

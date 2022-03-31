@@ -28,7 +28,7 @@ class BucketEncodingTest {
     void getMaxValues() {
         List<Integer> expectedValues = List.of(0, 511, 65535);
 
-        assertEquals(expectedValues, bucketEncoding.getAbsoluteMaxValuesOfResizeableBuckets());
+        assertEquals(expectedValues, bucketEncoding.getMaxAbsoluteValuesOfResizeableBuckets());
     }
 
     @Test

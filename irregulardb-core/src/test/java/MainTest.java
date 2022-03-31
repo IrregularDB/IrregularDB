@@ -22,9 +22,9 @@ class MainTest {
      *   src/test/resources/integration-test/10.csv
      */
     public void integrationTest() {
-        Partitioner partitioner = new IncrementPartitioner(new WorkingSetFactory(), ConfigProperties.INSTANCE.getConfiguredNumberOfWorkingSets());
+        Partitioner partitioner = new IncrementPartitioner(new WorkingSetFactory(), ConfigProperties.getInstance().getConfiguredNumberOfWorkingSets());
 
-        DataReceiverSpawner dataReceiverSpawner = new CSVDataReceiverSpawner(partitioner, ConfigProperties.INSTANCE.getCsvSources());
+        DataReceiverSpawner dataReceiverSpawner = new CSVDataReceiverSpawner(partitioner, ConfigProperties.getInstance().getCsvSources());
         dataReceiverSpawner.spawn();
     }
 

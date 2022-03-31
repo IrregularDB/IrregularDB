@@ -1,5 +1,6 @@
 package scheduling;
 
+import records.FinalizeTimeSeriesReading;
 import records.TimeSeriesReading;
 import segmentgenerator.TimeSeries;
 import segmentgenerator.TimeSeriesFactory;
@@ -47,12 +48,20 @@ public class WorkingSet {
             return false;
         }
 
-        String timeSeriesReadingKey = timeSeriesReading.tag();
-        if (!timeSeriesTagToTimeSeries.containsKey(timeSeriesReadingKey)) {
-            timeSeriesTagToTimeSeries.put(timeSeriesReadingKey, createTimeSeriesForNewKey(timeSeriesReadingKey));
+        String timeSeriesReadingKey = timeSeriesReading.getTag();
+
+        if (timeSeriesReading instanceof FinalizeTimeSeriesReading){
+            TimeSeries timeSeriesToClose = this.timeSeriesTagToTimeSeries.get(timeSeriesReadingKey);
+            timeSeriesToClose.close();
+            this.timeSeriesTagToTimeSeries.remove(timeSeriesReadingKey);
+
+        } else{
+            if (!timeSeriesTagToTimeSeries.containsKey(timeSeriesReadingKey)) {
+                timeSeriesTagToTimeSeries.put(timeSeriesReadingKey, createTimeSeriesForNewKey(timeSeriesReadingKey));
+            }
+            timeSeriesTagToTimeSeries.get(timeSeriesReadingKey).processDataPoint(timeSeriesReading.getDataPoint());
         }
 
-        timeSeriesTagToTimeSeries.get(timeSeriesReadingKey).processDataPoint(timeSeriesReading.dataPoint());
         return true;
     }
 

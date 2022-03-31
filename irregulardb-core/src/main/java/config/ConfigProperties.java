@@ -14,10 +14,25 @@ import java.util.stream.Collectors;
 
 public class ConfigProperties extends Properties{
 
-    public static final ConfigProperties INSTANCE = new ConfigProperties();
+    private static ConfigProperties INSTANCE;
+    public static boolean isTest = false;
 
-    private ConfigProperties(){
-        File file = new File("src/main/resources/config.properties");
+    public static ConfigProperties getInstance() {
+        if (INSTANCE != null) {
+            return INSTANCE;
+        }
+
+        if (!isTest) {
+            INSTANCE = new ConfigProperties("irregulardb-core/src/main/resources/config.properties");
+        } else {
+            INSTANCE = new ConfigProperties("src/test/resources/config.properties");
+        }
+        return INSTANCE;
+    }
+
+    private ConfigProperties(String path){
+        String property = System.getProperty("user.dir");
+        File file = new File(path);
         try {
             FileReader fileReader = new FileReader(file);
             load(fileReader);

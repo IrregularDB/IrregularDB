@@ -4,15 +4,6 @@ ALTER DATABASE postgres SET pljava.libjvm_location FROM CURRENT;
 
 CREATE EXTENSION pljava;
 
-truncate table sqlj.classpath_entry;
-truncate table sqlj.jar_descriptor;
-truncate table sqlj.typemap_entry;
-truncate table sqlj.jar_repository cascade ;
-truncate table sqlj.jar_entry CASCADE ;
-
-
-DROP FUNCTION decompressSegment;
-DROP FUNCTION hello;
 SELECT sqlj.remove_jar(
     'DecompressUDF', true);
 
@@ -29,6 +20,7 @@ DROP TYPE sqlDataPoint;
 CREATE TYPE sqlDataPoint AS(timeSeriesId integer, timestamp BigInt, value float);
 
 
+DROP FUNCTION decompressSegment(segment);
 CREATE FUNCTION decompressSegment(segment)
     RETURNS Setof sqlDataPoint
     AS 'SegmentDecompressor.decompressSegment'

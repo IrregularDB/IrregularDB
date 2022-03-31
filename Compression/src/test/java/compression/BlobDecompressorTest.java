@@ -12,12 +12,9 @@ import records.DataPoint;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class BlobDecompressorTest {
-    TimeStampCompressionModelType timeStampModelType;
+    TimestampCompressionModelType timeStampModelType;
     ValueCompressionModelType valueModelType;
     ByteBuffer timeStampBlob;
     ByteBuffer valueBlob;
@@ -47,7 +44,7 @@ class BlobDecompressorTest {
     }
 
     void setupRegularTimeStampModel(int si) {
-        timeStampModelType = TimeStampCompressionModelType.REGULAR;
+        timeStampModelType = TimestampCompressionModelType.REGULAR;
         timeStampBlob = ByteBuffer.allocate(4).putInt(si);
     }
 
@@ -262,7 +259,7 @@ class BlobDecompressorTest {
 
     @Test
     public void testDeltaDeltaTimeStampCompression(){
-        TimeStampCompressionModel deltaDeltaTimeStampCompression = new DeltaDeltaTimeStampCompression();
+        TimestampCompressionModel deltaDeltaTimeStampCompression = new DeltaDeltaTimestampCompression(0);
 
         List<DataPoint> dataPoints = new ArrayList<>();
         dataPoints.add(new DataPoint(0, 5.0F));
@@ -273,11 +270,11 @@ class BlobDecompressorTest {
         dataPoints.add(new DataPoint(27000, 5.0F));
         dataPoints.add(new DataPoint(Integer.MAX_VALUE, 5.0F));
 
-        dataPoints.forEach(dp -> deltaDeltaTimeStampCompression.append(dp));
+        dataPoints.forEach(deltaDeltaTimeStampCompression::append);
 
         var blobRepresentation = deltaDeltaTimeStampCompression.getBlobRepresentation();
 
-        var decodedTimestamps = BlobDecompressor.decompressTimeStamps(TimeStampCompressionModelType.DELTADELTA,
+        var decodedTimestamps = BlobDecompressor.decompressTimeStamps(TimestampCompressionModelType.DELTADELTA,
                 blobRepresentation, dataPoints.get(0).timestamp(), dataPoints.get(dataPoints.size() - 1).timestamp());
 
         for (int i = 0; i < decodedTimestamps.size(); i++){

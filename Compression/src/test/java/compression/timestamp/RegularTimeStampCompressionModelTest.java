@@ -11,10 +11,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 class RegularTimeStampCompressionModelTest {
-    RegularTimeStampCompressionModel regularModel;
+    RegularTimestampCompressionModel regularModel;
 
     // Helper method needed to be able to use reset and append all as it now takes data points
     private List<DataPoint> createDataPointsFromTimeStamps(List<Long> timeStamps) {
@@ -33,7 +31,7 @@ class RegularTimeStampCompressionModelTest {
     @BeforeEach
     void init() {
         Integer errorBound = 0;
-        regularModel = new RegularTimeStampCompressionModel(errorBound);
+        regularModel = new RegularTimestampCompressionModel(errorBound);
     }
 
     // We expect to be able to append any two data points no matter how different as then we have not SI
@@ -153,7 +151,7 @@ class RegularTimeStampCompressionModelTest {
 
         List<Long> integers = List.of(100L, 205L, 300L);
 
-        this.regularModel = new RegularTimeStampCompressionModel(errorBound);
+        this.regularModel = new RegularTimestampCompressionModel(errorBound);
         boolean success = regularModel.resetAndAppendAll(createDataPointsFromTimeStamps(integers));
 
         Assertions.assertTrue(success);
@@ -165,7 +163,7 @@ class RegularTimeStampCompressionModelTest {
 
         List<Long> integers = List.of(100L, 205L, 310L, 1000L);
 
-        this.regularModel = new RegularTimeStampCompressionModel(errorBound);
+        this.regularModel = new RegularTimestampCompressionModel(errorBound);
         boolean success = regularModel.resetAndAppendAll(createDataPointsFromTimeStamps(integers));
 
         Assertions.assertFalse(success);
@@ -176,7 +174,7 @@ class RegularTimeStampCompressionModelTest {
         int errorBound = 10000; //with a higher error-bound our candidate si = 97 should work
         List<Long> integers = List.of(100L, 205L, 310L, 1000L);
 
-        this.regularModel = new RegularTimeStampCompressionModel(errorBound);
+        this.regularModel = new RegularTimestampCompressionModel(errorBound);
         boolean success = regularModel.resetAndAppendAll(createDataPointsFromTimeStamps(integers));
 
         Assertions.assertTrue(success);

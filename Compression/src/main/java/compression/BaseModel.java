@@ -6,23 +6,11 @@ import java.nio.ByteBuffer;
 import java.util.List;
 
 public abstract class BaseModel {
-    private final Integer lengthBound;
+
     private ByteBuffer byteBuffer; //Used as a cache for a blob
 
-    /**
-     * @param lengthBound used to cutoff certain models that can always append (lossless)
-     */
-    public BaseModel(Integer lengthBound) {
-
-        this.lengthBound = lengthBound;
+    public BaseModel() {
         byteBuffer = null;
-    }
-
-    public int getLengthBound() {
-        if (lengthBound == null) {
-            throw new UnsupportedOperationException("You tried to get length bound for a model, which has no length bound defined");
-        }
-        return lengthBound;
     }
 
     protected abstract void resetModel();

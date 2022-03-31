@@ -1,9 +1,8 @@
 package segmentgenerator;
 
 import compression.CompressionModel;
-import records.FinalizeTimeSeriesReading;
 import records.Segment;
-import compression.timestamp.TimeStampCompressionModel;
+import compression.timestamp.TimestampCompressionModel;
 import compression.value.ValueCompressionModel;
 import records.DataPoint;
 
@@ -64,7 +63,7 @@ public class SegmentGenerator {
         ValueCompressionModel valueCompressionModel = bestCompressionModel.getValueCompressionModel();
         int valueCompressionModelLength = valueCompressionModel.getLength();
 
-        TimeStampCompressionModel timeStampCompressionModel = bestCompressionModel.getTimeStampCompressionModel();
+        TimestampCompressionModel timeStampCompressionModel = bestCompressionModel.getTimeStampCompressionModel();
         int timestampCompressionModelLength = timeStampCompressionModel.getLength();
 
         if (timestampCompressionModelLength > valueCompressionModelLength) {
@@ -77,7 +76,7 @@ public class SegmentGenerator {
 
     private Segment generateSegment(CompressionModel compressionModel, long startTime, long endTime) {
         ValueCompressionModel valueModel = compressionModel.getValueCompressionModel();
-        TimeStampCompressionModel timeStampModel = compressionModel.getTimeStampCompressionModel();
+        TimestampCompressionModel timeStampModel = compressionModel.getTimeStampCompressionModel();
 
         return new Segment(this.timeSeriesId, startTime, endTime, (byte) valueModel.getValueCompressionModelType().ordinal(), valueModel.getBlobRepresentation(), (byte) timeStampModel.getTimeStampCompressionModelType().ordinal(), timeStampModel.getBlobRepresentation());
     }

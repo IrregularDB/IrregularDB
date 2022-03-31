@@ -2,7 +2,7 @@ package segmentgenerator;
 
 import compression.BaseModel;
 import compression.CompressionModel;
-import compression.timestamp.TimeStampCompressionModel;
+import compression.timestamp.TimestampCompressionModel;
 import compression.value.ValueCompressionModel;
 
 import java.util.Comparator;
@@ -14,11 +14,11 @@ public class ModelPicker{
         //should not be instanciated
     }
 
-    public static CompressionModel findBestCompressionModel(List<ValueCompressionModel> valueCompressionModels, List<TimeStampCompressionModel> timeStampCompressionModels){
+    public static CompressionModel findBestCompressionModel(List<ValueCompressionModel> valueCompressionModels, List<TimestampCompressionModel> timestampCompressionModels){
         ValueCompressionModel bestValueCompressionModel = getBestValueModel(valueCompressionModels);
-        TimeStampCompressionModel bestTimeStampCompressionModel = getBestTimeStampModel(timeStampCompressionModels);
+        TimestampCompressionModel bestTimestampCompressionModel = getBestTimeStampModel(timestampCompressionModels);
 
-        return new CompressionModel(bestValueCompressionModel, bestTimeStampCompressionModel);
+        return new CompressionModel(bestValueCompressionModel, bestTimestampCompressionModel);
     }
 
     private static double calculateAmountBytesPerDataPoint(BaseModel model) {
@@ -41,8 +41,8 @@ public class ModelPicker{
                 .orElseThrow(() -> new RuntimeException("In ModelPicker:getBestValueModel() - Should not happen"));
     }
 
-    private static TimeStampCompressionModel getBestTimeStampModel(List<TimeStampCompressionModel> timeStampCompressionModels) {
-        return timeStampCompressionModels.stream()
+    private static TimestampCompressionModel getBestTimeStampModel(List<TimestampCompressionModel> timestampCompressionModels) {
+        return timestampCompressionModels.stream()
                 .min(Comparator.comparing(ModelPicker::calculateAmountBytesPerDataPoint))
                 .orElseThrow(() -> new RuntimeException("In ModelPicker:getBestTimeStampModel() - Should not happen"));    }
 }

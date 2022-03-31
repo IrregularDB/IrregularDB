@@ -1,7 +1,7 @@
 package segmentgenerator;
 
 import compression.CompressionModel;
-import compression.timestamp.TimeStampCompressionModel;
+import compression.timestamp.TimestampCompressionModel;
 import compression.value.ValueCompressionModel;
 import records.DataPoint;
 
@@ -14,14 +14,14 @@ import java.util.stream.Stream;
 public class CompressionModelManager {
 
     private List<ValueCompressionModel> activeValueModels;
-    private List<TimeStampCompressionModel> activeTimeStampModels;
+    private List<TimestampCompressionModel> activeTimeStampModels;
 
     private List<ValueCompressionModel> inactiveValueModels;
-    private List<TimeStampCompressionModel> inactiveTimestampModels;
+    private List<TimestampCompressionModel> inactiveTimestampModels;
 
-    public CompressionModelManager(List<ValueCompressionModel> valueCompressionModels, List<TimeStampCompressionModel> timeStampCompressionModels) {
+    public CompressionModelManager(List<ValueCompressionModel> valueCompressionModels, List<TimestampCompressionModel> timestampCompressionModels) {
         this.activeValueModels = new ArrayList<>(valueCompressionModels);
-        this.activeTimeStampModels = new ArrayList<>(timeStampCompressionModels);
+        this.activeTimeStampModels = new ArrayList<>(timestampCompressionModels);
 
         this.inactiveValueModels = new ArrayList<>();
         this.inactiveTimestampModels = new ArrayList<>();
@@ -37,7 +37,7 @@ public class CompressionModelManager {
         this.inactiveValueModels.addAll(valueModelsAppended.get(false));
 
         // Same for time stamp models
-        Map<Boolean, List<TimeStampCompressionModel>> timeStampModelAppended = activeTimeStampModels.stream()
+        Map<Boolean, List<TimestampCompressionModel>> timeStampModelAppended = activeTimeStampModels.stream()
                 .collect(Collectors.partitioningBy(timeStampModel -> timeStampModel.append(dataPoint)));
 
         this.activeTimeStampModels = timeStampModelAppended.get(true);
@@ -57,7 +57,7 @@ public class CompressionModelManager {
         this.inactiveValueModels = valueModelsAppended.get(false);
 
         // Same for time stamp models
-        Map<Boolean, List<TimeStampCompressionModel>> timeStampModelAppended = activeTimeStampModels.stream()
+        Map<Boolean, List<TimestampCompressionModel>> timeStampModelAppended = activeTimeStampModels.stream()
                 .collect(Collectors.partitioningBy(timeStampModel -> timeStampModel.resetAndAppendAll(notYetEmitted)));
 
         this.activeTimeStampModels = timeStampModelAppended.get(true);
@@ -69,7 +69,7 @@ public class CompressionModelManager {
 
     public CompressionModel getBestCompressionModel() {
         List<ValueCompressionModel> valueModels = Stream.concat(activeValueModels.stream(), inactiveValueModels.stream()).toList();
-        List<TimeStampCompressionModel> timeStampModels = Stream.concat(activeTimeStampModels.stream(), inactiveTimestampModels.stream()).toList();
+        List<TimestampCompressionModel> timeStampModels = Stream.concat(activeTimeStampModels.stream(), inactiveTimestampModels.stream()).toList();
         return ModelPicker.findBestCompressionModel(valueModels, timeStampModels);
     }
 }

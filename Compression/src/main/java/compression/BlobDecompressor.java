@@ -1,10 +1,9 @@
 package compression;
 
-import compression.encoding.BucketEncoding;
 import compression.encoding.GorillaValueEncoding;
 import compression.encoding.SignedBucketEncoder;
 import compression.encoding.SingleIntEncoding;
-import compression.timestamp.TimeStampCompressionModelType;
+import compression.timestamp.TimestampCompressionModelType;
 import compression.utility.BitStream.BitStream;
 import compression.utility.BitStream.BitStreamNew;
 import compression.value.ValueCompressionModelType;
@@ -12,22 +11,20 @@ import records.DataPoint;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 public class BlobDecompressor {
 
-    public static  List<DataPoint> decompressBlobs(TimeStampCompressionModelType timeStampModelType, ByteBuffer timeStampBlob,
-                                           ValueCompressionModelType valueModelType, ByteBuffer valueBlob,
-                                           Long startTime, Long endTime) {
+    public static  List<DataPoint> decompressBlobs(TimestampCompressionModelType timeStampModelType, ByteBuffer timeStampBlob,
+                                                   ValueCompressionModelType valueModelType, ByteBuffer valueBlob,
+                                                   Long startTime, Long endTime) {
         List<Long> timeStamps = decompressTimeStamps(timeStampModelType, timeStampBlob, startTime, endTime);
         return createDataPointsByDecompressingValues(valueModelType, valueBlob, timeStamps);
     }
 
-    public static List<Long> decompressTimeStamps(TimeStampCompressionModelType timeStampModelType, ByteBuffer timeStampBlob,
-                                            Long startTime, Long endTime) {
+    public static List<Long> decompressTimeStamps(TimestampCompressionModelType timeStampModelType, ByteBuffer timeStampBlob,
+                                                  Long startTime, Long endTime) {
         return switch (timeStampModelType) {
             case REGULAR -> decompressRegular(timeStampBlob, startTime, endTime);
             case DELTADELTA -> decompressDeltaDelta(timeStampBlob, startTime);

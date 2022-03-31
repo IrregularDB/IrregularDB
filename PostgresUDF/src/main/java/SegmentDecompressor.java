@@ -1,5 +1,5 @@
 import compression.BlobDecompressor;
-import compression.timestamp.TimeStampCompressionModelType;
+import compression.timestamp.TimestampCompressionModelType;
 import compression.utility.ModelTypeUtil;
 import compression.value.ValueCompressionModelType;
 import org.postgresql.pljava.ResultSetProvider;
@@ -23,7 +23,7 @@ public class SegmentDecompressor implements ResultSetProvider {
 
         this.timeSeriesId = timeSeriesId;
         this.readings = BlobDecompressor.decompressBlobs(
-                TimeStampCompressionModelType.values()[valueTimeStampModelPair.timeStampModelType()],
+                TimestampCompressionModelType.values()[valueTimeStampModelPair.timeStampModelType()],
                 ByteBuffer.wrap(timestampModelBlob),
                 ValueCompressionModelType.values()[valueTimeStampModelPair.valueModelType()],
                 ByteBuffer.wrap(valueModelBlob),

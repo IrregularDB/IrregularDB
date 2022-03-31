@@ -1,6 +1,6 @@
 package config;
 
-import compression.timestamp.TimeStampCompressionModelType;
+import compression.timestamp.TimestampCompressionModelType;
 import compression.value.ValueCompressionModelType;
 
 import java.io.File;
@@ -72,11 +72,11 @@ public class ConfigProperties extends Properties{
                 .collect(Collectors.toList());
     }
 
-    public List<TimeStampCompressionModelType> getTimeStampModels(){
+    public List<TimestampCompressionModelType> getTimeStampModels(){
         return Arrays.stream(getProperty("model.timestamp.types").split(","))
                 .map(String::trim)
                 .filter(Predicate.not(String::isEmpty))
-                .map(TimeStampCompressionModelType::valueOf)
+                .map(TimestampCompressionModelType::valueOf)
                 .collect(Collectors.toList());
     }
 

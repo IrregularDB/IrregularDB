@@ -1,7 +1,7 @@
 package compression;
 
-import compression.timestamp.TimeStampCompressionModel;
-import compression.timestamp.TimeStampCompressionModelType;
+import compression.timestamp.TimestampCompressionModel;
+import compression.timestamp.TimestampCompressionModelType;
 import compression.value.ValueCompressionModel;
 import compression.value.ValueCompressionModelType;
 import records.DataPoint;
@@ -11,9 +11,9 @@ import java.util.List;
 
 public class CompressionModel {
     private final ValueCompressionModel valueCompressionModel;
-    private final TimeStampCompressionModel timeStampCompressionModel;
+    private final TimestampCompressionModel timeStampCompressionModel;
 
-    public CompressionModel(ValueCompressionModel valueCompressionModel, TimeStampCompressionModel timeStampCompressionModel) {
+    public CompressionModel(ValueCompressionModel valueCompressionModel, TimestampCompressionModel timeStampCompressionModel) {
         this.valueCompressionModel = valueCompressionModel;
         this.timeStampCompressionModel = timeStampCompressionModel;
     }
@@ -37,7 +37,7 @@ public class CompressionModel {
         return valueCompressionModel.getValueCompressionModelType();
     }
 
-    public TimeStampCompressionModelType getTimeStampCompressionModelType() {
+    public TimestampCompressionModelType getTimeStampCompressionModelType() {
         return timeStampCompressionModel.getTimeStampCompressionModelType();
     }
 
@@ -50,7 +50,7 @@ public class CompressionModel {
         return valueCompressionModel;
     }
 
-    public TimeStampCompressionModel getTimeStampCompressionModel() {
+    public TimestampCompressionModel getTimeStampCompressionModel() {
         return timeStampCompressionModel;
     }
 }

@@ -1,7 +1,7 @@
 package segmentgenerator;
 
-import compression.timestamp.RegularTimeStampCompressionModel;
-import compression.timestamp.TimeStampCompressionModelType;
+import compression.timestamp.RegularTimestampCompressionModel;
+import compression.timestamp.TimestampCompressionModelType;
 import compression.value.PMCMeanValueCompressionModel;
 import compression.value.ValueCompressionModelType;
 import config.ConfigProperties;
@@ -37,10 +37,10 @@ class SegmentGeneratorTest {
 
         List<DataPoint> allDataPoints = new ArrayList<>(dataPoints);
         allDataPoints.add(lastDataPoint);
-        Segment expectedSegment = new Segment(1, 1, 6, (byte) ValueCompressionModelType.PMC_MEAN.ordinal(), constructValueDataBlob(allDataPoints), (byte) TimeStampCompressionModelType.REGULAR.ordinal(), constructTimestampDataBlob(allDataPoints));
+        Segment expectedSegment = new Segment(1, 1, 6, (byte) ValueCompressionModelType.PMC_MEAN.ordinal(), constructValueDataBlob(allDataPoints), (byte) TimestampCompressionModelType.REGULAR.ordinal(), constructTimestampDataBlob(allDataPoints));
 
         int errorBound = 0;
-        TestCompressionModelManagerRegularPMCMean testCompressionModelManagerRegularPMCMean = new TestCompressionModelManagerRegularPMCMean(List.of(new PMCMeanValueCompressionModel(errorBound)), List.of(new RegularTimeStampCompressionModel(errorBound)));
+        TestCompressionModelManagerRegularPMCMean testCompressionModelManagerRegularPMCMean = new TestCompressionModelManagerRegularPMCMean(List.of(new PMCMeanValueCompressionModel(errorBound)), List.of(new RegularTimestampCompressionModel(errorBound)));
 
         SegmentGenerator segmentGenerator = new SegmentGenerator(testCompressionModelManagerRegularPMCMean, 1);
 
@@ -65,7 +65,7 @@ class SegmentGeneratorTest {
     }
 
     private ByteBuffer constructTimestampDataBlob(List<DataPoint> dataPoints) {
-        RegularTimeStampCompressionModel regularTimeStampCompressionModel = new RegularTimeStampCompressionModel(0);
+        RegularTimestampCompressionModel regularTimeStampCompressionModel = new RegularTimestampCompressionModel(0);
         regularTimeStampCompressionModel.resetAndAppendAll(dataPoints);
         return regularTimeStampCompressionModel.getBlobRepresentation();
     }

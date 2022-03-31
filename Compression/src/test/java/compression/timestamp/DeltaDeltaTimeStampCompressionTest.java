@@ -9,19 +9,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 class DeltaDeltaTimeStampCompressionTest {
 
     Random random = new Random();
     long previousLong;
     float previousFloat;
     List<DataPoint> dataPoints = createTenDataPoints();
-    private DeltaDeltaTimeStampCompression deltaDeltaTimeStampCompression;
+    private DeltaDeltaTimestampCompression deltaDeltaTimeStampCompression;
 
     @BeforeEach
     void beforeEach(){
-        deltaDeltaTimeStampCompression = new DeltaDeltaTimeStampCompression();
+        deltaDeltaTimeStampCompression = new DeltaDeltaTimestampCompression(0);
     }
 
     @Test

@@ -15,8 +15,8 @@ public class CompressionModelFactory {
     static ConfigProperties config = ConfigProperties.getInstance();
 
 
-    public static List<TimeStampCompressionModel> getTimestampCompressionModels(String tag){
-        List<TimeStampCompressionModelType> timeStampModelTypes =  config.getTimeStampModels();
+    public static List<TimestampCompressionModel> getTimestampCompressionModels(String tag){
+        List<TimestampCompressionModelType> timeStampModelTypes =  config.getTimeStampModels();
 
         final Optional<Integer> timestampModelErrorBound = config.getTimeStampErrorBoundForTimeSeriesTagIfExists(tag);
         int timestampModelThreshold = timestampModelErrorBound.orElseGet(() -> config.getTimestampModelErrorBound());
@@ -55,12 +55,12 @@ public class CompressionModelFactory {
     }
 
 
-    private static TimeStampCompressionModel getTimestampCompressionModelByType(TimeStampCompressionModelType timeStampCompressionModelType, Integer errorBound) {
-        switch (timeStampCompressionModelType){
+    private static TimestampCompressionModel getTimestampCompressionModelByType(TimestampCompressionModelType timestampCompressionModelType, Integer errorBound) {
+        switch (timestampCompressionModelType){
             case REGULAR:
-                return new RegularTimeStampCompressionModel(errorBound);
+                return new RegularTimestampCompressionModel(errorBound);
             case DELTADELTA:
-                return new DeltaDeltaTimeStampCompression();
+                return new DeltaDeltaTimestampCompression(errorBound);
             default:
                 throw new RuntimeException("Type not defined");
         }

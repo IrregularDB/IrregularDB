@@ -7,15 +7,14 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RegularTimeStampCompressionModel extends TimeStampCompressionModel {
+public class RegularTimestampCompressionModel extends TimestampCompressionModel {
     private int si;
     private boolean earlierAppendFailed;
     private List<Long> timeStamps;
     private long nextExpectedTimestamp;
 
-    // TODO: update this constructor when adding error-bound
-    public RegularTimeStampCompressionModel(Integer errorBound) {
-        super(errorBound, null);
+    public RegularTimestampCompressionModel(Integer threshold) {
+        super(threshold);
         this.resetModel();
     }
 
@@ -142,8 +141,8 @@ public class RegularTimeStampCompressionModel extends TimeStampCompressionModel 
     }
 
     @Override
-    public TimeStampCompressionModelType getTimeStampCompressionModelType() {
-        return TimeStampCompressionModelType.REGULAR;
+    public TimestampCompressionModelType getTimeStampCompressionModelType() {
+        return TimestampCompressionModelType.REGULAR;
     }
 
     @Override

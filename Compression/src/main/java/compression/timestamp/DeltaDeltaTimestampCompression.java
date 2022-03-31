@@ -7,14 +7,14 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DeltaDeltaTimeStampCompression extends TimeStampCompressionModel{
+public class DeltaDeltaTimestampCompression extends TimestampCompressionModel {
     private final SignedBucketEncoder signedBucketEncoder;
     private List<Integer> deltaDeltaTimeStamps;
     private Long previousValue = null;
     private Integer previousDelta;
 
-    public DeltaDeltaTimeStampCompression() {
-        super(null, null);
+    public DeltaDeltaTimestampCompression(Integer threshold) {
+        super(threshold);
         // We make this a field so that we don't have to allocate a new signed bucket encoder each time get byte buffer is called
         signedBucketEncoder = new SignedBucketEncoder();
         resetModel();
@@ -67,7 +67,7 @@ public class DeltaDeltaTimeStampCompression extends TimeStampCompressionModel{
     }
 
     @Override
-    public TimeStampCompressionModelType getTimeStampCompressionModelType() {
-        return TimeStampCompressionModelType.DELTADELTA;
+    public TimestampCompressionModelType getTimeStampCompressionModelType() {
+        return TimestampCompressionModelType.DELTADELTA;
     }
 }

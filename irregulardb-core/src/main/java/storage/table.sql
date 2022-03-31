@@ -29,11 +29,10 @@ CREATE TABLE Segment(
 CREATE TABLE SegmentSummary(
     time_series_id int not null,
     start_time bigint not null,
-    average real,
+    minValue real,
+    maxValue real,
     CONSTRAINT fk_segmentSummary_ts_key_to_segment
         FOREIGN KEY(time_series_id, start_time) REFERENCES Segment(time_series_id, start_time),
     CONSTRAINT pk_segmentSummary_timeId_startTime
         PRIMARY KEY (time_series_id, start_time)
 );
-
-INSERT INTO SegmentSummary (time_series_id, start_time, average) VALUES (?,?,?);

@@ -51,11 +51,12 @@ public class PostgresConnection implements DatabaseConnection {
     }
 
     private PreparedStatement getPreparedStatementForInsertSegmentSummary(int timeSeriedId, long startTime, SegmentSummary segmentSummary) throws SQLException {
-        final String INSERT_SEGMENT_SUMMARY_STATEMENT = "INSERT INTO SegmentSummary(time_series_id, start_time, average) VALUES (?,?,?)";
+        final String INSERT_SEGMENT_SUMMARY_STATEMENT = "INSERT INTO SegmentSummary(time_series_id, start_time, minValue, maxvalue) VALUES (?,?,?,?)";
         PreparedStatement preparedStatement = connection.prepareStatement(INSERT_SEGMENT_SUMMARY_STATEMENT);
         preparedStatement.setInt(1, timeSeriedId);
         preparedStatement.setLong(2, startTime);
-        preparedStatement.setFloat(3, segmentSummary.getAverage());
+        preparedStatement.setFloat(3, segmentSummary.getMinValue());
+        preparedStatement.setFloat(4, segmentSummary.getMaxValue());
         return preparedStatement;
     }
 

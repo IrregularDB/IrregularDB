@@ -18,6 +18,7 @@ public abstract class DataReceiver {
     }
 
     protected void sendTimeSeriesReadingToBuffer(TimeSeriesReading timeSeriesReading){
+
         timeSeriesTagsEmitted.add(timeSeriesReading.getTag());
         this.workingSet.accept(timeSeriesReading);
     }
@@ -26,7 +27,7 @@ public abstract class DataReceiver {
 
     public void close(){
         for (String tag : timeSeriesTagsEmitted) {
-            this.workingSet.accept(new FinalizeTimeSeriesReading(tag, null));
+            this.workingSet.accept(new FinalizeTimeSeriesReading(tag));
         }
     }
 }

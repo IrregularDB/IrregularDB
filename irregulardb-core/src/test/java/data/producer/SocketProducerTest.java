@@ -20,6 +20,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 class SocketProducerTest {
+
     @BeforeAll
     public static void setupConfig(){
         ConfigProperties.isTest = true;
@@ -46,12 +47,15 @@ class SocketProducerTest {
     @Test
     void connectAndSendData() {
         int serverSocketPort = ConfigProperties.getInstance().getSocketDataReceiverSpawnerPort();
+
         Queue<TimeSeriesReading> workingSetBuffer = new ConcurrentLinkedQueue<>();
         TestPartitioner testPartitioner = new TestPartitioner(workingSetBuffer);
+
         SocketDataReceiverSpawner socketDataReceiverSpawner = new SocketDataReceiverSpawner(testPartitioner, serverSocketPort);
         socketDataReceiverSpawner.spawn();
 
         List<TimeSeriesReading> testData = getNTestDataForTag("key1", 10);
+
         SocketProducer socketProducer = new SocketProducer(testData, "localhost", serverSocketPort);
         socketProducer.connectAndSendData();
 

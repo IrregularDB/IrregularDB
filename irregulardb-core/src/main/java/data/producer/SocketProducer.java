@@ -10,6 +10,8 @@ import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
+import static sources.SocketDataReceiver.INDICATE_END_OF_STREAM;
+
 public class SocketProducer {
     private final List<TimeSeriesReading> timeSeriesReadings;
     private final String serverIp;
@@ -36,6 +38,7 @@ public class SocketProducer {
                 }
             }
             Thread.sleep(100);
+            dataOutputStream.writeByte(INDICATE_END_OF_STREAM);
             dataOutputStream.close();
         } catch (IOException e) {
             e.printStackTrace();

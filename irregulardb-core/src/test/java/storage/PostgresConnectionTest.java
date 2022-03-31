@@ -18,27 +18,27 @@ class PostgresConnectionTest {
         ConfigProperties.isTest = true;
     }
 
-    private final PostgresConnection postgresConnection = new PostgresConnection();
+//    private final PostgresConnection postgresConnection = new PostgresConnection();
 
 
     //@Test
-    public void testDBInsertsTimeSeries(){
-        int id1 = postgresConnection.getTimeSeriesId("key1");
-        int id2 = postgresConnection.getTimeSeriesId("key2");
-        int id3 = postgresConnection.getTimeSeriesId("key1");
-
-        Assertions.assertEquals(1, id1);
-        Assertions.assertEquals(2, id2);
-        Assertions.assertEquals(1, id3);
-    }
+//    public void testDBInsertsTimeSeries(){
+//        int id1 = postgresConnection.getTimeSeriesId("key1");
+//        int id2 = postgresConnection.getTimeSeriesId("key2");
+//        int id3 = postgresConnection.getTimeSeriesId("key1");
+//
+//        Assertions.assertEquals(1, id1);
+//        Assertions.assertEquals(2, id2);
+//        Assertions.assertEquals(1, id3);
+//    }
 
     //@Test
-    public void testDBInsertsSegment(){
-        byte valueModelTypeId = 0b1;
-        byte timeStampModelTypeId = 0b1;
-        Segment segment = new Segment(1, 111L,222L, valueModelTypeId, ByteBuffer.allocate(0), timeStampModelTypeId, ByteBuffer.allocate(0));
-        this.postgresConnection.insertSegment(segment);
-    }
+//    public void testDBInsertsSegment(){
+//        byte valueModelTypeId = 0b1;
+//        byte timeStampModelTypeId = 0b1;
+//        Segment segment = new Segment(1, 111L,222L, valueModelTypeId, ByteBuffer.allocate(0), timeStampModelTypeId, ByteBuffer.allocate(0));
+//        this.postgresConnection.insertSegment(segment);
+//    }
 
 
     @Test

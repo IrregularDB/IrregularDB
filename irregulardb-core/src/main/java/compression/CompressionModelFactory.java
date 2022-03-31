@@ -5,29 +5,30 @@ import compression.value.*;
 import config.ConfigProperties;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static compression.timestamp.TimeStampCompressionModelType.*;
-import static compression.value.ValueCompressionModelType.*;
-import static compression.value.ValueCompressionModelType.PMC_MEAN;
 
 public class CompressionModelFactory {
 
     static ConfigProperties config = ConfigProperties.getInstance();
 
 
-    public static List<TimeStampCompressionModel> getTimestampCompressionModels(){
+    public static List<TimeStampCompressionModel> getTimestampCompressionModels(String tag){
         List<TimeStampCompressionModelType> timeStampModelTypes =  config.getTimeStampModels();
-        final float timestampModelErrorBound = config.getTimeStampModelErrorBound();
 
-        return getCompressionModels(timeStampModelTypes, (modelType) -> getTimestampCompressionModelByType(modelType, timestampModelErrorBound));
+        final Optional<Integer> timestampModelErrorBound = config.getTimeStampErrorBoundForTimeSeriesTagIfExists(tag);
+        int timestampModelThreshold = timestampModelErrorBound.orElseGet(() -> config.getTimeStampModelErrorBound());
+
+        return getCompressionModels(timeStampModelTypes, (modelType) -> getTimestampCompressionModelByType(modelType, timestampModelThreshold));
     }
 
 
-    public static List<ValueCompressionModel> getValueCompressionModels() {
+    public static List<ValueCompressionModel> getValueCompressionModels(String tag) {
         List<ValueCompressionModelType> valueModelTypes =  config.getValueModels();
-        final float valueModelErrorBound = config.getValueModelErrorBound();
+        final Optional<Float> timestampModelErrorBound = config.getValueErrorBoundForTimeSeriesTagIfExists(tag);
+        float valueModelErrorBound = timestampModelErrorBound.orElseGet(() -> config.getValueModelErrorBound());
 
         return getCompressionModels(valueModelTypes, (modelType) -> CompressionModelFactory.getValueCompressionModelByType(modelType, valueModelErrorBound));
     }
@@ -54,12 +55,10 @@ public class CompressionModelFactory {
     }
 
 
-    private static TimeStampCompressionModel getTimestampCompressionModelByType(TimeStampCompressionModelType timeStampCompressionModelType, float errorBound) {
+    private static TimeStampCompressionModel getTimestampCompressionModelByType(TimeStampCompressionModelType timeStampCompressionModelType, Integer errorBound) {
         switch (timeStampCompressionModelType){
             case REGULAR:
                 return new RegularTimeStampCompressionModel(errorBound);
-            case DELTAPAIRS:
-                return new DeltaPairsTimeStampCompressionModel();
             case DELTADELTA:
                 return new DeltaDeltaTimeStampCompression();
             default:

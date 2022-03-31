@@ -64,7 +64,7 @@ public class TestCompressionModelManagerRegularPMCMean extends CompressionModelM
             PMCMeanValueCompressionModel pmcMeanValueCompressionModel = new PMCMeanValueCompressionModel(errorBound);
             pmcMeanValueCompressionModel.resetAndAppendAll(acceptedDataPoints);
 
-            RegularTimeStampCompressionModel regularTimeStampCompressionModel = new RegularTimeStampCompressionModel(errorBound);
+            RegularTimeStampCompressionModel regularTimeStampCompressionModel = new RegularTimeStampCompressionModel(0);
             regularTimeStampCompressionModel.resetAndAppendAll(acceptedDataPoints);
 
             return new CompressionModel(pmcMeanValueCompressionModel, regularTimeStampCompressionModel);

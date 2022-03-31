@@ -32,7 +32,7 @@ class RegularTimeStampCompressionModelTest {
 
     @BeforeEach
     void init() {
-        float errorBound = 0;
+        Integer errorBound = 0;
         regularModel = new RegularTimeStampCompressionModel(errorBound);
     }
 
@@ -149,7 +149,7 @@ class RegularTimeStampCompressionModelTest {
     @Test
     void sunshineErrorBoundTest(){
 
-        float errorBound = 0.1F * 100;
+        int errorBound = 10;
 
         List<Long> integers = List.of(100L, 205L, 300L);
 
@@ -161,9 +161,9 @@ class RegularTimeStampCompressionModelTest {
 
     @Test
     void sunshineErrorTest(){
-        float errorBound = 0.10F * 100; // errorbound is given as a percentage i.e. 10% here
+        int errorBound = 10;
 
-        List<Long> integers = List.of(100L, 205L, 310L, 390L);
+        List<Long> integers = List.of(100L, 205L, 310L, 1000L);
 
         this.regularModel = new RegularTimeStampCompressionModel(errorBound);
         boolean success = regularModel.resetAndAppendAll(createDataPointsFromTimeStamps(integers));
@@ -173,8 +173,8 @@ class RegularTimeStampCompressionModelTest {
 
     @Test
     void sunshineErrorTestWithHigherErrorBound(){
-        float errorBound = 0.2F * 100; //with a higher error-bound our candidate si = 97 should work
-        List<Long> integers = List.of(100L, 205L, 310L, 390L);
+        int errorBound = 10000; //with a higher error-bound our candidate si = 97 should work
+        List<Long> integers = List.of(100L, 205L, 310L, 1000L);
 
         this.regularModel = new RegularTimeStampCompressionModel(errorBound);
         boolean success = regularModel.resetAndAppendAll(createDataPointsFromTimeStamps(integers));

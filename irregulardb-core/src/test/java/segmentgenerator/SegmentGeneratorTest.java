@@ -39,7 +39,7 @@ class SegmentGeneratorTest {
         allDataPoints.add(lastDataPoint);
         Segment expectedSegment = new Segment(1, 1, 6, (byte) ValueCompressionModelType.PMC_MEAN.ordinal(), constructValueDataBlob(allDataPoints), (byte) TimeStampCompressionModelType.REGULAR.ordinal(), constructTimestampDataBlob(allDataPoints));
 
-        float errorBound = 0;
+        int errorBound = 0;
         TestCompressionModelManagerRegularPMCMean testCompressionModelManagerRegularPMCMean = new TestCompressionModelManagerRegularPMCMean(List.of(new PMCMeanValueCompressionModel(errorBound)), List.of(new RegularTimeStampCompressionModel(errorBound)));
 
         SegmentGenerator segmentGenerator = new SegmentGenerator(testCompressionModelManagerRegularPMCMean, 1);

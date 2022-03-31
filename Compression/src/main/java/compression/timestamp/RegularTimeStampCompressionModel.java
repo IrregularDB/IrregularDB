@@ -14,7 +14,7 @@ public class RegularTimeStampCompressionModel extends TimeStampCompressionModel 
     private long nextExpectedTimestamp;
 
     // TODO: update this constructor when adding error-bound
-    public RegularTimeStampCompressionModel(float errorBound) {
+    public RegularTimeStampCompressionModel(Integer errorBound) {
         super(errorBound, null);
         this.resetModel();
     }

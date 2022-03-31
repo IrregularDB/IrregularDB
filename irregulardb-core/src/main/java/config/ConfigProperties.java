@@ -81,7 +81,7 @@ public class ConfigProperties extends Properties{
     }
 
     public Integer getTimestampModelErrorBound(){
-        return Integer.parseInt(getProperty("model.timestamp.errorbound"));
+        return Integer.parseInt(getProperty("model.timestamp.threshold"));
     }
 
     public float getValueModelErrorBound(){
@@ -121,7 +121,7 @@ public class ConfigProperties extends Properties{
         for (Enumeration<?> e = propertyNames(); e.hasMoreElements(); ) {
             String name = (String)e.nextElement();
 
-            if (name.startsWith("model.timestamp.errorbound.")) {
+            if (name.startsWith("model.timestamp.threshold.")) {
                 String value = getProperty(name);
                 this.timestampErrorBounds.put(name, Integer.parseInt(value));
             }

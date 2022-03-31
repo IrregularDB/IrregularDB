@@ -70,7 +70,7 @@ public class RegularTimestampCompressionModel extends TimestampCompressionModel 
     }
 
     private boolean handleOtherDataPoints(long timeStamp) {
-        boolean withinErrorBound = isTimeStampWithinErrorBound(timeStamp, nextExpectedTimestamp, this.si, getErrorBound());
+        boolean withinErrorBound = isTimeStampWithinErrorBound(timeStamp, nextExpectedTimestamp, getThreshold());
         if (withinErrorBound) {
             timeStamps.add(timeStamp);
         } else {
@@ -108,7 +108,7 @@ public class RegularTimestampCompressionModel extends TimestampCompressionModel 
         long localNextExpectedTimestamp = startTime + candidateSI;
 
         for (int i = 1; i < allTimestamps.size(); i++) {
-            boolean timeStampWithinErrorBound = isTimeStampWithinErrorBound(allTimestamps.get(i), localNextExpectedTimestamp, candidateSI, getErrorBound());
+            boolean timeStampWithinErrorBound = isTimeStampWithinErrorBound(allTimestamps.get(i), localNextExpectedTimestamp, getThreshold());
             if (!timeStampWithinErrorBound) {
                 return false;
             }
@@ -117,19 +117,13 @@ public class RegularTimestampCompressionModel extends TimestampCompressionModel 
         return true;
     }
 
-    private static boolean isTimeStampWithinErrorBound(long timeStamp, long nextExpectedTimestamp, int si, float errorBound) {
-        int actualDifference = calculateDifference(timeStamp, nextExpectedTimestamp);
-        double percentageError = actualDifference / ((double)si);
-        return percentageError <= errorBound;
+    private static boolean isTimeStampWithinErrorBound(long timestamp, long nextExpectedTimestamp, Integer threshold) {
+        int actualDifference = calculateDifference(timestamp, nextExpectedTimestamp);
+        return actualDifference <= threshold;
     }
 
-    private static int calculateDifference(long timestamp1, long timeStamp2) {
-        long difference = Math.abs(timeStamp2 - timestamp1);
-
-        if (difference < Integer.MIN_VALUE || difference > Integer.MAX_VALUE) {
-            throw new SiConversionException(difference  + " the difference in timestamps cannot be cast to int without changing its value.");
-        }
-        return (int) difference;
+    private static int calculateDifference(long timestamp1, long timestamp2) {
+        return Math.abs(Math.toIntExact(timestamp2 - timestamp1));
     }
 
     @Override

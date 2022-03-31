@@ -11,8 +11,8 @@ public class SIDiffTimestampCompressionModel extends TimestampCompressionModel {
     private final SignedBucketEncoder signedBucketEncoder;
     private List<Long> timestamps;
 
-    public SIDiffTimestampCompressionModel(Integer errorBound) {
-        super(errorBound);
+    public SIDiffTimestampCompressionModel(Integer threshold) {
+        super(threshold);
         // We make this a field so that we don't have to allocate a new signed bucket encoder each time get byte buffer is called
         signedBucketEncoder = new SignedBucketEncoder();
         this.resetModel();
@@ -41,7 +41,7 @@ public class SIDiffTimestampCompressionModel extends TimestampCompressionModel {
         readings.add(si);
 
         long firstTimestamp = timestamps.get(0);
-        int allowedDerivation = (int)(si * getErrorBound());//TODO replace with threshold
+        int allowedDerivation = getThreshold();
         List<Integer> maxValuesOfBuckets = signedBucketEncoder.getMaxAbsoluteValuesOfResizeableBuckets();
 
         long approximation = firstTimestamp + (long) si;

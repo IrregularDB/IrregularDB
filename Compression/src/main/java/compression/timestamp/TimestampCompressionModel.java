@@ -3,11 +3,11 @@ package compression.timestamp;
 import compression.BaseModel;
 
 public abstract class TimestampCompressionModel extends BaseModel {
-    private final Integer errorBound;
+    private final Integer threshold;
 
     public TimestampCompressionModel(Integer threshold) {
         super();
-        this.errorBound = threshold;
+        this.threshold = threshold;
     }
 
     /**
@@ -16,11 +16,11 @@ public abstract class TimestampCompressionModel extends BaseModel {
      */
     public abstract TimestampCompressionModelType getTimeStampCompressionModelType();
 
-    public Integer getErrorBound() {
-        if (errorBound == null) {
+    public Integer getThreshold() {
+        if (threshold == null) {
             throw new UnsupportedOperationException("You tried to get error bound for a model, which has no error bound defined");
         }
-        return errorBound;
+        return threshold;
     }
 }
 

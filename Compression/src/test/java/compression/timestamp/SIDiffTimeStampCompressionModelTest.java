@@ -14,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class SIDiffTimeStampCompressionModelTest {
     Random random;
-    private TimeStampCompressionModel siDiffTimestampModelType;
+    private TimestampCompressionModel siDiffTimestampModelType;
 
 
     // Helper that creates random data points in increasing order
@@ -38,8 +38,8 @@ class SIDiffTimeStampCompressionModelTest {
 
     @BeforeEach
     void beforeEach(){
-        float errorBound = 0;
-        siDiffTimestampModelType = new SIDiffTimeStampCompressionModel(errorBound);
+        Integer errorBound = 0;
+        siDiffTimestampModelType = new SIDiffTimestampCompressionModel(errorBound);
         random = new Random();
     }
 
@@ -109,7 +109,7 @@ class SIDiffTimeStampCompressionModelTest {
 
         var blobRepresentation = siDiffTimestampModelType.getBlobRepresentation();
 
-        var decodedValues = BlobDecompressor.decompressTimeStamps(TimeStampCompressionModelType.SIDIFF,
+        var decodedValues = BlobDecompressor.decompressTimeStamps(TimestampCompressionModelType.SIDIFF,
                 blobRepresentation, dataPoints.get(0).timestamp(), dataPoints.get(dataPoints.size() - 1).timestamp());
 
         for (int i = 0; i < decodedValues.size(); i++){

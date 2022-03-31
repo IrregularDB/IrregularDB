@@ -259,7 +259,7 @@ class BlobDecompressorTest {
 
     @Test
     public void testDeltaDeltaTimeStampCompression(){
-        TimestampCompressionModel deltaDeltaTimeStampCompression = new DeltaDeltaTimestampCompression(0);
+        TimestampCompressionModel deltaDeltaTimeStampCompression = new DeltaDeltaTimestampCompressionModel(0);
 
         List<DataPoint> dataPoints = new ArrayList<>();
         dataPoints.add(new DataPoint(0, 5.0F));

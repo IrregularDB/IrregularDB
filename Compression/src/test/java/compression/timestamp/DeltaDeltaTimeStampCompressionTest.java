@@ -15,17 +15,17 @@ class DeltaDeltaTimeStampCompressionTest {
     long previousLong;
     float previousFloat;
     List<DataPoint> dataPoints = createTenDataPoints();
-    private DeltaDeltaTimestampCompression deltaDeltaTimeStampCompression;
+    private DeltaDeltaTimestampCompressionModel deltaDeltaTimeStampCompressionModel;
 
     @BeforeEach
     void beforeEach(){
-        deltaDeltaTimeStampCompression = new DeltaDeltaTimestampCompression(0);
+        deltaDeltaTimeStampCompressionModel = new DeltaDeltaTimestampCompressionModel(0);
     }
 
     @Test
     public void testModelAppendsTwice(){
-        boolean append1 = deltaDeltaTimeStampCompression.append(createDataPoint());
-        boolean append2 = deltaDeltaTimeStampCompression.append(createDataPoint());
+        boolean append1 = deltaDeltaTimeStampCompressionModel.append(createDataPoint());
+        boolean append2 = deltaDeltaTimeStampCompressionModel.append(createDataPoint());
 
         Assertions.assertTrue(append1);
         Assertions.assertTrue(append2);
@@ -33,13 +33,13 @@ class DeltaDeltaTimeStampCompressionTest {
 
     @Test
     public void testModelResets(){
-        deltaDeltaTimeStampCompression.append(createDataPoint());
-        deltaDeltaTimeStampCompression.append(createDataPoint());
-        deltaDeltaTimeStampCompression.append(createDataPoint());
+        deltaDeltaTimeStampCompressionModel.append(createDataPoint());
+        deltaDeltaTimeStampCompressionModel.append(createDataPoint());
+        deltaDeltaTimeStampCompressionModel.append(createDataPoint());
 
         List<DataPoint> dataPointList = createTenDataPoints();
-        boolean success = deltaDeltaTimeStampCompression.resetAndAppendAll(dataPointList);
-        int actualLength = deltaDeltaTimeStampCompression.getLength();
+        boolean success = deltaDeltaTimeStampCompressionModel.resetAndAppendAll(dataPointList);
+        int actualLength = deltaDeltaTimeStampCompressionModel.getLength();
 
         Assertions.assertTrue(success);
         Assertions.assertEquals(10, actualLength);
@@ -47,9 +47,9 @@ class DeltaDeltaTimeStampCompressionTest {
 
     @Test
     public void testReduceSizeToN(){
-        dataPoints.forEach(dp -> deltaDeltaTimeStampCompression.append(dp));
-        deltaDeltaTimeStampCompression.reduceToSizeN(5);
-        int actualAmountOfTimeStamps = deltaDeltaTimeStampCompression.getLength();
+        dataPoints.forEach(dp -> deltaDeltaTimeStampCompressionModel.append(dp));
+        deltaDeltaTimeStampCompressionModel.reduceToSizeN(5);
+        int actualAmountOfTimeStamps = deltaDeltaTimeStampCompressionModel.getLength();
 
         // Assert list has 5 data points
         Assertions.assertEquals(5, actualAmountOfTimeStamps);
@@ -57,23 +57,23 @@ class DeltaDeltaTimeStampCompressionTest {
 
     @Test
     public void testReduceSizeWithNumberOfTimeStamps(){
-        dataPoints.forEach(dp -> deltaDeltaTimeStampCompression.append(dp));
+        dataPoints.forEach(dp -> deltaDeltaTimeStampCompressionModel.append(dp));
         int expectedAmountTimestamps = dataPoints.size();
-        deltaDeltaTimeStampCompression.reduceToSizeN(expectedAmountTimestamps);
+        deltaDeltaTimeStampCompressionModel.reduceToSizeN(expectedAmountTimestamps);
 
-        Assertions.assertEquals(expectedAmountTimestamps, deltaDeltaTimeStampCompression.getLength());
+        Assertions.assertEquals(expectedAmountTimestamps, deltaDeltaTimeStampCompressionModel.getLength());
     }
 
     @Test
     public void testReduceSizeWithZeroThrowsException(){
-        dataPoints.forEach(dp -> deltaDeltaTimeStampCompression.append(dp));
-        Assertions.assertThrows(IllegalArgumentException.class, () -> deltaDeltaTimeStampCompression.reduceToSizeN(0));
+        dataPoints.forEach(dp -> deltaDeltaTimeStampCompressionModel.append(dp));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> deltaDeltaTimeStampCompressionModel.reduceToSizeN(0));
     }
 
     @Test
     public void testReduceSizeWithMoreThanListSizeThrowsException(){
-        dataPoints.forEach(dp -> deltaDeltaTimeStampCompression.append(dp));
-        Assertions.assertThrows(IllegalArgumentException.class, () -> deltaDeltaTimeStampCompression.reduceToSizeN(20));
+        dataPoints.forEach(dp -> deltaDeltaTimeStampCompressionModel.append(dp));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> deltaDeltaTimeStampCompressionModel.reduceToSizeN(20));
     }
 
     // Helper that creates random data points in increasing order

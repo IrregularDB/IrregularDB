@@ -1,3 +1,4 @@
+DROP TABLE IF EXISTS SegmentSummary;
 DROP TABLE IF EXISTS Segment;
 DROP TABLE IF EXISTS TimeSeries;
 DROP SEQUENCE IF EXISTS TimeSeriesIdSequence;
@@ -22,5 +23,16 @@ CREATE TABLE Segment(
                     FOREIGN KEY(time_series_id)
                     REFERENCES TimeSeries(id)
                     ON DELETE CASCADE,
-    CONSTRAINT pk_timeId_startTime primary key(time_series_id, start_time)
+    CONSTRAINT pk_segment_timeId_startTime primary key(time_series_id, start_time)
+);
+
+CREATE TABLE SegmentSummary(
+    time_series_id int not null,
+    start_time bigint not null,
+    minValue real,
+    maxValue real,
+    CONSTRAINT fk_segmentSummary_ts_key_to_segment
+        FOREIGN KEY(time_series_id, start_time) REFERENCES Segment(time_series_id, start_time),
+    CONSTRAINT pk_segmentSummary_timeId_startTime
+        PRIMARY KEY (time_series_id, start_time)
 );

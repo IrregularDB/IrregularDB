@@ -1,14 +1,16 @@
 package storage;
 
 import records.Segment;
+import records.SegmentSummary;
 
 public interface DatabaseConnection {
 
     /**
      * Inserts a segment in the segment table.
      * @param segment the segment to insert
+     * @param segmentSummary null is allowed
      */
-    void insertSegment(Segment segment);
+    void insertSegment(Segment segment, SegmentSummary segmentSummary);
 
     /**
      * Gets timeSeriesId from timeSeriesTag. If not already in database

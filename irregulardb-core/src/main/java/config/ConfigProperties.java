@@ -116,7 +116,11 @@ public class ConfigProperties extends Properties{
         }
     }
 
+    public boolean populateSegmentSummary(){
+        return Boolean.parseBoolean(getProperty("model.segment.compute.summary", "true"));
+    }
     /* Private methods */
+
     private void parseAllTimestampThresholds(){
         for (Enumeration<?> e = propertyNames(); e.hasMoreElements(); ) {
             String name = (String)e.nextElement();

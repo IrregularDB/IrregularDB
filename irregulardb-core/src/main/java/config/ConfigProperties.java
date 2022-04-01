@@ -96,8 +96,8 @@ public class ConfigProperties extends Properties{
         return Integer.parseInt(getProperty("source.socket.port"));
     }
 
-    public int getValueModelLengthBound(){
-        return Integer.parseInt(getProperty("model.value.length_bound"));
+    public int getModelLengthBound(){
+        return Integer.parseInt(getProperty("model.length_bound"));
     }
 
     public Integer getTimeStampThresholdForTimeSeriesTag(String tag){

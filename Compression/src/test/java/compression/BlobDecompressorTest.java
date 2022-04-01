@@ -83,7 +83,7 @@ class BlobDecompressorTest {
 
     void setupGorillaValueModel(List<DataPoint> dataPoints) {
         valueModelType = ValueCompressionModelType.GORILLA;
-        ValueCompressionModel gorillaModel = new GorillaValueCompressionModel(dataPoints.size());
+        ValueCompressionModel gorillaModel = new GorillaValueCompressionModel();
         gorillaModel.resetAndAppendAll(dataPoints);
         valueBlob = gorillaModel.getBlobRepresentation();
     }

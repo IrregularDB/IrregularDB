@@ -47,14 +47,14 @@ public class SegmentGenerator {
     }
 
     private void prepareForNextSegment(int amountOfDataPointsUsedInSegment) {
-        popNFromBuffer(amountOfDataPointsUsedInSegment);
+        removeNOldestFromBuffer(amountOfDataPointsUsedInSegment);
         boolean success = compressionModelManager.resetAndTryAppendBuffer(notYetEmitted);
         if (!success) {
             throw new RuntimeException("We have hit an edge case where more than one segment must be generated to accommodate the new data point");
         }
     }
 
-    private void popNFromBuffer(int dataPointsUsedForPrevSegment) {
+    private void removeNOldestFromBuffer(int dataPointsUsedForPrevSegment) {
         this.notYetEmitted = notYetEmitted.subList(dataPointsUsedForPrevSegment, notYetEmitted.size());
     }
 

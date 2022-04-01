@@ -29,7 +29,9 @@ public class PostgresConnection implements DatabaseConnection {
             PreparedStatement insertSegmentStatement = getPreparedStatementForInsertSegment(segment);
             insertSegmentStatement.execute();
 
-            insertSegmentSummary(segmentSummary, insertSegmentStatement.getGeneratedKeys());
+            if (segmentSummary != null) {
+                insertSegmentSummary(segmentSummary, insertSegmentStatement.getGeneratedKeys());
+            }
 
         } catch (SQLException e) {
             System.out.println("Couldn't insert segment: " + segment.toString() + "\n\n" + e.getMessage());
@@ -37,10 +39,6 @@ public class PostgresConnection implements DatabaseConnection {
     }
 
     private void insertSegmentSummary(SegmentSummary segmentSummary, ResultSet generatedKeys) throws SQLException {
-        if (segmentSummary == null) {
-            return;
-        }
-
         if (generatedKeys.next()) {
             int time_series_id = generatedKeys.getInt("time_series_id");
             long start_time = generatedKeys.getLong("start_time");

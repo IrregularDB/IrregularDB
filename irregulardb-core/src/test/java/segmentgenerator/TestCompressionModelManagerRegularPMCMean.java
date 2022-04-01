@@ -1,9 +1,9 @@
 package segmentgenerator;
 
 import compression.CompressionModel;
-import compression.timestamp.RegularTimeStampCompressionModel;
-import compression.timestamp.TimeStampCompressionModel;
-import compression.timestamp.TimeStampCompressionModelType;
+import compression.timestamp.RegularTimestampCompressionModel;
+import compression.timestamp.TimestampCompressionModel;
+import compression.timestamp.TimestampCompressionModelType;
 import compression.value.PMCMeanValueCompressionModel;
 import compression.value.ValueCompressionModel;
 import compression.value.ValueCompressionModelType;
@@ -15,16 +15,16 @@ import java.util.List;
 public class TestCompressionModelManagerRegularPMCMean extends CompressionModelManager {
 
     private final List<ValueCompressionModel> valueCompressionModels;
-    private final List<TimeStampCompressionModel> timeStampCompressionModels;
+    private final List<TimestampCompressionModel> timestampCompressionModels;
 
     private List<DataPoint> acceptedDataPoints;
 
     private Float expectedValue = null;
 
-    public TestCompressionModelManagerRegularPMCMean(List<ValueCompressionModel> valueCompressionModels, List<TimeStampCompressionModel> timeStampCompressionModels) {
-        super(valueCompressionModels, timeStampCompressionModels);
+    public TestCompressionModelManagerRegularPMCMean(List<ValueCompressionModel> valueCompressionModels, List<TimestampCompressionModel> timestampCompressionModels) {
+        super(valueCompressionModels, timestampCompressionModels);
         this.valueCompressionModels = valueCompressionModels;
-        this.timeStampCompressionModels = timeStampCompressionModels;
+        this.timestampCompressionModels = timestampCompressionModels;
         this.acceptedDataPoints = new ArrayList<>();
     }
 
@@ -57,14 +57,14 @@ public class TestCompressionModelManagerRegularPMCMean extends CompressionModelM
 
     @Override
     public CompressionModel getBestCompressionModel() {
-        if (timeStampCompressionModels.get(0).getTimeStampCompressionModelType() == TimeStampCompressionModelType.REGULAR &&
+        if (timestampCompressionModels.get(0).getTimestampCompressionModelType() == TimestampCompressionModelType.REGULAR &&
                 valueCompressionModels.get(0).getValueCompressionModelType() == ValueCompressionModelType.PMC_MEAN) {
 
             float errorBound = 0;
             PMCMeanValueCompressionModel pmcMeanValueCompressionModel = new PMCMeanValueCompressionModel(errorBound);
             pmcMeanValueCompressionModel.resetAndAppendAll(acceptedDataPoints);
 
-            RegularTimeStampCompressionModel regularTimeStampCompressionModel = new RegularTimeStampCompressionModel(errorBound);
+            RegularTimestampCompressionModel regularTimeStampCompressionModel = new RegularTimestampCompressionModel(0);
             regularTimeStampCompressionModel.resetAndAppendAll(acceptedDataPoints);
 
             return new CompressionModel(pmcMeanValueCompressionModel, regularTimeStampCompressionModel);

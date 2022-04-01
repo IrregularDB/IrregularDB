@@ -12,9 +12,9 @@ import java.util.Random;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class SIDiffTimeStampCompressionModelTest {
+class SIDiffTimestampCompressionModelTest {
     Random random;
-    private TimeStampCompressionModel siDiffTimestampModelType;
+    private TimestampCompressionModel siDiffTimestampModelType;
 
 
     // Helper that creates random data points in increasing order
@@ -38,8 +38,7 @@ class SIDiffTimeStampCompressionModelTest {
 
     @BeforeEach
     void beforeEach(){
-        float errorBound = 0;
-        siDiffTimestampModelType = new SIDiffTimeStampCompressionModel(errorBound);
+        siDiffTimestampModelType = new SIDiffTimestampCompressionModel(0);
         random = new Random();
     }
 
@@ -71,14 +70,14 @@ class SIDiffTimeStampCompressionModelTest {
         List<DataPoint> dataPoints = createTenDataPoints();
         dataPoints.forEach(dp -> siDiffTimestampModelType.append(dp));
         siDiffTimestampModelType.reduceToSizeN(5);
-        int actualAmountOfTimeStamps = siDiffTimestampModelType.getLength();
+        int actualAmountOfTimestamps = siDiffTimestampModelType.getLength();
 
         // Assert list has 5 data points
-        assertEquals(5, actualAmountOfTimeStamps);
+        assertEquals(5, actualAmountOfTimestamps);
     }
 
     @Test
-    public void testReduceSizeWithNumberOfTimeStamps(){
+    public void testReduceSizeWithNumberOfTimestamps(){
         List<DataPoint> dataPoints = createTenDataPoints();
         dataPoints.forEach(dp -> siDiffTimestampModelType.append(dp));
         int expectedAmountTimestamps = dataPoints.size();
@@ -109,7 +108,7 @@ class SIDiffTimeStampCompressionModelTest {
 
         var blobRepresentation = siDiffTimestampModelType.getBlobRepresentation();
 
-        var decodedValues = BlobDecompressor.decompressTimeStamps(TimeStampCompressionModelType.SIDIFF,
+        var decodedValues = BlobDecompressor.decompressTimestamps(TimestampCompressionModelType.SIDIFF,
                 blobRepresentation, dataPoints.get(0).timestamp(), dataPoints.get(dataPoints.size() - 1).timestamp());
 
         for (int i = 0; i < decodedValues.size(); i++){

@@ -8,26 +8,23 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static compression.timestamp.TimeStampCompressionModelType.*;
-import static compression.value.ValueCompressionModelType.*;
-import static compression.value.ValueCompressionModelType.PMC_MEAN;
 
 public class CompressionModelFactory {
 
     static ConfigProperties config = ConfigProperties.getInstance();
 
 
-    public static List<TimeStampCompressionModel> getTimestampCompressionModels(){
-        List<TimeStampCompressionModelType> timeStampModelTypes =  config.getTimeStampModels();
-        final float timestampModelErrorBound = config.getTimeStampModelErrorBound();
+    public static List<TimestampCompressionModel> getTimestampCompressionModels(String tag){
+        List<TimestampCompressionModelType> timestampModelTypes =  config.getTimestampModels();
+        final Integer timestampModelThreshold = config.getTimeStampThresholdForTimeSeriesTag(tag);
 
-        return getCompressionModels(timeStampModelTypes, (modelType) -> getTimestampCompressionModelByType(modelType, timestampModelErrorBound));
+        return getCompressionModels(timestampModelTypes, (modelType) -> getTimestampCompressionModelByType(modelType, timestampModelThreshold));
     }
 
 
-    public static List<ValueCompressionModel> getValueCompressionModels() {
+    public static List<ValueCompressionModel> getValueCompressionModels(String tag) {
         List<ValueCompressionModelType> valueModelTypes =  config.getValueModels();
-        final float valueModelErrorBound = config.getValueModelErrorBound();
+        final Float valueModelErrorBound = config.getValueErrorBoundForTimeSeriesTag(tag);
 
         return getCompressionModels(valueModelTypes, (modelType) -> CompressionModelFactory.getValueCompressionModelByType(modelType, valueModelErrorBound));
     }
@@ -54,14 +51,14 @@ public class CompressionModelFactory {
     }
 
 
-    private static TimeStampCompressionModel getTimestampCompressionModelByType(TimeStampCompressionModelType timeStampCompressionModelType, float errorBound) {
-        switch (timeStampCompressionModelType){
+    private static TimestampCompressionModel getTimestampCompressionModelByType(TimestampCompressionModelType timestampCompressionModelType, Integer threshold) {
+        switch (timestampCompressionModelType){
             case REGULAR:
-                return new RegularTimeStampCompressionModel(errorBound);
+                return new RegularTimestampCompressionModel(threshold);
             case DELTADELTA:
-                return new DeltaDeltaTimeStampCompression();
+                return new DeltaDeltaTimestampCompressionModel(threshold);
             case SIDIFF:
-                return new SIDiffTimeStampCompressionModel(errorBound);
+                return new SIDiffTimestampCompressionModel(threshold);
             default:
                 throw new RuntimeException("Type not defined");
         }

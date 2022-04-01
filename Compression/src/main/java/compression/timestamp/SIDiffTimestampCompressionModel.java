@@ -7,12 +7,12 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SIDiffTimeStampCompressionModel extends TimeStampCompressionModel {
+public class SIDiffTimestampCompressionModel extends TimestampCompressionModel {
     private final SignedBucketEncoder signedBucketEncoder;
     private List<Long> timestamps;
 
-    public SIDiffTimeStampCompressionModel(float errorBound) {
-        super(errorBound, null);
+    public SIDiffTimestampCompressionModel(Integer threshold) {
+        super(threshold);
         // We make this a field so that we don't have to allocate a new signed bucket encoder each time get byte buffer is called
         signedBucketEncoder = new SignedBucketEncoder();
         this.resetModel();
@@ -41,7 +41,7 @@ public class SIDiffTimeStampCompressionModel extends TimeStampCompressionModel {
         readings.add(si);
 
         long firstTimestamp = timestamps.get(0);
-        int allowedDerivation = (int)(si * getErrorBound());//TODO replace with threshold
+        int allowedDerivation = getThreshold();
         List<Integer> maxValuesOfBuckets = signedBucketEncoder.getMaxAbsoluteValuesOfResizeableBuckets();
 
         long approximation = firstTimestamp + (long) si;
@@ -83,7 +83,7 @@ public class SIDiffTimeStampCompressionModel extends TimeStampCompressionModel {
     }
 
     @Override
-    public TimeStampCompressionModelType getTimeStampCompressionModelType() {
-        return TimeStampCompressionModelType.SIDIFF;
+    public TimestampCompressionModelType getTimestampCompressionModelType() {
+        return TimestampCompressionModelType.SIDIFF;
     }
 }

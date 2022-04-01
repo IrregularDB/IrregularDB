@@ -1,21 +1,22 @@
 package config;
 
-import compression.timestamp.TimeStampCompressionModelType;
+import compression.timestamp.TimestampCompressionModelType;
 import compression.value.ValueCompressionModelType;
 
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Properties;
+import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class ConfigProperties extends Properties{
 
-    private static ConfigProperties INSTANCE;
     public static boolean isTest = false;
+    private static ConfigProperties INSTANCE;
+
+    private final Map<String, Integer> timestampThresholds = new HashMap<>();
+    private final Map<String, Float> valueErrorBounds = new HashMap<>();
 
     public static ConfigProperties getInstance() {
         if (INSTANCE != null) {
@@ -39,6 +40,8 @@ public class ConfigProperties extends Properties{
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+        parseAllTimestampThresholds();
+        parseAllValueErrorBounds();
     }
 
     public int getConfiguredNumberOfWorkingSets(){
@@ -69,16 +72,16 @@ public class ConfigProperties extends Properties{
                 .collect(Collectors.toList());
     }
 
-    public List<TimeStampCompressionModelType> getTimeStampModels(){
+    public List<TimestampCompressionModelType> getTimestampModels(){
         return Arrays.stream(getProperty("model.timestamp.types").split(","))
                 .map(String::trim)
                 .filter(Predicate.not(String::isEmpty))
-                .map(TimeStampCompressionModelType::valueOf)
+                .map(TimestampCompressionModelType::valueOf)
                 .collect(Collectors.toList());
     }
 
-    public float getTimeStampModelErrorBound(){
-        return Float.parseFloat(getProperty("model.timestamp.errorbound"));
+    public Integer getTimestampModelThreshold(){
+        return Integer.parseInt(getProperty("model.timestamp.threshold"));
     }
 
     public float getValueModelErrorBound(){
@@ -97,7 +100,45 @@ public class ConfigProperties extends Properties{
         return Integer.parseInt(getProperty("model.value.length_bound"));
     }
 
+    public Integer getTimeStampThresholdForTimeSeriesTag(String tag){
+        if (this.timestampThresholds.containsKey(tag)){
+            return this.timestampThresholds.get(tag);
+        } else {
+            return this.getTimestampModelThreshold();
+        }
+    }
+
+    public Float getValueErrorBoundForTimeSeriesTag(String tag){
+        if (this.timestampThresholds.containsKey(tag)){
+            return this.valueErrorBounds.get(tag);
+        } else {
+            return this.getValueModelErrorBound();
+        }
+    }
+
     public boolean populateSegmentSummary(){
         return Boolean.parseBoolean(getProperty("model.segment.compute.summary", "true"));
+    }
+    /* Private methods */
+
+    private void parseAllTimestampThresholds(){
+        for (Enumeration<?> e = propertyNames(); e.hasMoreElements(); ) {
+            String name = (String)e.nextElement();
+
+            if (name.startsWith("model.timestamp.threshold.")) {
+                String value = getProperty(name);
+                this.timestampThresholds.put(name, Integer.parseInt(value));
+            }
+        }
+    }
+
+    private void parseAllValueErrorBounds(){
+        for (Enumeration<?> e = propertyNames(); e.hasMoreElements(); ) {
+            String name = (String)e.nextElement();
+            if (name.startsWith("model.value.errorbound.")) {
+                String value = getProperty(name);
+                this.valueErrorBounds.put(name, Float.parseFloat(value));
+            }
+        }
     }
 }

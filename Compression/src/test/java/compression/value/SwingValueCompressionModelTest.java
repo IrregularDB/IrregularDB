@@ -10,8 +10,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 class SwingValueCompressionModelTest {
     SwingValueCompressionModel swingModel;
 
@@ -90,7 +88,7 @@ class SwingValueCompressionModelTest {
     }
 
     @Test
-    void resetAndAppendAllNonRegularTimeStamps() {
+    void resetAndAppendAllNonRegularTimestamps() {
         List<DataPoint> dataPoints = new ArrayList<>();
         dataPoints.add(new DataPoint(0, 1.00F));
         dataPoints.add(new DataPoint(3, 1.03F));

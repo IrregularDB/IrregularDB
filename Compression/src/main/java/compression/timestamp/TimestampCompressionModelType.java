@@ -1,6 +1,6 @@
 package compression.timestamp;
 
-public enum TimeStampCompressionModelType {
+public enum TimestampCompressionModelType {
     REGULAR,
     DELTADELTA,
     SIDIFF

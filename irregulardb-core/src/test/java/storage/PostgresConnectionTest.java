@@ -5,10 +5,7 @@ import config.ConfigProperties;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import records.Segment;
-import records.ValueTimeStampModelPair;
-
-import java.nio.ByteBuffer;
+import records.ValueTimestampModelPair;
 
 
 class PostgresConnectionTest {
@@ -35,8 +32,8 @@ class PostgresConnectionTest {
     //@Test
 //    public void testDBInsertsSegment(){
 //        byte valueModelTypeId = 0b1;
-//        byte timeStampModelTypeId = 0b1;
-//        Segment segment = new Segment(1, 111L,222L, valueModelTypeId, ByteBuffer.allocate(0), timeStampModelTypeId, ByteBuffer.allocate(0));
+//        byte timestampModelTypeId = 0b1;
+//        Segment segment = new Segment(1, 111L,222L, valueModelTypeId, ByteBuffer.allocate(0), timestampModelTypeId, ByteBuffer.allocate(0));
 //        this.postgresConnection.insertSegment(segment);
 //    }
 
@@ -46,10 +43,10 @@ class PostgresConnectionTest {
         byte valueModelType = 5;
         byte timestampType = 2;
         short combined = ModelTypeUtil.combineTwoModelTypes(valueModelType, timestampType);
-        ValueTimeStampModelPair modelPair = ModelTypeUtil.combinedModelTypesToIndividual(combined);
+        ValueTimestampModelPair modelPair = ModelTypeUtil.combinedModelTypesToIndividual(combined);
 
         Assertions.assertEquals(valueModelType, modelPair.valueModelType());
-        Assertions.assertEquals(timestampType, modelPair.timeStampModelType());
+        Assertions.assertEquals(timestampType, modelPair.timestampModelType());
     }
 
     @Test
@@ -61,7 +58,7 @@ class PostgresConnectionTest {
     }
 
     @Test
-    public void TestOfCombinedModelTypesWithNegativeTimeStampModelType() {
+    public void TestOfCombinedModelTypesWithNegativeTimestampModelType() {
         byte valueModelType = 127;
         byte timestampModelType = -1;
         Assertions.assertThrows(IllegalArgumentException.class, () -> ModelTypeUtil.combineTwoModelTypes(valueModelType, timestampModelType));

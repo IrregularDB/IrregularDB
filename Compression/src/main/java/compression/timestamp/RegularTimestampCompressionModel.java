@@ -7,15 +7,14 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RegularTimeStampCompressionModel extends TimeStampCompressionModel {
+public class RegularTimestampCompressionModel extends TimestampCompressionModel {
     private int si;
     private boolean earlierAppendFailed;
-    private List<Long> timeStamps;
+    private List<Long> timestamps;
     private long nextExpectedTimestamp;
 
-    // TODO: update this constructor when adding error-bound
-    public RegularTimeStampCompressionModel(float errorBound) {
-        super(errorBound, null);
+    public RegularTimestampCompressionModel(Integer threshold) {
+        super(threshold);
         this.resetModel();
     }
 
@@ -23,69 +22,71 @@ public class RegularTimeStampCompressionModel extends TimeStampCompressionModel 
     protected void resetModel() {
         this.si = -1; // We use -1 to represent that no SI has been calculated yet.
         this.earlierAppendFailed = false;
-        this.timeStamps = new ArrayList<>();
+        this.timestamps = new ArrayList<>();
         this.nextExpectedTimestamp = Long.MIN_VALUE;
     }
 
     @Override
     public int getLength() {
-        return timeStamps.size();
+        return timestamps.size();
     }
 
     @Override
     protected boolean appendDataPoint(DataPoint dataPoint) {
-        return appendTimeStamp(dataPoint.timestamp());
+        return appendTimestamp(dataPoint.timestamp());
     }
 
-    private boolean appendTimeStamp(long timeStamp) {
+    private boolean appendTimestamp(long timeStamp) {
         try {
             if (earlierAppendFailed) { // Security added so that if you try to append after an earlier append failed
                 throw new IllegalArgumentException("You tried to append to a model that had failed an earlier append");
             }
-            boolean withinErrorBound;
+            boolean withinThreshold;
 
             // Special handling for first two time stamps:
             if (this.getLength() < 2) {
                 handleFirstTwoDataPoints(timeStamp);
-                withinErrorBound = true;
+                withinThreshold = true;
             } else {
-                withinErrorBound = handleOtherDataPoints(timeStamp);
-                if (withinErrorBound)
-                    this.nextExpectedTimestamp += si;
+                withinThreshold = handleOtherDataPoints(timeStamp);
+
+                this.nextExpectedTimestamp += si;
+                if (!withinThreshold)
+                    earlierAppendFailed = true;
             }
-            return withinErrorBound;
+            return withinThreshold;
         } catch (SiConversionException e) {
             earlierAppendFailed = true;
             return false;
         }
     }
 
-    private void handleFirstTwoDataPoints(long timeStamp) {
-        if (timeStamps.size() == 0) {
-            timeStamps.add(timeStamp);
+    private void handleFirstTwoDataPoints(long timestamp) {
+        if (timestamps.size() == 0) {
+            timestamps.add(timestamp);
         } else {
-            si = calculateDifference(timeStamps.get(timeStamps.size() - 1), timeStamp);
-            timeStamps.add(timeStamp);
-            nextExpectedTimestamp = timeStamp + si;
+            si = calculateDifference(timestamps.get(timestamps.size() - 1), timestamp);
+            timestamps.add(timestamp);
+            nextExpectedTimestamp = timestamp + si;
         }
     }
 
-    private boolean handleOtherDataPoints(long timeStamp) {
-        boolean withinErrorBound = isTimeStampWithinErrorBound(timeStamp, nextExpectedTimestamp, this.si, getErrorBound());
-        if (withinErrorBound) {
-            timeStamps.add(timeStamp);
+    private boolean handleOtherDataPoints(long timestamp) {
+        boolean withinThreshold = isTimestampWithinThreshold(timestamp, nextExpectedTimestamp, getThreshold());
+        if (withinThreshold) {
+            timestamps.add(timestamp);
         } else {
-            withinErrorBound = testNewCandidateSI(timeStamp);
-            if (withinErrorBound) {
-                timeStamps.add(timeStamp);
+            withinThreshold = testNewCandidateSI(timestamp);
+            if (withinThreshold) {
+                timestamps.add(timestamp);
             }
         }
-        return withinErrorBound;
+        return withinThreshold;
     }
 
     private boolean testNewCandidateSI(long timestamp) {
         boolean fitNewSI = false;
-        ArrayList<Long> allTimestamps = new ArrayList<>(this.timeStamps);
+        ArrayList<Long> allTimestamps = new ArrayList<>(this.timestamps);
         allTimestamps.add(timestamp);
 
         Integer candidateSI = calculateCandidateSI(allTimestamps);
@@ -93,8 +94,6 @@ public class RegularTimeStampCompressionModel extends TimeStampCompressionModel 
         if (doesCandidateSIFit(allTimestamps, candidateSI)) {
             this.si = candidateSI;
             fitNewSI = true;
-        } else {
-            earlierAppendFailed = true;
         }
         return fitNewSI;
     }
@@ -109,8 +108,8 @@ public class RegularTimeStampCompressionModel extends TimeStampCompressionModel 
         long localNextExpectedTimestamp = startTime + candidateSI;
 
         for (int i = 1; i < allTimestamps.size(); i++) {
-            boolean timeStampWithinErrorBound = isTimeStampWithinErrorBound(allTimestamps.get(i), localNextExpectedTimestamp, candidateSI, getErrorBound());
-            if (!timeStampWithinErrorBound) {
+            boolean timestampWithinThreshold = isTimestampWithinThreshold(allTimestamps.get(i), localNextExpectedTimestamp, getThreshold());
+            if (!timestampWithinThreshold) {
                 return false;
             }
             localNextExpectedTimestamp += candidateSI;
@@ -118,19 +117,13 @@ public class RegularTimeStampCompressionModel extends TimeStampCompressionModel 
         return true;
     }
 
-    private static boolean isTimeStampWithinErrorBound(long timeStamp, long nextExpectedTimestamp, int si, float errorBound) {
-        int actualDifference = calculateDifference(timeStamp, nextExpectedTimestamp);
-        double percentageError = actualDifference / ((double)si);
-        return percentageError <= errorBound;
+    private static boolean isTimestampWithinThreshold(long timestamp, long nextExpectedTimestamp, Integer threshold) {
+        int actualDifference = calculateDifference(timestamp, nextExpectedTimestamp);
+        return actualDifference <= threshold;
     }
 
-    private static int calculateDifference(long timestamp1, long timeStamp2) {
-        long difference = Math.abs(timeStamp2 - timestamp1);
-
-        if (difference < Integer.MIN_VALUE || difference > Integer.MAX_VALUE) {
-            throw new SiConversionException(difference  + " the difference in timestamps cannot be cast to int without changing its value.");
-        }
-        return (int) difference;
+    private static int calculateDifference(long timestamp1, long timestamp2) {
+        return Math.abs(Math.toIntExact(timestamp2 - timestamp1));
     }
 
     @Override
@@ -142,12 +135,12 @@ public class RegularTimeStampCompressionModel extends TimeStampCompressionModel 
     }
 
     @Override
-    public TimeStampCompressionModelType getTimeStampCompressionModelType() {
-        return TimeStampCompressionModelType.REGULAR;
+    public TimestampCompressionModelType getTimestampCompressionModelType() {
+        return TimestampCompressionModelType.REGULAR;
     }
 
     @Override
     protected void reduceToSize(int n) {
-        timeStamps.subList(n, this.getLength()).clear();
+        timestamps.subList(n, this.getLength()).clear();
     }
 }

@@ -13,14 +13,13 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class BlobDecompressorTest {
-    TimeStampCompressionModelType timeStampModelType;
+    TimestampCompressionModelType timestampModelType;
     ValueCompressionModelType valueModelType;
-    ByteBuffer timeStampBlob;
+    ByteBuffer timestampBlob;
     ByteBuffer valueBlob;
 
     // Helper that creates random data points in increasing order
@@ -46,30 +45,30 @@ class BlobDecompressorTest {
     @BeforeEach
     void beforeEach(){
         // Done in order to ensure none of the tests affect each other
-        timeStampModelType = null;
+        timestampModelType = null;
         valueModelType = null;
-        timeStampBlob = null;
+        timestampBlob = null;
         valueBlob = null;
     }
 
-    List<Long> callTimeStampDecompressor(long startTime, long endTime) {
-        if (timeStampModelType == null || timeStampBlob == null) {
+    List<Long> callTimestampDecompressor(long startTime, long endTime) {
+        if (timestampModelType == null || timestampBlob == null) {
             throw new RuntimeException("You forgot to setup time stamp compression model. Call for example setupRegularTimeStamp() before calling this method");
         }
 
-        return BlobDecompressor.decompressTimeStamps(timeStampModelType, timeStampBlob, startTime, endTime);
+        return BlobDecompressor.decompressTimestamps(timestampModelType, timestampBlob, startTime, endTime);
     }
 
-    List<DataPoint> callValueDecompressor(List<Long> timeStamps) {
+    List<DataPoint> callValueDecompressor(List<Long> timestamps) {
         if (valueModelType == null || valueBlob == null) {
             throw new RuntimeException("You forgot to setup value compression model. Call for example setupPMCMeanValue() before calling this method");
         }
-        return BlobDecompressor.createDataPointsByDecompressingValues(valueModelType, valueBlob, timeStamps);
+        return BlobDecompressor.createDataPointsByDecompressingValues(valueModelType, valueBlob, timestamps);
     }
 
-    void setupRegularTimeStampModel(int si) {
-        timeStampModelType = TimeStampCompressionModelType.REGULAR;
-        timeStampBlob = ByteBuffer.allocate(4).putInt(si);
+    void setupRegularTimestampModel(int si) {
+        timestampModelType = TimestampCompressionModelType.REGULAR;
+        timestampBlob = ByteBuffer.allocate(4).putInt(si);
     }
 
     void setupPMCMeanValueModel(float mean) {
@@ -94,41 +93,41 @@ class BlobDecompressorTest {
      */
     @Test
     void decompressRegularSI100() {
-        setupRegularTimeStampModel(100);
+        setupRegularTimestampModel(100);
 
         long startTime = 0;
         long endTime = 500;
 
-        List<Long> timeStamps = callTimeStampDecompressor(startTime, endTime);
+        List<Long> timestamps = callTimestampDecompressor(startTime, endTime);
 
-        List<Long> expectedTimeStamps =  List.of(0L, 100L, 200L, 300L, 400L, 500L);
-        assertEquals(expectedTimeStamps, timeStamps);
+        List<Long> expectedTimestamps =  List.of(0L, 100L, 200L, 300L, 400L, 500L);
+        assertEquals(expectedTimestamps, timestamps);
     }
 
     @Test
     void decompressRegularWeirdSI() {
-        setupRegularTimeStampModel(55);
+        setupRegularTimestampModel(55);
         long startTime = 110;
         long endTime = 275;
-        List<Long> timeStamps = callTimeStampDecompressor(startTime, endTime);
+        List<Long> timestamps = callTimestampDecompressor(startTime, endTime);
 
-        List<Long> expectedTimeStamps =  List.of(110L, 165L, 220L, 275L);
-        assertEquals(expectedTimeStamps, timeStamps);
+        List<Long> expectedTimestamps =  List.of(110L, 165L, 220L, 275L);
+        assertEquals(expectedTimestamps, timestamps);
     }
 
     @Test
     void decompressRegularEndTimeDoesNotAlign() {
         // We here expect it the last time stamp to be the last time the time stamp aligned with SI before the end time
         // i.e. we don't expect it to add 400
-        setupRegularTimeStampModel(100);
+        setupRegularTimestampModel(100);
 
         long startTime = 0;
         long endTime = 301;
 
-        List<Long> timeStamps = callTimeStampDecompressor(startTime, endTime);
+        List<Long> timestamps = callTimestampDecompressor(startTime, endTime);
 
-        List<Long> expectedTimeStamps =  List.of(0L, 100L, 200L, 300L);
-        assertEquals(expectedTimeStamps, timeStamps);
+        List<Long> expectedTimestamps =  List.of(0L, 100L, 200L, 300L);
+        assertEquals(expectedTimestamps, timestamps);
     }
 
     /***
@@ -138,8 +137,8 @@ class BlobDecompressorTest {
     void decompressPMCMean() {
         float meanValue = 2.5F;
         setupPMCMeanValueModel(meanValue);
-        List<Long> timeStamps = List.of(0L, 100L, 200L, 300L, 400L, 500L);
-        List<DataPoint> dataPoints = callValueDecompressor(timeStamps);
+        List<Long> timestamps = List.of(0L, 100L, 200L, 300L, 400L, 500L);
+        List<DataPoint> dataPoints = callValueDecompressor(timestamps);
         List<DataPoint> expectedDataPoints = new ArrayList<>();
         expectedDataPoints.add(new DataPoint(0, meanValue));
         expectedDataPoints.add(new DataPoint(100, meanValue));
@@ -154,8 +153,8 @@ class BlobDecompressorTest {
     void decompressPMCMeanIrregular() {
         setupPMCMeanValueModel(5.0F);
 
-        List<Long> timeStamps = List.of(0L, 75L, 200L, 300L, 500L);
-        List<DataPoint> dataPoints = callValueDecompressor(timeStamps);
+        List<Long> timestamps = List.of(0L, 75L, 200L, 300L, 500L);
+        List<DataPoint> dataPoints = callValueDecompressor(timestamps);
         List<DataPoint> expectedDataPoints = new ArrayList<>();
         expectedDataPoints.add(new DataPoint(0, 5.0F));
         expectedDataPoints.add(new DataPoint(75, 5.0F));
@@ -172,8 +171,8 @@ class BlobDecompressorTest {
     void decompressSwing() {
         setupSwingValueModel(0.05F, 0.00F);
 
-        List<Long> timeStamps = List.of(0L, 1L, 2L, 3L, 4L, 5L);
-        List<DataPoint> dataPoints = callValueDecompressor(timeStamps);
+        List<Long> timestamps = List.of(0L, 1L, 2L, 3L, 4L, 5L);
+        List<DataPoint> dataPoints = callValueDecompressor(timestamps);
         List<DataPoint> expectedDataPoints = new ArrayList<>();
         expectedDataPoints.add(new DataPoint(0, 0));
         expectedDataPoints.add(new DataPoint(1, 0.05F));
@@ -196,7 +195,7 @@ class BlobDecompressorTest {
     void decompressSwingNegativeSlope() {
         setupSwingValueModel(-0.05F, 10.00F);
 
-        List<Long> timeStamps = List.of(0L, 1L, 2L, 3L, 4L, 5L);
+        List<Long> timestamps = List.of(0L, 1L, 2L, 3L, 4L, 5L);
         List<DataPoint> expectedDataPoints = new ArrayList<>();
         expectedDataPoints.add(new DataPoint(0, 10.00F));
         expectedDataPoints.add(new DataPoint(1, 9.95F));
@@ -205,7 +204,7 @@ class BlobDecompressorTest {
         expectedDataPoints.add(new DataPoint(4, 9.80F));
         expectedDataPoints.add(new DataPoint(5, 9.75F));
 
-        List<DataPoint> actualDataPoints = callValueDecompressor(timeStamps);
+        List<DataPoint> actualDataPoints = callValueDecompressor(timestamps);
         var allowedDifference = 0.000001;
         for (int i = 0; i < actualDataPoints.size(); i++) {
             DataPoint actualDataPoint = actualDataPoints.get(i);
@@ -226,11 +225,11 @@ class BlobDecompressorTest {
         expectedDataPoints.add(new DataPoint(4, 90.0F));
         expectedDataPoints.add(new DataPoint(5, 10.0F));
 
-        List<Long> timeStamps = expectedDataPoints.stream()
+        List<Long> timestamps = expectedDataPoints.stream()
                 .map(DataPoint::timestamp).toList();
 
         setupGorillaValueModel(expectedDataPoints);
-        List<DataPoint> actualDataPoints = callValueDecompressor(timeStamps);
+        List<DataPoint> actualDataPoints = callValueDecompressor(timestamps);
 
         assertEquals(expectedDataPoints, actualDataPoints);
     }
@@ -245,11 +244,11 @@ class BlobDecompressorTest {
         expectedDataPoints.add(new DataPoint(14, 90.0F));
         expectedDataPoints.add(new DataPoint(15, 10.0F));
 
-        List<Long> timeStamps = expectedDataPoints.stream()
+        List<Long> timestamps = expectedDataPoints.stream()
                 .map(DataPoint::timestamp).toList();
 
         setupGorillaValueModel(expectedDataPoints);
-        List<DataPoint> actualDataPoints = callValueDecompressor(timeStamps);
+        List<DataPoint> actualDataPoints = callValueDecompressor(timestamps);
 
         assertEquals(expectedDataPoints, actualDataPoints);
     }
@@ -259,12 +258,12 @@ class BlobDecompressorTest {
      */
     @Test
     void decompressRegularAndPMCMean() {
-        setupRegularTimeStampModel(100);
+        setupRegularTimestampModel(100);
         setupPMCMeanValueModel(5.0F);
 
         long startTime = 0;
         long endTime = 500;
-        List<DataPoint> dataPoints = BlobDecompressor.decompressBlobs(timeStampModelType, timeStampBlob, valueModelType, valueBlob, startTime, endTime);
+        List<DataPoint> dataPoints = BlobDecompressor.decompressBlobs(timestampModelType, timestampBlob, valueModelType, valueBlob, startTime, endTime);
 
         List<DataPoint> expectedDataPoints = new ArrayList<>();
         expectedDataPoints.add(new DataPoint(0, 5.0F));
@@ -282,8 +281,8 @@ class BlobDecompressorTest {
      */
 
     @Test
-    public void testDeltaDeltaTimeStampCompression(){
-        TimeStampCompressionModel deltaDeltaTimeStampCompression = new DeltaDeltaTimeStampCompression();
+    public void testDeltaDeltaTimestampCompression(){
+        TimestampCompressionModel deltaDeltaTimestampCompression = new DeltaDeltaTimestampCompressionModel(0);
 
         List<DataPoint> dataPoints = new ArrayList<>();
         dataPoints.add(new DataPoint(0, 5.0F));
@@ -294,11 +293,11 @@ class BlobDecompressorTest {
         dataPoints.add(new DataPoint(27000, 5.0F));
         dataPoints.add(new DataPoint(Integer.MAX_VALUE, 5.0F));
 
-        dataPoints.forEach(dp -> deltaDeltaTimeStampCompression.append(dp));
+        dataPoints.forEach(deltaDeltaTimestampCompression::append);
 
-        var blobRepresentation = deltaDeltaTimeStampCompression.getBlobRepresentation();
+        var blobRepresentation = deltaDeltaTimestampCompression.getBlobRepresentation();
 
-        var decodedTimestamps = BlobDecompressor.decompressTimeStamps(TimeStampCompressionModelType.DELTADELTA,
+        var decodedTimestamps = BlobDecompressor.decompressTimestamps(TimestampCompressionModelType.DELTADELTA,
                 blobRepresentation, dataPoints.get(0).timestamp(), dataPoints.get(dataPoints.size() - 1).timestamp());
 
         for (int i = 0; i < decodedTimestamps.size(); i++){
@@ -308,14 +307,14 @@ class BlobDecompressorTest {
 
     @Test
     public void testDeltaDeltaRandomDataPoints(){
-        TimeStampCompressionModel deltaDeltaTimeStampCompression = new DeltaDeltaTimeStampCompression();
+        TimestampCompressionModel deltaDeltaTimestampCompression = new DeltaDeltaTimestampCompressionModel(0);
 
         List<DataPoint> dataPoints = createXRandomDataPoints(10);
-        deltaDeltaTimeStampCompression.resetAndAppendAll(dataPoints);
+        deltaDeltaTimestampCompression.resetAndAppendAll(dataPoints);
 
-        var blobRepresentation = deltaDeltaTimeStampCompression.getBlobRepresentation();
+        var blobRepresentation = deltaDeltaTimestampCompression.getBlobRepresentation();
 
-        var decodedTimestamps = BlobDecompressor.decompressTimeStamps(TimeStampCompressionModelType.DELTADELTA,
+        var decodedTimestamps = BlobDecompressor.decompressTimestamps(TimestampCompressionModelType.DELTADELTA,
                 blobRepresentation, dataPoints.get(0).timestamp(), dataPoints.get(dataPoints.size() - 1).timestamp());
 
         for (int i = 0; i < decodedTimestamps.size(); i++){
@@ -329,15 +328,14 @@ class BlobDecompressorTest {
      */
     @Test
     public void testSIDiffRandomDataPointsNoErrorBound(){
-        float errorBound = 0.0F;
-        TimeStampCompressionModel SIDiffTimeStampCompression = new SIDiffTimeStampCompressionModel(errorBound);
+        TimestampCompressionModel SIDiffTimestampCompression = new SIDiffTimestampCompressionModel(0);
 
         List<DataPoint> dataPoints = createXRandomDataPoints(10);
-        SIDiffTimeStampCompression.resetAndAppendAll(dataPoints);
+        SIDiffTimestampCompression.resetAndAppendAll(dataPoints);
 
-        var blobRepresentation = SIDiffTimeStampCompression.getBlobRepresentation();
+        var blobRepresentation = SIDiffTimestampCompression.getBlobRepresentation();
 
-        var decodedTimestamps = BlobDecompressor.decompressTimeStamps(TimeStampCompressionModelType.SIDIFF,
+        var decodedTimestamps = BlobDecompressor.decompressTimestamps(TimestampCompressionModelType.SIDIFF,
                 blobRepresentation, dataPoints.get(0).timestamp(), dataPoints.get(dataPoints.size() - 1).timestamp());
 
         for (int i = 0; i < decodedTimestamps.size(); i++){
@@ -347,8 +345,7 @@ class BlobDecompressorTest {
 
     @Test
     public void testSIDiffNoErrorBound(){
-        float errorBound = 0.0F;
-        TimeStampCompressionModel SIDiffTimeStampCompression = new SIDiffTimeStampCompressionModel(errorBound);
+        TimestampCompressionModel SIDiffTimestampCompression = new SIDiffTimestampCompressionModel(0);
 
         List<DataPoint> dataPoints = new ArrayList<>();
         dataPoints.add(new DataPoint(0, 5.0F));
@@ -358,11 +355,11 @@ class BlobDecompressorTest {
         dataPoints.add(new DataPoint(395, 5.0F));
         dataPoints.add(new DataPoint(500, 5.0F));
 
-        SIDiffTimeStampCompression.resetAndAppendAll(dataPoints);
+        SIDiffTimestampCompression.resetAndAppendAll(dataPoints);
 
-        var blobRepresentation = SIDiffTimeStampCompression.getBlobRepresentation();
+        var blobRepresentation = SIDiffTimestampCompression.getBlobRepresentation();
 
-        var decodedTimestamps = BlobDecompressor.decompressTimeStamps(TimeStampCompressionModelType.SIDIFF,
+        var decodedTimestamps = BlobDecompressor.decompressTimestamps(TimestampCompressionModelType.SIDIFF,
                 blobRepresentation, dataPoints.get(0).timestamp(), dataPoints.get(dataPoints.size() - 1).timestamp());
 
         for (int i = 0; i < decodedTimestamps.size(); i++){
@@ -370,43 +367,34 @@ class BlobDecompressorTest {
         }
     }
 
-    private boolean isTimestampWithinErrorBound(long actualTimestamp, long recreatedTimestamp, int si, float errorBound) {
-        long difference = Math.abs(actualTimestamp - recreatedTimestamp);
-        if (difference < Integer.MIN_VALUE || difference > Integer.MAX_VALUE) {
-            throw new SiConversionException(difference  + " the difference in timestamps cannot be cast to int without changing its value.");
-        }
-        double percentageError = difference / ((double)si);
-        return percentageError <= errorBound;
-    }
-
-    private int calculateSI(List<DataPoint> dataPoints) {
-        return Math.round((float) (dataPoints.get(dataPoints.size() - 1).timestamp() - dataPoints.get(0).timestamp()) / (dataPoints.size() - 1));
+    private boolean isTimestampWithinThreshold(long actualTimestamp, long recreatedTimestamp, int threshold) {
+        long difference = Math.abs(Math.toIntExact(actualTimestamp - recreatedTimestamp));
+        return difference <= threshold;
     }
 
     @Test
     public void testSIDiffRandomDataPoints10PercentError(){
-        float errorBound = 10.0F;
-        TimeStampCompressionModel SIDiffTimeStampCompression = new SIDiffTimeStampCompressionModel(errorBound);
+        int threshold = 10;
+        TimestampCompressionModel SIDiffTimestampCompression = new SIDiffTimestampCompressionModel(threshold);
 
         List<DataPoint> dataPoints = createXRandomDataPoints(10);
-        SIDiffTimeStampCompression.resetAndAppendAll(dataPoints);
+        SIDiffTimestampCompression.resetAndAppendAll(dataPoints);
 
-        var blobRepresentation = SIDiffTimeStampCompression.getBlobRepresentation();
+        var blobRepresentation = SIDiffTimestampCompression.getBlobRepresentation();
 
-        var decodedTimestamps = BlobDecompressor.decompressTimeStamps(TimeStampCompressionModelType.SIDIFF,
+        var decodedTimestamps = BlobDecompressor.decompressTimestamps(TimestampCompressionModelType.SIDIFF,
                 blobRepresentation, dataPoints.get(0).timestamp(), dataPoints.get(dataPoints.size() - 1).timestamp());
 
-        int si = calculateSI(dataPoints);
 
         for (int i = 0; i < decodedTimestamps.size(); i++){
-            Assertions.assertTrue(isTimestampWithinErrorBound(dataPoints.get(i).timestamp(), decodedTimestamps.get(i), si, errorBound));
+            Assertions.assertTrue(isTimestampWithinThreshold(dataPoints.get(i).timestamp(), decodedTimestamps.get(i), threshold));
         }
     }
 
     @Test
     public void testSIDiff10PercentError(){
-        float errorBound = 10.0F;
-        TimeStampCompressionModel SIDiffTimeStampCompression = new SIDiffTimeStampCompressionModel(errorBound);
+        int threshold = 10;
+        TimestampCompressionModel SIDiffTimestampCompression = new SIDiffTimestampCompressionModel(threshold);
 
         List<DataPoint> dataPoints = new ArrayList<>();
         dataPoints.add(new DataPoint(0, 5.0F));
@@ -416,24 +404,22 @@ class BlobDecompressorTest {
         dataPoints.add(new DataPoint(395, 5.0F));
         dataPoints.add(new DataPoint(500, 5.0F));
 
-        SIDiffTimeStampCompression.resetAndAppendAll(dataPoints);
+        SIDiffTimestampCompression.resetAndAppendAll(dataPoints);
 
-        var blobRepresentation = SIDiffTimeStampCompression.getBlobRepresentation();
+        var blobRepresentation = SIDiffTimestampCompression.getBlobRepresentation();
 
-        var decodedTimestamps = BlobDecompressor.decompressTimeStamps(TimeStampCompressionModelType.SIDIFF,
+        var decodedTimestamps = BlobDecompressor.decompressTimestamps(TimestampCompressionModelType.SIDIFF,
                 blobRepresentation, dataPoints.get(0).timestamp(), dataPoints.get(dataPoints.size() - 1).timestamp());
 
-        int si = calculateSI(dataPoints);
-
         for (int i = 0; i < decodedTimestamps.size(); i++){
-            Assertions.assertTrue(isTimestampWithinErrorBound(dataPoints.get(i).timestamp(), decodedTimestamps.get(i), si, errorBound));
+            Assertions.assertTrue(isTimestampWithinThreshold(dataPoints.get(i).timestamp(), decodedTimestamps.get(i), threshold));
         }
     }
 
     @Test
     public void testSIDiffThatTheyGetMovedBucketsDown(){
-        float errorBound = 10.0F;
-        TimeStampCompressionModel SIDiffTimeStampCompression = new SIDiffTimeStampCompressionModel(errorBound);
+        Integer threshold = 250;
+        TimestampCompressionModel SIDiffTimestampCompression = new SIDiffTimestampCompressionModel(threshold);
 
         // We have 5 data points and last time stamp is 10000 so we get:
         // SI = 2500
@@ -445,11 +431,11 @@ class BlobDecompressorTest {
         dataPoints.add(new DataPoint(7500 + (511 + 250), 5.0F));
         dataPoints.add(new DataPoint(10000, 5.0F));
 
-        SIDiffTimeStampCompression.resetAndAppendAll(dataPoints);
+        SIDiffTimestampCompression.resetAndAppendAll(dataPoints);
 
-        var blobRepresentation = SIDiffTimeStampCompression.getBlobRepresentation();
+        var blobRepresentation = SIDiffTimestampCompression.getBlobRepresentation();
 
-        var decodedTimestamps = BlobDecompressor.decompressTimeStamps(TimeStampCompressionModelType.SIDIFF,
+        var decodedTimestamps = BlobDecompressor.decompressTimestamps(TimestampCompressionModelType.SIDIFF,
                 blobRepresentation, dataPoints.get(0).timestamp(), dataPoints.get(dataPoints.size() - 1).timestamp());
 
         assertEquals(0, decodedTimestamps.get(0));

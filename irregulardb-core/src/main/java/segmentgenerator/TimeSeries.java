@@ -17,7 +17,7 @@ public class TimeSeries {
         this.timeSeriesTag = timeSeriesTag;
         this.databaseConnection = dbConnection;
         int timeSeriesId = getTimeSeriesIdFromDb();
-        this.segmentGenerator = new SegmentGenerator(new CompressionModelManager(CompressionModelFactory.getValueCompressionModels(), CompressionModelFactory.getTimestampCompressionModels()), timeSeriesId);
+        this.segmentGenerator = new SegmentGenerator(new CompressionModelManager(CompressionModelFactory.getValueCompressionModels(timeSeriesTag), CompressionModelFactory.getTimestampCompressionModels(timeSeriesTag)), timeSeriesId);
         this.computeSegmentSummary = ConfigProperties.getInstance().populateSegmentSummary();
     }
 

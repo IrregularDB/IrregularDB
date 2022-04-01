@@ -6,42 +6,11 @@ import java.nio.ByteBuffer;
 import java.util.List;
 
 public abstract class BaseModel {
-    private final Float errorBound;
-    private final Integer lengthBound;
+
     private ByteBuffer byteBuffer; //Used as a cache for a blob
 
-    /**
-     * @param errorBound this value must be given as a percentage e.g. 10 not 0.1 for 10%;
-     * @param lengthBound
-     */
-    public BaseModel(Float errorBound, Integer lengthBound) {
-        // This small hack is added because floating point imprecision can lead to error-bound
-        // of zero not really working.
-        if (errorBound != null) {
-            if (errorBound == 0) {
-                this.errorBound = 0.00001F;
-            } else {
-                this.errorBound = errorBound / 100;
-            }
-        } else {
-            this.errorBound = null;
-        }
-        this.lengthBound = lengthBound;
+    public BaseModel() {
         byteBuffer = null;
-    }
-
-    public float getErrorBound() {
-        if (errorBound == null) {
-            throw new UnsupportedOperationException("You tried to get error bound for a model, which has no error bound defined");
-        }
-        return errorBound;
-    }
-
-    public int getLengthBound() {
-        if (lengthBound == null) {
-            throw new UnsupportedOperationException("You tried to get length bound for a model, which has no length bound defined");
-        }
-        return lengthBound;
     }
 
     protected abstract void resetModel();

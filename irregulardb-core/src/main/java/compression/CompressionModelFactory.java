@@ -42,7 +42,7 @@ public class CompressionModelFactory {
             case PMC_MEAN:
                 return new PMCMeanValueCompressionModel(errorBound);
             case GORILLA:
-                return new GorillaValueCompressionModel(ConfigProperties.getInstance().getValueModelLengthBound());
+                return new GorillaValueCompressionModel();
             case SWING:
                 return new SwingValueCompressionModel(errorBound);
             default:

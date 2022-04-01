@@ -11,8 +11,8 @@ import java.util.List;
 public class GorillaValueCompressionModel extends ValueCompressionModel {
     List<Float> values;
 
-    public GorillaValueCompressionModel(int lengthBound) {
-        super(null, lengthBound);
+    public GorillaValueCompressionModel() {
+        super(null);
         this.resetModel();
     }
 
@@ -28,12 +28,8 @@ public class GorillaValueCompressionModel extends ValueCompressionModel {
 
     @Override
     protected boolean appendDataPoint(DataPoint dataPoint) {
-        if (this.getLength() < super.getLengthBound()) {
-            values.add(dataPoint.value());
-            return true;
-        } else {
-            return false;
-        }
+        values.add(dataPoint.value());
+        return true;
     }
 
     @Override

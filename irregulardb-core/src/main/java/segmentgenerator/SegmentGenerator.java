@@ -1,6 +1,7 @@
 package segmentgenerator;
 
 import compression.CompressionModel;
+import config.ConfigProperties;
 import records.Segment;
 import compression.timestamp.TimestampCompressionModel;
 import compression.value.ValueCompressionModel;
@@ -10,6 +11,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SegmentGenerator {
+
+    private static final int LENGTH_BOUND = ConfigProperties.getInstance().getModelLengthBound();
 
     private final CompressionModelManager compressionModelManager;
     private final int timeSeriesId;
@@ -21,9 +24,16 @@ public class SegmentGenerator {
         this.notYetEmitted = new ArrayList<>();
     }
 
+    /**
+     *
+     * @param dataPoint
+     * @return on false as the return value, generateSegment must be the next method invoked by the caller
+     */
     public boolean acceptDataPoint(DataPoint dataPoint) {
         notYetEmitted.add(dataPoint);
-        return compressionModelManager.tryAppendDataPointToAllModels(dataPoint);
+        boolean appendSuccess = compressionModelManager.tryAppendDataPointToAllModels(dataPoint);
+
+        return appendSuccess && notYetEmitted.size() < LENGTH_BOUND;
     }
 
     public Segment constructSegmentFromBuffer() {

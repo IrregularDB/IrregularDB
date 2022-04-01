@@ -63,6 +63,33 @@ class SegmentGeneratorTest {
         }
     }
 
+    @Test
+    public void testLengthBound(){
+        int EXPECTED_LENGTH_BOUND = 50; //this is defined in the test config.properties
+        List<DataPoint> nPmcMeanDataPoints = getNPmcMeanDataPoints(1, 1, 1, EXPECTED_LENGTH_BOUND);
+
+        TestCompressionModelManagerRegularPMCMean testCompressionModelManagerRegularPMCMean = new TestCompressionModelManagerRegularPMCMean(List.of(new PMCMeanValueCompressionModel(0)), List.of(new RegularTimestampCompressionModel(0)));
+
+        SegmentGenerator segmentGenerator = new SegmentGenerator(testCompressionModelManagerRegularPMCMean, 1);
+
+        long amountSuccess = nPmcMeanDataPoints.stream()
+                .map(segmentGenerator::acceptDataPoint)
+                .filter(a -> a)
+                .count();
+
+        Assertions.assertEquals(nPmcMeanDataPoints.size() - 1, amountSuccess);
+    }
+
+    private List<DataPoint> getNPmcMeanDataPoints(int startTime, int timeIncrement, float value, int amount) {
+        List<DataPoint> dataPoints = new ArrayList<>();
+        int time = startTime;
+        for (int i = 0; i < amount; i++) {
+            dataPoints.add(new DataPoint(time, value));
+            time += timeIncrement;
+        }
+        return dataPoints;
+    }
+
     private ByteBuffer constructValueDataBlob(List<DataPoint> dataPoints){
         PMCMeanValueCompressionModel pmcMeanValueCompressionModel = new PMCMeanValueCompressionModel(0);
         pmcMeanValueCompressionModel.resetAndAppendAll(dataPoints);

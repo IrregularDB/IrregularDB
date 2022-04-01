@@ -9,6 +9,7 @@ import java.util.List;
 
 public class DeltaDeltaTimestampCompressionModel extends TimestampCompressionModel {
     private final SignedBucketEncoder signedBucketEncoder;
+    private final List<Integer> maxBucketValues;
     private List<Integer> deltaDeltaTimestamps;
     private Long previousValue = null;
     private Integer previousDelta;
@@ -17,6 +18,8 @@ public class DeltaDeltaTimestampCompressionModel extends TimestampCompressionMod
         super(threshold);
         // We make this a field so that we don't have to allocate a new signed bucket encoder each time get byte buffer is called
         signedBucketEncoder = new SignedBucketEncoder();
+        this.maxBucketValues = signedBucketEncoder.getMaxAbsoluteValuesOfResizeableBuckets();
+
         resetModel();
     }
 

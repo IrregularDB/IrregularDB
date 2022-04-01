@@ -1,6 +1,6 @@
 package segmentgenerator;
 
-import compression.CompressionModel;
+import records.CompressionModel;
 import compression.timestamp.TimestampCompressionModel;
 import compression.value.ValueCompressionModel;
 import records.DataPoint;

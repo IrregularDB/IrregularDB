@@ -1,6 +1,6 @@
 package segmentgenerator;
 
-import compression.CompressionModel;
+import records.CompressionModel;
 import records.Segment;
 import compression.timestamp.TimestampCompressionModel;
 import compression.value.ValueCompressionModel;
@@ -59,10 +59,10 @@ public class SegmentGenerator {
     }
 
     private int syncValueAndTimestampModelLength(CompressionModel bestCompressionModel) {
-        ValueCompressionModel valueCompressionModel = bestCompressionModel.getValueCompressionModel();
+        ValueCompressionModel valueCompressionModel = bestCompressionModel.valueCompressionModel();
         int valueCompressionModelLength = valueCompressionModel.getLength();
 
-        TimestampCompressionModel timestampCompressionModel = bestCompressionModel.getTimestampCompressionModel();
+        TimestampCompressionModel timestampCompressionModel = bestCompressionModel.timestampCompressionModel();
         int timestampCompressionModelLength = timestampCompressionModel.getLength();
 
         if (timestampCompressionModelLength > valueCompressionModelLength) {
@@ -74,8 +74,8 @@ public class SegmentGenerator {
     }
 
     private Segment generateSegment(CompressionModel compressionModel, long startTime, long endTime) {
-        ValueCompressionModel valueModel = compressionModel.getValueCompressionModel();
-        TimestampCompressionModel timestampModel = compressionModel.getTimestampCompressionModel();
+        ValueCompressionModel valueModel = compressionModel.valueCompressionModel();
+        TimestampCompressionModel timestampModel = compressionModel.timestampCompressionModel();
 
         return new Segment(
                 this.timeSeriesId,

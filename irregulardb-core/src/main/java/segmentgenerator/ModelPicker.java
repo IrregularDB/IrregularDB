@@ -1,7 +1,7 @@
 package segmentgenerator;
 
 import compression.BaseModel;
-import compression.CompressionModel;
+import records.CompressionModel;
 import compression.timestamp.TimestampCompressionModel;
 import compression.value.ValueCompressionModel;
 

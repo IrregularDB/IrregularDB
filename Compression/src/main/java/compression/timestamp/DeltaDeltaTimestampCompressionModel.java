@@ -11,7 +11,7 @@ public class DeltaDeltaTimestampCompressionModel extends TimestampCompressionMod
     private final SignedBucketEncoder signedBucketEncoder;
     private final List<Integer> maxBucketValues;
     private List<Integer> deltaDeltaTimestamps;
-    private Long previousValue = null;
+    private Long previousTimestamp = null;
     private Integer previousDelta;
 
     public DeltaDeltaTimestampCompressionModel(Integer threshold) {
@@ -26,7 +26,7 @@ public class DeltaDeltaTimestampCompressionModel extends TimestampCompressionMod
     @Override
     protected void resetModel() {
         this.deltaDeltaTimestamps = new ArrayList<>();
-        this.previousValue = null;
+        this.previousTimestamp = null;
         this.previousDelta = null;
     }
 
@@ -38,39 +38,30 @@ public class DeltaDeltaTimestampCompressionModel extends TimestampCompressionMod
 
     @Override
     protected boolean appendDataPoint(DataPoint dataPoint) {
-        if (this.deltaDeltaTimestamps.size() == 0 && previousValue == null){
+        if (this.deltaDeltaTimestamps.size() == 0 && previousTimestamp == null){
             // Don't store anything for first timestamp but remember it for next time
-            previousValue = dataPoint.timestamp();
+            previousTimestamp = dataPoint.timestamp();
+        } else if (this.deltaDeltaTimestamps.size() == 0 && previousDelta == null) {
+            // Handle second data point by storing its delta
+            int delta = calculateDelta(dataPoint);
+            int approximatedDelta = tryApplyThreshold(delta);
+
+            previousDelta = approximatedDelta;
+            previousTimestamp = previousTimestamp + previousDelta;
+            deltaDeltaTimestamps.add(approximatedDelta);
         } else {
-            Integer timestampToBeAdded = tryApplyThreshold(dataPoint);
+            int deltaOfDelta = calculateDelta(dataPoint) - previousDelta;
+            int approximatedDeltaOfDelta = tryApplyThreshold(deltaOfDelta);
 
-            if (this.deltaDeltaTimestamps.size() == 0) {
-                // Add the first value as delta
-                previousValue = previousValue + timestampToBeAdded;
-                previousDelta = timestampToBeAdded;
-            } else {
-                // Save the remaining entries as deltadelta
-                previousDelta = previousDelta + timestampToBeAdded;
-                previousValue = previousValue + previousDelta;
-            }
-
-            deltaDeltaTimestamps.add(timestampToBeAdded);
+            previousDelta = previousDelta + approximatedDeltaOfDelta;
+            previousTimestamp = previousTimestamp + previousDelta;
+            deltaDeltaTimestamps.add(approximatedDeltaOfDelta);
         }
         return true;
     }
 
-    private Integer tryApplyThreshold(DataPoint dataPoint) {
-
-        int delta = (int) (dataPoint.timestamp() - previousValue);
-        int result;
-
-        if (this.deltaDeltaTimestamps.size() == 0) {
-            result = tryApplyThreshold(delta);
-        } else {
-            result = tryApplyThreshold(delta - previousDelta);
-        }
-
-        return result;
+    private int calculateDelta(DataPoint dataPoint) {
+        return (int) (dataPoint.timestamp() - previousTimestamp);
     }
 
     private Integer tryApplyThreshold(int value) {

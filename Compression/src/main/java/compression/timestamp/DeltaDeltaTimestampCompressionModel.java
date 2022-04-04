@@ -9,6 +9,7 @@ import java.util.List;
 
 public class DeltaDeltaTimestampCompressionModel extends TimestampCompressionModel {
     private final SignedBucketEncoder signedBucketEncoder;
+    private final List<Integer> maxBucketValues;
     private List<Integer> deltaDeltaTimestamps;
     private Long previousValue = null;
     private Integer previousDelta;
@@ -17,6 +18,8 @@ public class DeltaDeltaTimestampCompressionModel extends TimestampCompressionMod
         super(threshold);
         // We make this a field so that we don't have to allocate a new signed bucket encoder each time get byte buffer is called
         signedBucketEncoder = new SignedBucketEncoder();
+        this.maxBucketValues = signedBucketEncoder.getMaxAbsoluteValuesOfResizeableBuckets();
+
         resetModel();
     }
 
@@ -38,21 +41,46 @@ public class DeltaDeltaTimestampCompressionModel extends TimestampCompressionMod
         if (this.deltaDeltaTimestamps.size() == 0 && previousValue == null){
             // Don't store anything for first timestamp but remember it for next time
             previousValue = dataPoint.timestamp();
-        } else if (this.deltaDeltaTimestamps.size() == 0){
-            // Save the first entry as the delta value.
-            Integer delta = (int) (dataPoint.timestamp() - previousValue);
-            deltaDeltaTimestamps.add(delta);
-            previousValue = dataPoint.timestamp();
-            previousDelta = delta;
         } else {
-            // Save the remaining entries as deltadelta
-            Integer delta = (int) (dataPoint.timestamp() - previousValue);
-            Integer deltaDelta = delta - previousDelta;
-            deltaDeltaTimestamps.add(deltaDelta);
-            previousValue = dataPoint.timestamp();
-            previousDelta = delta;
+            Integer timestampToBeAdded = tryApplyThreshold(dataPoint);
+
+            if (this.deltaDeltaTimestamps.size() == 0) {
+                // Add the first value as delta
+                previousValue = previousValue + timestampToBeAdded;
+                previousDelta = timestampToBeAdded;
+            } else {
+                // Save the remaining entries as deltadelta
+                previousDelta = previousDelta + timestampToBeAdded;
+                previousValue = previousValue + previousDelta;
+            }
+
+            deltaDeltaTimestamps.add(timestampToBeAdded);
         }
         return true;
+    }
+
+    private Integer tryApplyThreshold(DataPoint dataPoint) {
+
+        int delta = (int) (dataPoint.timestamp() - previousValue);
+        int result;
+
+        if (this.deltaDeltaTimestamps.size() == 0) {
+            result = tryApplyThreshold(delta);
+        } else {
+            result = tryApplyThreshold(delta - previousDelta);
+        }
+
+        return result;
+    }
+
+    private Integer tryApplyThreshold(int value) {
+        int absoluteValue = Math.abs(value);
+        for (Integer maxValue : maxBucketValues) {
+            if (maxValue < absoluteValue && (absoluteValue - getThreshold()) <= maxValue) {
+               return value < 0 ? -maxValue : maxValue;
+            }
+        }
+        return value;
     }
 
     @Override

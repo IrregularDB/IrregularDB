@@ -46,7 +46,11 @@ public class BlobDecompressor {
     }
 
     private static List<Long> decompressDeltaDelta(ByteBuffer timestampBlob, long startTime){
+        if (timestampBlob.limit() == 0) {
+            return List.of(startTime);
+        }
         BitStream bitStream = new BitStreamNew(timestampBlob);
+
         SignedBucketEncoder signedBucketEncoder = new SignedBucketEncoder();
         List<Integer> deltaDeltaTimes = signedBucketEncoder.decodeSigned(bitStream);
 

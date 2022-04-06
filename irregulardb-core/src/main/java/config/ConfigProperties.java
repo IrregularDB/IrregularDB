@@ -2,6 +2,7 @@ package config;
 
 import compression.timestamp.TimestampCompressionModelType;
 import compression.value.ValueCompressionModelType;
+import segmentgenerator.ModelPickerFactory;
 
 import java.io.File;
 import java.io.FileReader;
@@ -119,6 +120,11 @@ public class ConfigProperties extends Properties{
     public boolean populateSegmentSummary(){
         return Boolean.parseBoolean(getProperty("model.segment.compute.summary", "true"));
     }
+
+    public ModelPickerFactory.ModelPickerType getModelPickerType(){
+        return ModelPickerFactory.ModelPickerType.valueOf(getProperty("model.picker"));
+    }
+
     /* Private methods */
 
     private void parseAllTimestampThresholds(){

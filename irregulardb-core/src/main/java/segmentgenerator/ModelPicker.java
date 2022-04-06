@@ -8,20 +8,19 @@ import compression.value.ValueCompressionModel;
 import java.util.Comparator;
 import java.util.List;
 
-public class ModelPicker{
+public abstract class ModelPicker{
 
-    private ModelPicker(){
-        //should not be instanciated
+    protected static final int overheadPerModel = calculateOverheadPerModel();
+
+    public abstract CompressionModel findBestCompressionModel(List<ValueCompressionModel> valueCompressionModels, List<TimestampCompressionModel> timestampCompressionModels);
+
+    protected double calculateAmountBytesPerDataPoint(BaseModel model) {
+        int amountBytesUsed = overheadPerModel + model.getAmountBytesUsed();
+        int amountDataPoints = model.getLength();
+        return ((double) amountBytesUsed) / ((double) amountDataPoints);
     }
 
-    public static CompressionModel findBestCompressionModel(List<ValueCompressionModel> valueCompressionModels, List<TimestampCompressionModel> timestampCompressionModels){
-        ValueCompressionModel bestValueCompressionModel = getBestValueModel(valueCompressionModels);
-        TimestampCompressionModel bestTimestampCompressionModel = getBestTimeStampModel(timestampCompressionModels);
-
-        return new CompressionModel(bestValueCompressionModel, bestTimestampCompressionModel);
-    }
-
-    private static double calculateAmountBytesPerDataPoint(BaseModel model) {
+    private static int calculateOverheadPerModel() {
         // TODO: ensure this overhead is correct, maybe pass it as an input of some kind through the config
         // We have the following overhead:
         //   time_series_id (integer) = 4 bytes
@@ -29,20 +28,7 @@ public class ModelPicker{
         //   end_time (int) = 4 bytes
         //   value_timestamp_model_type (smallint) = 2 bytes
         //   bytea (varbyte) in postgresql has an overhead of 4 bytes, this goes for both the blobs = 4 + 4 bytes
-        int overhead = 4 + 8 + 4 + 2 + 4 + 4;
-        int amountBytesUsed = overhead + model.getAmountBytesUsed();
-        int amountDataPoints = model.getLength();
-        return ((double) amountBytesUsed) / ((double) amountDataPoints);
+    int overhead = 4 + 8 + 4 + 2 + 4 + 4;
+        return overhead/2; // there are two models to share the overhead
     }
-
-    private static ValueCompressionModel getBestValueModel(List<ValueCompressionModel> valueCompressionModels){
-        return valueCompressionModels.stream()
-                .min(Comparator.comparing(ModelPicker::calculateAmountBytesPerDataPoint))
-                .orElseThrow(() -> new RuntimeException("In ModelPicker:getBestValueModel() - Should not happen"));
-    }
-
-    private static TimestampCompressionModel getBestTimeStampModel(List<TimestampCompressionModel> timestampCompressionModels) {
-        return timestampCompressionModels.stream()
-                .min(Comparator.comparing(ModelPicker::calculateAmountBytesPerDataPoint))
-                .orElseThrow(() -> new RuntimeException("In ModelPicker:getBestTimeStampModel() - Should not happen"));    }
 }

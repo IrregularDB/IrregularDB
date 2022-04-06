@@ -13,6 +13,8 @@ import java.util.stream.Stream;
 
 public class CompressionModelManager {
 
+    private final ModelPicker modelPicker;
+
     private List<ValueCompressionModel> activeValueModels;
     private List<TimestampCompressionModel> activeTimestampModels;
 
@@ -25,6 +27,7 @@ public class CompressionModelManager {
 
         this.inactiveValueModels = new ArrayList<>();
         this.inactiveTimestampModels = new ArrayList<>();
+        this.modelPicker = new ModelPickerFactory().getModelPicker();//can be taken as a method parameter if we want
     }
 
     public boolean tryAppendDataPointToAllModels(DataPoint dataPoint) {
@@ -70,6 +73,6 @@ public class CompressionModelManager {
     public CompressionModel getBestCompressionModel() {
         List<ValueCompressionModel> valueModels = Stream.concat(activeValueModels.stream(), inactiveValueModels.stream()).toList();
         List<TimestampCompressionModel> timeStampModels = Stream.concat(activeTimestampModels.stream(), inactiveTimestampModels.stream()).toList();
-        return ModelPicker.findBestCompressionModel(valueModels, timeStampModels);
+        return modelPicker.findBestCompressionModel(valueModels, timeStampModels);
     }
 }

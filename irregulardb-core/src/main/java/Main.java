@@ -19,7 +19,7 @@ public class Main {
     private static void initializeDataReceiverSpawners(Partitioner partitioner) {
         List<String> csvSources = ConfigProperties.getInstance().getCsvSources();
 
-        if (csvSources.size() != 0){
+        if (!csvSources.isEmpty()){
             DataReceiverSpawner dataReceiverSpawner = new CSVDataReceiverSpawner(partitioner, csvSources);
             dataReceiverSpawner.spawn();
         }

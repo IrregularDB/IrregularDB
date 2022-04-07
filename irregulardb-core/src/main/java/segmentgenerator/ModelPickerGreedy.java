@@ -39,16 +39,23 @@ public class ModelPickerGreedy extends ModelPicker {
         return (bytesUsedByModel)/lengthBound;
     }
 
-    public ModelPickerGreedy() {
-
-    }
-
     @Override
     public CompressionModel findBestCompressionModel(List<ValueCompressionModel> valueCompressionModels, List<TimestampCompressionModel> timestampCompressionModels) {
         ValueCompressionModel bestValueCompressionModel = getBestValueModel(valueCompressionModels);
         TimestampCompressionModel bestTimestampCompressionModel = getBestTimeStampModel(timestampCompressionModels);
 
-        return new CompressionModel(bestValueCompressionModel, bestTimestampCompressionModel);
+        if (bestValueCompressionModel.getLength() < bestTimestampCompressionModel.getLength()) {
+            bestValueCompressionModel.reduceToSizeN(bestTimestampCompressionModel.getLength());
+        } else {
+            bestTimestampCompressionModel.reduceToSizeN(bestValueCompressionModel.getLength());
+        }
+        return new CompressionModel(
+                bestValueCompressionModel.getValueCompressionModelType(),
+                bestValueCompressionModel.getBlobRepresentation(),
+                bestTimestampCompressionModel.getTimestampCompressionModelType(),
+                bestTimestampCompressionModel.getBlobRepresentation(),
+                bestTimestampCompressionModel.getLength()//could just as well be the value model length
+        );
     }
 
     protected ValueCompressionModel getBestValueModel(List<ValueCompressionModel> valueCompressionModelsList){

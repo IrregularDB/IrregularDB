@@ -75,13 +75,18 @@ public class PMCMeanValueCompressionModel extends ValueCompressionModel {
 
     @Override
     protected ByteBuffer createByteBuffer() {
-        if (this.getLength() == 0) {
+        if (!canCreateByteBuffer()) {
             throw new UnsupportedOperationException("No data points where added to the PMC-mean value model before trying to get the value blob");
         }
 
         // We convert to float as this is what we store (i.e. we support floating point precision)
         float mean = (this.sum / this.getLength());
         return ByteBuffer.allocate(4).putFloat(mean);
+    }
+
+    @Override
+    public boolean canCreateByteBuffer() {
+        return getLength() != 0;
     }
 
     @Override

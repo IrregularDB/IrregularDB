@@ -98,7 +98,7 @@ class PMCMeanValueCompressionModelTest {
 
     @Test
     void getValueBlobEmptyModel() {
-        Assertions.assertThrows(UnsupportedOperationException.class, () -> pmcMeanModel.getBlobRepresentation());
+        Assertions.assertThrows(IllegalStateException.class, () -> pmcMeanModel.getBlobRepresentation());
     }
 
     @Test
@@ -115,7 +115,7 @@ class PMCMeanValueCompressionModelTest {
     @Test
     void getAmountOfBytesUsed0DataPoints() {
         // We expect this to throw and exception as no model has been made yet.
-        Assertions.assertThrows(UnsupportedOperationException.class, () -> pmcMeanModel.getAmountBytesUsed());
+        Assertions.assertThrows(IllegalStateException.class, () -> pmcMeanModel.getAmountBytesUsed());
     }
 
     @Test

@@ -54,6 +54,12 @@ public class SIDiffTimestampCompressionModel extends TimestampCompressionModel {
         return signedBucketEncoder.encode(readings).getFinishedByteBuffer();
     }
 
+    @Override
+    public boolean canCreateByteBuffer() {
+        return getLength() >= 2;
+    }
+
+
     private int calculateSI() {
         long firstTimestamp = timestamps.get(0);
         long lastTimestamp = timestamps.get(timestamps.size() - 1);

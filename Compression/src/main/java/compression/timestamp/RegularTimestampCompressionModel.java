@@ -128,10 +128,15 @@ public class RegularTimestampCompressionModel extends TimestampCompressionModel 
 
     @Override
     protected ByteBuffer createByteBuffer() {
-        if (this.getLength() < 2) {
+        if (!canCreateByteBuffer()) {
             throw new UnsupportedOperationException("Regular time stamp model needs at least two data points before you are able to get the time stamp blob");
         }
         return SingleIntEncoding.encode(si);
+    }
+
+    @Override
+    public boolean canCreateByteBuffer() {
+        return getLength() >= 2;
     }
 
     @Override

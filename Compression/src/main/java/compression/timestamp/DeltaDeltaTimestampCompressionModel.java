@@ -80,6 +80,11 @@ public class DeltaDeltaTimestampCompressionModel extends TimestampCompressionMod
     }
 
     @Override
+    public boolean canCreateByteBuffer() {
+        return true;
+    }
+
+    @Override
     protected void reduceToSize(int n) {
         // We have to cut the list down to size n-1 as the first time stamp is not in the list
         this.deltaDeltaTimestamps.subList(n - 1, deltaDeltaTimestamps.size()).clear();

@@ -14,9 +14,15 @@ public abstract class ModelPicker{
 
     public abstract CompressionModel findBestCompressionModel(List<ValueCompressionModel> valueCompressionModels, List<TimestampCompressionModel> timestampCompressionModels);
 
-    protected double calculateAmountBytesPerDataPoint(BaseModel model) {
-        int amountBytesUsed = overheadPerModel + model.getAmountBytesUsed();
-        int amountDataPoints = model.getLength();
+    protected double calculateAmountBytesPerDataPoint(int bytesUsedByModel, int modelLength) {
+        int amountBytesUsed = overheadPerModel + bytesUsedByModel;
+        int amountDataPoints = modelLength;
+        return ((double) amountBytesUsed) / ((double) amountDataPoints);
+    }
+
+    protected double calculateAmountBytesPerDataPoint(BaseModel baseModel) {
+        int amountBytesUsed = overheadPerModel + baseModel.getBlobRepresentation().position();
+        int amountDataPoints = baseModel.getLength();
         return ((double) amountBytesUsed) / ((double) amountDataPoints);
     }
 

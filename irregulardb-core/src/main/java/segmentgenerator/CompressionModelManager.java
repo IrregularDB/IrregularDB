@@ -27,7 +27,7 @@ public class CompressionModelManager {
 
         this.inactiveValueModels = new ArrayList<>();
         this.inactiveTimestampModels = new ArrayList<>();
-        this.modelPicker = new ModelPickerFactory().getModelPicker();//can be taken as a method parameter if we want
+        this.modelPicker = ModelPickerFactory.getModelPicker();//can be taken as a method parameter if we want
     }
 
     public boolean tryAppendDataPointToAllModels(DataPoint dataPoint) {

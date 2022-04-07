@@ -98,7 +98,7 @@ public class SwingValueCompressionModel extends ValueCompressionModel {
 
     @Override
     protected ByteBuffer createByteBuffer() {
-        if (this.getLength() < 2) {
+        if (!canCreateByteBuffer()) {
             throw new UnsupportedOperationException("Swing filter model needs at least two data points before you are able to get its value blob");
         }
 
@@ -108,6 +108,11 @@ public class SwingValueCompressionModel extends ValueCompressionModel {
 
         // We convert to float as this is what we store (i.e. we support floating point precision)
         return ByteBuffer.allocate(8).putFloat(slope).putFloat(intercept);
+    }
+
+    @Override
+    public boolean canCreateByteBuffer() {
+        return this.getLength() >= 2;
     }
 
     @Override

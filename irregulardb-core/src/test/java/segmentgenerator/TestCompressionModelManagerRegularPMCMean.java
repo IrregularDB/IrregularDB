@@ -67,7 +67,13 @@ public class TestCompressionModelManagerRegularPMCMean extends CompressionModelM
             RegularTimestampCompressionModel regularTimeStampCompressionModel = new RegularTimestampCompressionModel(0);
             regularTimeStampCompressionModel.resetAndAppendAll(acceptedDataPoints);
 
-            return new CompressionModel(pmcMeanValueCompressionModel, regularTimeStampCompressionModel);
+            return new CompressionModel(
+                    pmcMeanValueCompressionModel.getValueCompressionModelType(),
+                    pmcMeanValueCompressionModel.getBlobRepresentation(),
+                    regularTimeStampCompressionModel.getTimestampCompressionModelType(),
+                    regularTimeStampCompressionModel.getBlobRepresentation(),
+                    acceptedDataPoints.size()
+            );
         }
         throw new RuntimeException("There is only a simple overwrite");
     }

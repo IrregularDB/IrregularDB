@@ -5,24 +5,21 @@ import config.ConfigProperties;
 public class ModelPickerFactory {
 
     public enum ModelPickerType {
-        ModelPickerGreedy,
-        ModelPickerBruteForce;
+        MODEL_PICKER_GREEDY,
+        MODEL_PICKER_BRUTE_FORCE;
     }
 
-    private final ModelPickerType modelPickerType;
+    private static final ModelPickerType modelPickerType = ConfigProperties.getInstance().getModelPickerType();
 
-    public ModelPickerFactory() {
-        modelPickerType = ConfigProperties.getInstance().getModelPickerType();
-    }
 
-    public ModelPicker getModelPicker() {
-        return initializeModelPickerByType(this.modelPickerType);
+    public static ModelPicker getModelPicker() {
+        return initializeModelPickerByType(modelPickerType);
     }
 
     private static ModelPicker initializeModelPickerByType(ModelPickerType modelPickerType) {
         return switch (modelPickerType) {
-            case ModelPickerGreedy -> new ModelPickerGreedy();
-            case ModelPickerBruteForce -> new ModelPickerBruteForce();
+            case MODEL_PICKER_GREEDY -> new ModelPickerGreedy();
+            case MODEL_PICKER_BRUTE_FORCE -> new ModelPickerBruteForce();
             default -> throw new IllegalArgumentException("Illegal model picker type" + modelPickerType.name());
         };
     }

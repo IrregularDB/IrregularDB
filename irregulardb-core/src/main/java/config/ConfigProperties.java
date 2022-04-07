@@ -109,7 +109,7 @@ public class ConfigProperties extends Properties {
     }
 
     public int getSocketDataReceiverSpawnerPort() {
-        return Integer.parseInt(getProperty("source.socket.port"));
+        return Integer.parseInt(getProperty("source.socket.port", "4672"));
     }
 
     public int getModelLengthBound() {

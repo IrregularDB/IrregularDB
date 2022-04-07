@@ -107,7 +107,7 @@ public class ConfigProperties extends Properties{
     }
 
     public float getValueModelErrorBound(){
-        String errorBoundProperty = getProperty("model.value.errorbound");
+        String errorBoundProperty = getProperty("model.value.error_bound");
 
         if (errorBoundProperty == null){
             return 0.0f;
@@ -117,7 +117,7 @@ public class ConfigProperties extends Properties{
     }
 
     public String getJDBConnectionString(){
-        return getProperty("database.jdbc.connectionstring");
+        return getProperty("database.jdbc.connection_string");
     }
 
     public int getSocketDataReceiverSpawnerPort(){

@@ -36,6 +36,10 @@ public class SIDiffTimestampCompressionModel extends TimestampCompressionModel {
 
     @Override
     protected ByteBuffer createByteBuffer() {
+        if (!canCreateByteBuffer()) {
+            throw new UnsupportedOperationException("SIdiff time stamp model needs at least two data points before you are able to get the time stamp blob");
+        }
+
         List<Integer> readings = new ArrayList<>();
         int si = calculateSI();
         readings.add(si);

@@ -13,11 +13,11 @@ import java.util.List;
 
 
 public class PMCMeanValueCompressionModel extends ValueCompressionModel {
-    private List<Float> values;
     private float min;
     private float max;
     private float sum;
     private boolean earlierAppendFailed;
+    private int length;
 
     public PMCMeanValueCompressionModel(float errorBound) {
         super(errorBound);
@@ -30,12 +30,12 @@ public class PMCMeanValueCompressionModel extends ValueCompressionModel {
         this.max = Float.NEGATIVE_INFINITY;
         this.sum = 0;
         this.earlierAppendFailed = false;
-        this.values = new ArrayList<>();
+        this.length = 0;
     }
 
     @Override
     public int getLength() {
-        return values.size();
+        return length;
     }
 
     @Override
@@ -59,18 +59,18 @@ public class PMCMeanValueCompressionModel extends ValueCompressionModel {
         boolean appendSucceeded = PercentageError.isWithinErrorBound(mean, nextMin, super.getErrorBound()) &&
                           PercentageError.isWithinErrorBound(mean, nextMax, super.getErrorBound());
         if (appendSucceeded) {
-            updateModelState(nextMin, nextMax, nextSum, value);
+            updateModelState(nextMin, nextMax, nextSum);
         } else {
             this.earlierAppendFailed = true;
         }
         return appendSucceeded;
     }
 
-    private void updateModelState(float min, float max, float sum, float value) {
+    private void updateModelState(float min, float max, float sum) {
         this.min = min;
         this.max = max;
         this.sum = sum;
-        this.values.add(value);
+        this.length++;
     }
 
     @Override
@@ -91,6 +91,7 @@ public class PMCMeanValueCompressionModel extends ValueCompressionModel {
 
     @Override
     protected void reduceToSize(int n) {
-        values.subList(n, this.getLength()).clear();
+        // Do nothing except update length (if the constant model could fit the longer list of values it can also fit the shorter list)
+        length = n;
     }
 }

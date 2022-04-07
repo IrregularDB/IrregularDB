@@ -19,7 +19,7 @@ public class SwingValueCompressionModel extends ValueCompressionModel {
     private LinearFunction lowerBound;
 
     public SwingValueCompressionModel(float errorBound) {
-        super(errorBound);
+        super(errorBound, "Swing filter model needs at least two data points before you are able to get its value blob");
         // The error bound provided is in percentage, so we first transform it to a decimal number
         // NOTE: due to the same reason as in ModelarDB we here choose to divide with 100.1 instead of 100
         // as we otherwise would allow data points slightly above the error bound.
@@ -98,10 +98,6 @@ public class SwingValueCompressionModel extends ValueCompressionModel {
 
     @Override
     protected ByteBuffer createByteBuffer() {
-        if (!canCreateByteBuffer()) {
-            throw new IllegalStateException("Swing filter model needs at least two data points before you are able to get its value blob");
-        }
-
         // We choose to save the average i.e. the line between our two bounds
         float slope = (this.lowerBound.getSlope() + this.upperBound.getSlope()) / 2;
         float intercept = (this.lowerBound.getIntercept() + this.upperBound.getIntercept()) / 2;

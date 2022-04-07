@@ -14,7 +14,7 @@ public class RegularTimestampCompressionModel extends TimestampCompressionModel 
     private long nextExpectedTimestamp;
 
     public RegularTimestampCompressionModel(Integer threshold) {
-        super(threshold);
+        super(threshold, "Regular time stamp model needs at least two data points before you are able to get the time stamp blob");
         this.resetModel();
     }
 
@@ -123,9 +123,6 @@ public class RegularTimestampCompressionModel extends TimestampCompressionModel 
 
     @Override
     protected ByteBuffer createByteBuffer() {
-        if (!canCreateByteBuffer()) {
-            throw new IllegalStateException("Regular time stamp model needs at least two data points before you are able to get the time stamp blob");
-        }
         return SingleIntEncoding.encode(si);
     }
 

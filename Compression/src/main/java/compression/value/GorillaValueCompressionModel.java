@@ -12,7 +12,7 @@ public class GorillaValueCompressionModel extends ValueCompressionModel {
     List<Float> values;
 
     public GorillaValueCompressionModel() {
-        super(null);
+        super(null, "No data points where added to the Gorilla value model before trying to get the value blob");
         this.resetModel();
     }
 
@@ -34,10 +34,6 @@ public class GorillaValueCompressionModel extends ValueCompressionModel {
 
     @Override
     protected ByteBuffer createByteBuffer() {
-        if (!canCreateByteBuffer()) {
-            throw new IllegalStateException("No data points where added to the Gorilla value model before trying to get the value blob");
-        }
-
         BitBuffer encode = GorillaValueEncoding.encode(values);
         return encode.getFinishedByteBuffer();
     }

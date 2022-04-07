@@ -6,10 +6,12 @@ import java.nio.ByteBuffer;
 import java.util.List;
 
 public abstract class BaseModel {
+    private final String cantConstructBlobErrorMessage;
 
     private ByteBuffer byteBuffer; //Used as a cache for a blob
 
-    public BaseModel() {
+    public BaseModel(String cantConstructBlobErrorMessage) {
+        this.cantConstructBlobErrorMessage = cantConstructBlobErrorMessage;
         byteBuffer = null;
     }
 
@@ -56,7 +58,7 @@ public abstract class BaseModel {
      */
     public final ByteBuffer getBlobRepresentation() {
         if (!canCreateByteBuffer()) {
-            throw new IllegalStateException("Can create byte buffer returns false");
+            throw new IllegalStateException(cantConstructBlobErrorMessage);
         }
         if (byteBuffer == null) {
             byteBuffer = createByteBuffer();

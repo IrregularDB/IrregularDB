@@ -59,9 +59,9 @@ public class ModelPickerGreedy extends ModelPicker {
     }
 
     protected ValueCompressionModel getBestValueModel(List<ValueCompressionModel> valueCompressionModelsList) {
-        //Can we ignore gorilla?
         ValueCompressionModelsWrapper valueCompressionModels = new ValueCompressionModelsWrapper(valueCompressionModelsList);
 
+        //Can we ignore gorilla?
         performShortCircutingValueModels(valueCompressionModelsList, valueCompressionModels);
 
         return valueCompressionModelsList.stream()
@@ -87,9 +87,9 @@ public class ModelPickerGreedy extends ModelPicker {
     }
 
     protected TimestampCompressionModel getBestTimeStampModel(List<TimestampCompressionModel> timestampCompressionModelsList) {
-        //Can we ignore SIDiff or DeltaDelta
         TimestampCompressionModelsWrapper timestampCompressionModelsWrapper = new TimestampCompressionModelsWrapper(timestampCompressionModelsList);
 
+        //Can we ignore SIDiff or DeltaDelta
         performShortCircutingTimestampModels(timestampCompressionModelsList, timestampCompressionModelsWrapper);
 
         return timestampCompressionModelsList.stream()

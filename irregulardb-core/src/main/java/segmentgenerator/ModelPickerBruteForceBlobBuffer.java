@@ -17,7 +17,7 @@ public class ModelPickerBruteForceBlobBuffer {
     private final Map<BaseModel, Map<Integer, ByteBuffer>> compressionModelBlobBuffer;
 
     /**
-     * Notive that the models will have reduceToSizeN called for each of them with the lowest size of the other type
+     * Notice that the models will have reduceToSizeN called for each of them with the lowest size of the other type
      */
     public ModelPickerBruteForceBlobBuffer(List<ValueCompressionModel> valueModels, List<TimestampCompressionModel> timestampModels) {
         this.compressionModelBlobBuffer = new HashMap<>();

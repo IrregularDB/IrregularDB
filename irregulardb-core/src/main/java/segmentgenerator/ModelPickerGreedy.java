@@ -17,26 +17,26 @@ public class ModelPickerGreedy extends ModelPicker {
     private final double siDiffAndDeltaDeltaBestBytePerDataPoint = getSiDiffDeltaDeltaBestBytesPerDatapoint();
     private final int lengthBound = ConfigProperties.getInstance().getModelLengthBound();
 
-    private double getGorillaBestBytePerDatapoint(){
+    private double getGorillaBestBytePerDatapoint() {
         //store 1 float as an int e.g. 32 bits, + 1 bit per value + 1 value that is not the same as the others
         int bitsForGorillaValueNotSame = 2 + 4 + 5 + 1;//lowest possible amount of bits for a gorilla value that is not the same as the rest
         int bitsUsedForGorilla = Integer.SIZE + (lengthBound - 2) + bitsForGorillaValueNotSame;
 
         double bytesUsedByGorilla = Math.ceil(bitsUsedForGorilla / (double) Byte.SIZE);
 
-        return (bytesUsedByGorilla + overheadPerModel)/lengthBound;
+        return (bytesUsedByGorilla + overheadPerModel) / lengthBound;
     }
 
-    private double getSiDiffDeltaDeltaBestBytesPerDatapoint(){
+    private double getSiDiffDeltaDeltaBestBytesPerDatapoint() {
 
         int controlBits = 2;
         int signBits = 1;
         int smallestNonZeroBucketSizeInBits = BucketEncoding.getSmallestNonZeroBucketSizeInBits();
         int bitsForSmallesBucketSize = smallestNonZeroBucketSizeInBits + controlBits + signBits;
         int bitsUsedByModel = 2 * bitsForSmallesBucketSize + (lengthBound - 2) * controlBits; //TODO if simon no fix signed encoder add signBit
-        double bytesUsedByModel = Math.ceil(bitsUsedByModel / (double)Byte.SIZE);
+        double bytesUsedByModel = Math.ceil(bitsUsedByModel / (double) Byte.SIZE);
 
-        return (bytesUsedByModel)/lengthBound;
+        return (bytesUsedByModel) / lengthBound;
     }
 
     @Override
@@ -58,10 +58,18 @@ public class ModelPickerGreedy extends ModelPicker {
         );
     }
 
-    protected ValueCompressionModel getBestValueModel(List<ValueCompressionModel> valueCompressionModelsList){
+    protected ValueCompressionModel getBestValueModel(List<ValueCompressionModel> valueCompressionModelsList) {
         //Can we ignore gorilla?
         ValueCompressionModelsWrapper valueCompressionModels = new ValueCompressionModelsWrapper(valueCompressionModelsList);
 
+        performShortCircutingValueModels(valueCompressionModelsList, valueCompressionModels);
+
+        return valueCompressionModelsList.stream()
+                .min(Comparator.comparing(this::calculateAmountBytesPerDataPoint))
+                .orElseThrow(() -> new RuntimeException("In ModelPicker:getBestValueModel() - models list.empty should not happen"));
+    }
+
+    private void performShortCircutingValueModels(List<ValueCompressionModel> valueCompressionModelsList, ValueCompressionModelsWrapper valueCompressionModels) {
         boolean gorillaRemoved = false;
         if (valueCompressionModels.getPmcMean() != null) {
             double pmcMeanBytesPerDataPoint = calculateAmountBytesPerDataPoint(valueCompressionModels.getPmcMean());
@@ -76,16 +84,20 @@ public class ModelPickerGreedy extends ModelPicker {
                 valueCompressionModelsList.remove(valueCompressionModels.getGorilla());
             }
         }
-
-        return valueCompressionModelsList.stream()
-                .min(Comparator.comparing(this::calculateAmountBytesPerDataPoint))
-                .orElseThrow(() -> new RuntimeException("In ModelPicker:getBestValueModel() - models list.empty should not happen"));
     }
 
     protected TimestampCompressionModel getBestTimeStampModel(List<TimestampCompressionModel> timestampCompressionModelsList) {
         //Can we ignore SIDiff or DeltaDelta
         TimestampCompressionModelsWrapper timestampCompressionModelsWrapper = new TimestampCompressionModelsWrapper(timestampCompressionModelsList);
 
+        performShortCircutingTimestampModels(timestampCompressionModelsList, timestampCompressionModelsWrapper);
+
+        return timestampCompressionModelsList.stream()
+                .min(Comparator.comparing(this::calculateAmountBytesPerDataPoint))
+                .orElseThrow(() -> new RuntimeException("In ModelPicker:getBestTimeStampModel() - Should not happen"));
+    }
+
+    private void performShortCircutingTimestampModels(List<TimestampCompressionModel> timestampCompressionModelsList, TimestampCompressionModelsWrapper timestampCompressionModelsWrapper) {
         if (timestampCompressionModelsWrapper.getRegular() != null) {
             double bytesPerDataPointRegular = calculateAmountBytesPerDataPoint(timestampCompressionModelsWrapper.getRegular());
             if (bytesPerDataPointRegular < siDiffAndDeltaDeltaBestBytePerDataPoint) {
@@ -97,10 +109,6 @@ public class ModelPickerGreedy extends ModelPicker {
                 }
             }
         }
-
-        return timestampCompressionModelsList.stream()
-                .min(Comparator.comparing(this::calculateAmountBytesPerDataPoint))
-                .orElseThrow(() -> new RuntimeException("In ModelPicker:getBestTimeStampModel() - Should not happen"));
     }
 
 }

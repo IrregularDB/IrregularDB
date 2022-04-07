@@ -8,6 +8,10 @@ import java.nio.ByteBuffer;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * Produces and caches blobs for all model combinations
+ * Used to aid ModelPickerBruteForce
+ */
 public class ModelPickerBruteForceBlobBuffer {
 
     private final Map<BaseModel, Map<Integer, ByteBuffer>> compressionModelBlobBuffer;

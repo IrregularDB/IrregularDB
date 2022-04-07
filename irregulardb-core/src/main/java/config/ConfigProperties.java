@@ -47,7 +47,8 @@ public class ConfigProperties extends Properties{
     public int getConfiguredNumberOfWorkingSets(){
         String workingsets = getProperty("workingsets");
         if (workingsets == null) {
-            throw new MissingConfigPropertyException("workingsets");
+            // Defaults to 1
+            return 1;
         }
 
         return Integer.parseInt(workingsets);
@@ -56,7 +57,8 @@ public class ConfigProperties extends Properties{
     public List<String> getCsvSources(){
         String csvSource = getProperty("source.csv");
         if (csvSource == null) {
-            throw new MissingConfigPropertyException("source.csv");
+            // no sources -> return empty list
+            return new ArrayList<>();
         }
 
         return Arrays.stream(csvSource.trim().split(","))
@@ -65,7 +67,14 @@ public class ConfigProperties extends Properties{
     }
 
     public List<ValueCompressionModelType> getValueModels(){
-        return Arrays.stream(getProperty("model.value.types").split(","))
+
+        String valueTypes = getProperty("model.value.types");
+
+        if (valueTypes == null){
+            return new ArrayList<>(List.of(ValueCompressionModelType.values()));
+        }
+
+        return Arrays.stream(valueTypes.split(","))
                 .map(String::trim)
                 .filter(Predicate.not(String::isEmpty))
                 .map(ValueCompressionModelType::valueOf)
@@ -73,7 +82,14 @@ public class ConfigProperties extends Properties{
     }
 
     public List<TimestampCompressionModelType> getTimestampModels(){
-        return Arrays.stream(getProperty("model.timestamp.types").split(","))
+
+        String timestampTypes = getProperty("model.timestamp.types");
+
+        if (timestampTypes == null){
+            return new ArrayList<>(List.of(TimestampCompressionModelType.values()));
+        }
+
+        return Arrays.stream(timestampTypes.split(","))
                 .map(String::trim)
                 .filter(Predicate.not(String::isEmpty))
                 .map(TimestampCompressionModelType::valueOf)
@@ -81,11 +97,23 @@ public class ConfigProperties extends Properties{
     }
 
     public Integer getTimestampModelThreshold(){
-        return Integer.parseInt(getProperty("model.timestamp.threshold"));
+        String thresholdProperty = getProperty("model.timestamp.threshold");
+
+        if (thresholdProperty == null){
+            return 0;
+        } else {
+            return Integer.parseInt(thresholdProperty);
+        }
     }
 
     public float getValueModelErrorBound(){
-        return Float.parseFloat(getProperty("model.value.errorbound"));
+        String errorBoundProperty = getProperty("model.value.errorbound");
+
+        if (errorBoundProperty == null){
+            return 0.0f;
+        } else {
+            return Float.parseFloat(errorBoundProperty);
+        }
     }
 
     public String getJDBConnectionString(){
@@ -97,7 +125,12 @@ public class ConfigProperties extends Properties{
     }
 
     public int getModelLengthBound(){
-        return Integer.parseInt(getProperty("model.length_bound"));
+        String lengthBoundProperty = getProperty("model.length_bound");
+        if (lengthBoundProperty == null){
+            return 50;
+        } else {
+            return Integer.parseInt(lengthBoundProperty);
+        }
     }
 
     public Integer getTimeStampThresholdForTimeSeriesTag(String tag){
@@ -117,7 +150,12 @@ public class ConfigProperties extends Properties{
     }
 
     public boolean populateSegmentSummary(){
-        return Boolean.parseBoolean(getProperty("model.segment.compute.summary", "true"));
+        String summaryProperty = getProperty("model.segment.compute.summary", "true");
+        if (summaryProperty == null){
+            return false;
+        } else {
+            return Boolean.parseBoolean(summaryProperty);
+        }
     }
     /* Private methods */
 

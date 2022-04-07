@@ -11,7 +11,7 @@ import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-public class ConfigProperties extends Properties{
+public class ConfigProperties extends Properties {
 
     public static boolean isTest = false;
     private static ConfigProperties INSTANCE;
@@ -32,7 +32,7 @@ public class ConfigProperties extends Properties{
         return INSTANCE;
     }
 
-    private ConfigProperties(String path){
+    private ConfigProperties(String path) {
         String property = System.getProperty("user.dir");
         File file = new File(path);
         try {
@@ -45,19 +45,21 @@ public class ConfigProperties extends Properties{
         parseAllValueErrorBounds();
     }
 
-    public int getConfiguredNumberOfWorkingSets(){
+    public int getConfiguredNumberOfWorkingSets() {
         String workingsets = getProperty("workingsets");
         if (workingsets == null) {
-            throw new MissingConfigPropertyException("workingsets");
+            // Defaults to 1
+            return 1;
         }
 
         return Integer.parseInt(workingsets);
     }
 
-    public List<String> getCsvSources(){
+    public List<String> getCsvSources() {
         String csvSource = getProperty("source.csv");
         if (csvSource == null) {
-            throw new MissingConfigPropertyException("source.csv");
+            // no sources -> return empty list
+            return Collections.emptyList();
         }
 
         return Arrays.stream(csvSource.trim().split(","))
@@ -65,60 +67,74 @@ public class ConfigProperties extends Properties{
                 .collect(Collectors.toList());
     }
 
-    public List<ValueCompressionModelType> getValueModels(){
-        return Arrays.stream(getProperty("model.value.types").split(","))
+    public List<ValueCompressionModelType> getValueModels() {
+
+        String valueTypes = getProperty("model.value.types");
+
+        if (valueTypes == null) {
+            return new ArrayList<>(List.of(ValueCompressionModelType.values()));
+        }
+
+        return Arrays.stream(valueTypes.split(","))
                 .map(String::trim)
                 .filter(Predicate.not(String::isEmpty))
                 .map(ValueCompressionModelType::valueOf)
                 .collect(Collectors.toList());
     }
 
-    public List<TimestampCompressionModelType> getTimestampModels(){
-        return Arrays.stream(getProperty("model.timestamp.types").split(","))
+    public List<TimestampCompressionModelType> getTimestampModels() {
+
+        String timestampTypes = getProperty("model.timestamp.types");
+
+        if (timestampTypes == null) {
+            return new ArrayList<>(List.of(TimestampCompressionModelType.values()));
+        }
+
+        return Arrays.stream(timestampTypes.split(","))
                 .map(String::trim)
                 .filter(Predicate.not(String::isEmpty))
                 .map(TimestampCompressionModelType::valueOf)
                 .collect(Collectors.toList());
     }
 
-    public Integer getTimestampModelThreshold(){
-        return Integer.parseInt(getProperty("model.timestamp.threshold"));
+    public Integer getTimestampModelThreshold() {
+        return Integer.parseInt(getProperty("model.timestamp.threshold", "0"));
     }
 
-    public float getValueModelErrorBound(){
-        return Float.parseFloat(getProperty("model.value.errorbound"));
+    public float getValueModelErrorBound() {
+        return Float.parseFloat(getProperty("model.value.error_bound", "0.0"));
     }
 
-    public String getJDBConnectionString(){
-        return getProperty("database.jdbc.connectionstring");
+    public String getJDBConnectionString() {
+        return getProperty("database.jdbc.connection_string");
     }
 
-    public int getSocketDataReceiverSpawnerPort(){
-        return Integer.parseInt(getProperty("source.socket.port"));
+    public int getSocketDataReceiverSpawnerPort() {
+        return Integer.parseInt(getProperty("source.socket.port", "4672"));
     }
 
-    public int getModelLengthBound(){
-        return Integer.parseInt(getProperty("model.length_bound"));
+    public int getModelLengthBound() {
+        return Integer.parseInt(getProperty("model.length_bound", "50"));
     }
 
-    public Integer getTimeStampThresholdForTimeSeriesTag(String tag){
-        if (this.timestampThresholds.containsKey(tag)){
+    public Integer getTimeStampThresholdForTimeSeriesTag(String tag) {
+        if (this.timestampThresholds.containsKey(tag)) {
             return this.timestampThresholds.get(tag);
         } else {
             return this.getTimestampModelThreshold();
         }
     }
 
-    public Float getValueErrorBoundForTimeSeriesTag(String tag){
-        if (this.timestampThresholds.containsKey(tag)){
+    public Float getValueErrorBoundForTimeSeriesTag(String tag) {
+        if (this.timestampThresholds.containsKey(tag)) {
             return this.valueErrorBounds.get(tag);
         } else {
             return this.getValueModelErrorBound();
         }
     }
 
-    public boolean populateSegmentSummary(){
-        return Boolean.parseBoolean(getProperty("model.segment.compute.summary", "true"));
+    public boolean populateSegmentSummary() {
+        return Boolean.parseBoolean(getProperty("model.segment.compute.summary", "false"));
     }
 
     public ModelPickerFactory.ModelPickerType getModelPickerType(){
@@ -126,10 +142,9 @@ public class ConfigProperties extends Properties{
     }
 
     /* Private methods */
-
-    private void parseAllTimestampThresholds(){
+    private void parseAllTimestampThresholds() {
         for (Enumeration<?> e = propertyNames(); e.hasMoreElements(); ) {
-            String name = (String)e.nextElement();
+            String name = (String) e.nextElement();
 
             if (name.startsWith("model.timestamp.threshold.")) {
                 String value = getProperty(name);
@@ -138,9 +153,9 @@ public class ConfigProperties extends Properties{
         }
     }
 
-    private void parseAllValueErrorBounds(){
+    private void parseAllValueErrorBounds() {
         for (Enumeration<?> e = propertyNames(); e.hasMoreElements(); ) {
-            String name = (String)e.nextElement();
+            String name = (String) e.nextElement();
             if (name.startsWith("model.value.errorbound.")) {
                 String value = getProperty(name);
                 this.valueErrorBounds.put(name, Float.parseFloat(value));

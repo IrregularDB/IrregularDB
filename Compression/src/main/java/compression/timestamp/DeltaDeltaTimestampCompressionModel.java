@@ -77,7 +77,7 @@ public class DeltaDeltaTimestampCompressionModel extends TimestampCompressionMod
     @Override
     protected ByteBuffer createByteBuffer() {
         if (!canCreateByteBuffer()) {
-            throw new UnsupportedOperationException("DeltaDelta time stamp model needs at least one data point before you are able to get the time stamp blob");
+            throw new IllegalStateException("DeltaDelta time stamp model needs at least one data point before you are able to get the time stamp blob");
         }
 
         return signedBucketEncoder.encode(this.deltaDeltaTimestamps).getFinishedByteBuffer();

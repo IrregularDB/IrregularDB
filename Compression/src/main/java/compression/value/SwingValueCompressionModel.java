@@ -99,7 +99,7 @@ public class SwingValueCompressionModel extends ValueCompressionModel {
     @Override
     protected ByteBuffer createByteBuffer() {
         if (!canCreateByteBuffer()) {
-            throw new UnsupportedOperationException("Swing filter model needs at least two data points before you are able to get its value blob");
+            throw new IllegalStateException("Swing filter model needs at least two data points before you are able to get its value blob");
         }
 
         // We choose to save the average i.e. the line between our two bounds

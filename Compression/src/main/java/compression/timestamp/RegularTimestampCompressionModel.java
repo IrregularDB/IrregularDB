@@ -37,28 +37,23 @@ public class RegularTimestampCompressionModel extends TimestampCompressionModel 
     }
 
     private boolean appendTimestamp(long timeStamp) {
-        try {
-            if (earlierAppendFailed) { // Security added so that if you try to append after an earlier append failed
-                throw new IllegalArgumentException("You tried to append to a model that had failed an earlier append");
-            }
-            boolean withinThreshold;
-
-            // Special handling for first two time stamps:
-            if (this.getLength() < 2) {
-                handleFirstTwoDataPoints(timeStamp);
-                withinThreshold = true;
-            } else {
-                withinThreshold = handleOtherDataPoints(timeStamp);
-
-                this.nextExpectedTimestamp += si;
-                if (!withinThreshold)
-                    earlierAppendFailed = true;
-            }
-            return withinThreshold;
-        } catch (SiConversionException e) {
-            earlierAppendFailed = true;
-            return false;
+        if (earlierAppendFailed) { // Security added so that if you try to append after an earlier append failed
+            throw new IllegalArgumentException("You tried to append to a model that had failed an earlier append");
         }
+        boolean withinThreshold;
+
+        // Special handling for first two time stamps:
+        if (this.getLength() < 2) {
+            handleFirstTwoDataPoints(timeStamp);
+            withinThreshold = true;
+        } else {
+            withinThreshold = handleOtherDataPoints(timeStamp);
+
+            this.nextExpectedTimestamp += si;
+            if (!withinThreshold)
+                earlierAppendFailed = true;
+        }
+        return withinThreshold;
     }
 
     private void handleFirstTwoDataPoints(long timestamp) {
@@ -129,7 +124,7 @@ public class RegularTimestampCompressionModel extends TimestampCompressionModel 
     @Override
     protected ByteBuffer createByteBuffer() {
         if (!canCreateByteBuffer()) {
-            throw new UnsupportedOperationException("Regular time stamp model needs at least two data points before you are able to get the time stamp blob");
+            throw new IllegalStateException("Regular time stamp model needs at least two data points before you are able to get the time stamp blob");
         }
         return SingleIntEncoding.encode(si);
     }

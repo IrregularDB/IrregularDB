@@ -6,10 +6,12 @@ import java.nio.ByteBuffer;
 import java.util.List;
 
 public abstract class BaseModel {
+    private final String cantConstructBlobErrorMessage;
 
     private ByteBuffer byteBuffer; //Used as a cache for a blob
 
-    public BaseModel() {
+    public BaseModel(String cantConstructBlobErrorMessage) {
+        this.cantConstructBlobErrorMessage = cantConstructBlobErrorMessage;
         byteBuffer = null;
     }
 
@@ -47,7 +49,7 @@ public abstract class BaseModel {
      * @return returns amount of bytes used in the byte buffer to represent the model
      */
     public final int getAmountBytesUsed() {
-        return getBlobRepresentation().position();
+        return getBlobRepresentation().capacity();
     }
 
     /**
@@ -55,6 +57,9 @@ public abstract class BaseModel {
      * @return ByteBuffer class from java
      */
     public final ByteBuffer getBlobRepresentation() {
+        if (!canCreateByteBuffer()) {
+            throw new IllegalStateException(cantConstructBlobErrorMessage);
+        }
         if (byteBuffer == null) {
             byteBuffer = createByteBuffer();
         }
@@ -63,12 +68,17 @@ public abstract class BaseModel {
 
     protected abstract ByteBuffer createByteBuffer();
 
+
+    public abstract boolean canCreateByteBuffer();
+
     /**
      * This method is used when joining time stamp and value compression models
      *  by reducing the longest of the two down to the length of the other one
      */
     public final void reduceToSizeN(int n) {
-        if (n <= 0){
+        if (n == this.getLength()) {
+            return;
+        }else if (n <= 0){
             throw new IllegalArgumentException("n cannot be 0 or lower");
         } else if (n > this.getLength()){
             throw new IllegalArgumentException("n cannot bigger than amount of elements represented by model");

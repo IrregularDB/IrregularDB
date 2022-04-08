@@ -6,8 +6,8 @@ public abstract class ValueCompressionModel extends BaseModel {
 
     private final Float errorBound;
 
-    public ValueCompressionModel(Float errorBound) {
-        super();
+    public ValueCompressionModel(Float errorBound, String cantConstructBlobErrorMessage) {
+        super(cantConstructBlobErrorMessage);
 
         // HACK: Floating point imprecision can lead to error-bound of zero not really working.
         if (errorBound != null) {

@@ -12,7 +12,7 @@ public class SIDiffTimestampCompressionModel extends TimestampCompressionModel {
     private List<Long> timestamps;
 
     public SIDiffTimestampCompressionModel(Integer threshold) {
-        super(threshold);
+        super(threshold, "SIdiff time stamp model needs at least two data points before you are able to get the time stamp blob");
         // We make this a field so that we don't have to allocate a new signed bucket encoder each time get byte buffer is called
         signedBucketEncoder = new SignedBucketEncoder();
         this.resetModel();
@@ -53,6 +53,12 @@ public class SIDiffTimestampCompressionModel extends TimestampCompressionModel {
         }
         return signedBucketEncoder.encode(readings).getFinishedByteBuffer();
     }
+
+    @Override
+    public boolean canCreateByteBuffer() {
+        return getLength() >= 2;
+    }
+
 
     private int calculateSI() {
         long firstTimestamp = timestamps.get(0);

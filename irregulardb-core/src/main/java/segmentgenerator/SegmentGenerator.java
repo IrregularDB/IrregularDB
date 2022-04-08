@@ -44,12 +44,15 @@ public class SegmentGenerator {
         CompressionModel bestCompressionModel = this.compressionModelManager.getBestCompressionModel();
 
         //find size of each model and reduce the largest down to the size of the smallest
-        int amountOfDataPoints = syncValueAndTimestampModelLength(bestCompressionModel);
-        if (amountOfDataPoints == 0) {
+        if (bestCompressionModel.length() == 0) {
             throw new RuntimeException("Segment generated with size 0");
         }
 
-        Segment segment = generateSegment(bestCompressionModel, notYetEmitted.get(0).timestamp(), notYetEmitted.get(amountOfDataPoints - 1).timestamp());
+        Segment segment = generateSegment(
+                bestCompressionModel,
+                notYetEmitted.get(0).timestamp(),
+                notYetEmitted.get(bestCompressionModel.length()- 1).timestamp()
+        );
 
         prepareForNextSegment(segment.dataPointsUsed().size());
 
@@ -68,34 +71,16 @@ public class SegmentGenerator {
         this.notYetEmitted = notYetEmitted.subList(dataPointsUsedForPrevSegment, notYetEmitted.size());
     }
 
-    private int syncValueAndTimestampModelLength(CompressionModel bestCompressionModel) {
-        ValueCompressionModel valueCompressionModel = bestCompressionModel.valueCompressionModel();
-        int valueCompressionModelLength = valueCompressionModel.getLength();
-
-        TimestampCompressionModel timestampCompressionModel = bestCompressionModel.timestampCompressionModel();
-        int timestampCompressionModelLength = timestampCompressionModel.getLength();
-
-        if (timestampCompressionModelLength > valueCompressionModelLength) {
-            timestampCompressionModel.reduceToSizeN(valueCompressionModelLength);
-        } else {
-            valueCompressionModel.reduceToSizeN(timestampCompressionModelLength);
-        }
-        return Integer.min(timestampCompressionModelLength, valueCompressionModelLength);
-    }
-
     private Segment generateSegment(CompressionModel compressionModel, long startTime, long endTime) {
-        ValueCompressionModel valueModel = compressionModel.valueCompressionModel();
-        TimestampCompressionModel timestampModel = compressionModel.timestampCompressionModel();
-
         return new Segment(
                 this.timeSeriesId,
                 startTime,
                 endTime,
-                (byte) valueModel.getValueCompressionModelType().ordinal(),
-                valueModel.getBlobRepresentation(),
-                (byte) timestampModel.getTimestampCompressionModelType().ordinal(),
-                timestampModel.getBlobRepresentation(),
-                this.notYetEmitted.subList(0, valueModel.getLength())
+                (byte) compressionModel.valueType().ordinal(),
+                compressionModel.valueCompressionModel(),
+                (byte) compressionModel.timestampType().ordinal(),
+                compressionModel.timestampCompressionModel(),
+                this.notYetEmitted.subList(0, compressionModel.length())
         );
     }
 

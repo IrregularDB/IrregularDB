@@ -100,7 +100,7 @@ class RegularTimestampCompressionModelTest {
 
     @Test
     void getTimestampBlobEmptyModel() {
-        Assertions.assertThrows(UnsupportedOperationException.class, () -> regularModel.getBlobRepresentation());
+        Assertions.assertThrows(IllegalStateException.class, () -> regularModel.getBlobRepresentation());
     }
 
     @Test
@@ -116,7 +116,7 @@ class RegularTimestampCompressionModelTest {
     @Test
     void getAmountOfBytesUsed0DataPoints() {
         // We expect this to throw and exception as no model has been made yet.
-        Assertions.assertThrows(UnsupportedOperationException.class, () -> regularModel.getAmountBytesUsed());
+        Assertions.assertThrows(IllegalStateException.class, () -> regularModel.getAmountBytesUsed());
     }
 
     @Test

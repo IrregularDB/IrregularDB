@@ -165,7 +165,7 @@ class SwingValueCompressionModelTest {
 
     @Test
     void getValueBlobEmptyModel() {
-        Assertions.assertThrows(UnsupportedOperationException.class, () -> swingModel.getBlobRepresentation());
+        Assertions.assertThrows(IllegalStateException.class, () -> swingModel.getBlobRepresentation());
     }
 
     @Test
@@ -184,7 +184,7 @@ class SwingValueCompressionModelTest {
     @Test
     void getAmountOfBytesUsed0DataPoints() {
         // We expect this to throw and exception as no model has been made yet.
-        Assertions.assertThrows(UnsupportedOperationException.class, () -> swingModel.getAmountBytesUsed());
+        Assertions.assertThrows(IllegalStateException.class, () -> swingModel.getAmountBytesUsed());
     }
 
     @Test

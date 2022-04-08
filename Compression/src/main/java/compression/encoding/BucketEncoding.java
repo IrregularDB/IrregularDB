@@ -20,6 +20,9 @@ public class BucketEncoding {
     protected static final int AMT_CONTROL_BITS = 2;
     protected final BitBuffer bitBuffer;
 
+    public static int getSmallestNonZeroBucketSizeInBits(){
+        return BUCKET_1_BIT_SIZE;
+    }
 
     public BucketEncoding(){
         bitBuffer = new BitBufferNew(true);

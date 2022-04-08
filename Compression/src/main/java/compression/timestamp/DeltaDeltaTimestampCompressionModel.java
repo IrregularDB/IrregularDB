@@ -1,6 +1,6 @@
 package compression.timestamp;
 
-import compression.encoding.SignedBucketEncoder;
+import compression.encoding.BucketEncoding;
 import records.DataPoint;
 
 import java.nio.ByteBuffer;
@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class DeltaDeltaTimestampCompressionModel extends TimestampCompressionModel {
-    private final SignedBucketEncoder signedBucketEncoder;
+    private final BucketEncoding signedBucketEncoder;
     private final List<Integer> maxBucketValues;
     private List<Integer> deltaDeltaTimestamps;
     private Long previousTimestamp = null;
@@ -17,7 +17,7 @@ public class DeltaDeltaTimestampCompressionModel extends TimestampCompressionMod
     public DeltaDeltaTimestampCompressionModel(Integer threshold) {
         super(threshold, "DeltaDelta time stamp model needs at least one data point before you are able to get the time stamp blob");
         // We make this a field so that we don't have to allocate a new signed bucket encoder each time get byte buffer is called
-        signedBucketEncoder = new SignedBucketEncoder();
+        signedBucketEncoder = new BucketEncoding(true);
         this.maxBucketValues = signedBucketEncoder.getMaxAbsoluteValuesOfResizeableBuckets();
 
         resetModel();

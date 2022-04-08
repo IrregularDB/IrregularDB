@@ -1,6 +1,6 @@
 package compression.timestamp;
 
-import compression.encoding.SignedBucketEncoder;
+import compression.encoding.BucketEncoding;
 import records.DataPoint;
 
 import java.nio.ByteBuffer;
@@ -8,13 +8,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SIDiffTimestampCompressionModel extends TimestampCompressionModel {
-    private final SignedBucketEncoder signedBucketEncoder;
+    private final BucketEncoding signedBucketEncoder;
     private List<Long> timestamps;
 
     public SIDiffTimestampCompressionModel(Integer threshold) {
         super(threshold, "SIdiff time stamp model needs at least two data points before you are able to get the time stamp blob");
         // We make this a field so that we don't have to allocate a new signed bucket encoder each time get byte buffer is called
-        signedBucketEncoder = new SignedBucketEncoder();
+        signedBucketEncoder = new BucketEncoding(true);
         this.resetModel();
     }
 

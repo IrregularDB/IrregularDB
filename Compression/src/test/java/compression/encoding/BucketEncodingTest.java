@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class BucketEncodingTest {
 
-    BucketEncoding bucketEncoding = new BucketEncoding();
+    BucketEncoding bucketEncoding = new BucketEncoding(false);
 
     String removeSpace(String string) {
         return string.replace(" ", "");
@@ -153,7 +153,7 @@ class BucketEncodingTest {
     @Test
     void encodeTooLargeValue() {
         // We try to insert a value with 32 bits, which we don't allow
-        int i1 = BitUtil.bits2Int(removeSpace("1000 0000 0000 0000 0000 0000 0000 0000"));
+        int i1 = BitUtil.bits2Int(removeSpace("1111 0000 0000 0000 0000 0000 0000 0000"));
 
         List<Integer> readings = List.of(i1);
 

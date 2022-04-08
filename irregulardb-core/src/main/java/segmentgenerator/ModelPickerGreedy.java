@@ -2,41 +2,42 @@ package segmentgenerator;
 
 import compression.encoding.BucketEncoding;
 import compression.timestamp.TimestampCompressionModel;
-import compression.timestamp.TimestampCompressionModelsWrapper;
+import compression.timestamp.TimestampCompressionModelType;
 import compression.value.ValueCompressionModel;
-import compression.value.ValueCompressionModelsWrapper;
+import compression.value.ValueCompressionModelType;
 import config.ConfigProperties;
 import records.CompressionModel;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class ModelPickerGreedy extends ModelPicker {
 
-    private final double gorillaBestBytePerDatapoint = getGorillaBestBytePerDatapoint();
-    private final double siDiffAndDeltaDeltaBestBytePerDataPoint = getSiDiffDeltaDeltaBestBytesPerDatapoint();
-    private final int lengthBound = ConfigProperties.getInstance().getModelLengthBound();
+    private static final int lengthBound = ConfigProperties.getInstance().getModelLengthBound();
+    private static final double gorillaBestBytePerDatapoint = getGorillaBestBytePerDatapoint();
+    private static final double siDiffAndDeltaDeltaBestBytesPerDataPoint = getSiDiffDeltaDeltaBestBytesPerDatapoint();
 
-    private double getGorillaBestBytePerDatapoint() {
-        //store 1 float as an int e.g. 32 bits, + 1 bit per value + 1 value that is not the same as the others
+    private static double getGorillaBestBytePerDatapoint() {
         int bitsForGorillaValueNotSame = 2 + 4 + 5 + 1;//lowest possible amount of bits for a gorilla value that is not the same as the rest
+
+        // Store 1 float as an int e.g. 32 bits, + 1 bit per value (except two of them) + 1 value that is not the same as the others
         int bitsUsedForGorilla = Integer.SIZE + (lengthBound - 2) + bitsForGorillaValueNotSame;
 
         double bytesUsedByGorilla = Math.ceil(bitsUsedForGorilla / (double) Byte.SIZE);
-
         return (bytesUsedByGorilla + overheadPerModel) / lengthBound;
     }
 
-    private double getSiDiffDeltaDeltaBestBytesPerDatapoint() {
-
+    private static double getSiDiffDeltaDeltaBestBytesPerDatapoint() {
         int controlBits = 2;
         int signBits = 1;
         int smallestNonZeroBucketSizeInBits = BucketEncoding.getSmallestNonZeroBucketSizeInBits();
-        int bitsForSmallesBucketSize = smallestNonZeroBucketSizeInBits + controlBits + signBits;
-        int bitsUsedByModel = 2 * bitsForSmallesBucketSize + (lengthBound - 2) * controlBits; //TODO if simon no fix signed encoder add signBit
+        int bitsForSmallestBucketSize = smallestNonZeroBucketSizeInBits + controlBits + signBits;
+        // We have two values using the non-zero bucket (the SI/base-delta) and another non-zero value
+        int bitsUsedByModel = 2 * bitsForSmallestBucketSize + (lengthBound - 2) * controlBits; //TODO if simon no fix signed encoder add signBit
         double bytesUsedByModel = Math.ceil(bitsUsedByModel / (double) Byte.SIZE);
-
-        return (bytesUsedByModel) / lengthBound;
+        return (bytesUsedByModel + overheadPerModel) / lengthBound;
     }
 
     @Override
@@ -59,54 +60,56 @@ public class ModelPickerGreedy extends ModelPicker {
     }
 
     protected ValueCompressionModel getBestValueModel(List<ValueCompressionModel> valueCompressionModelsList) {
-        ValueCompressionModelsWrapper valueCompressionModels = new ValueCompressionModelsWrapper(valueCompressionModelsList);
-
-        //Can we ignore gorilla?
-        performShortCircutingValueModels(valueCompressionModelsList, valueCompressionModels);
+        //Check if it is allowed to ignore gorilla
+        performShortCircuitingValueModels(valueCompressionModelsList);
 
         return valueCompressionModelsList.stream()
                 .min(Comparator.comparing(this::calculateAmountBytesPerDataPoint))
                 .orElseThrow(() -> new RuntimeException("In ModelPicker:getBestValueModel() - models list.empty should not happen"));
     }
 
-    private void performShortCircutingValueModels(List<ValueCompressionModel> valueCompressionModelsList, ValueCompressionModelsWrapper valueCompressionModels) {
+    private void performShortCircuitingValueModels(List<ValueCompressionModel> valueCompressionModelsList) {
+        Map<ValueCompressionModelType, ValueCompressionModel> typeToValueModel = valueCompressionModelsList.stream()
+                .collect(Collectors.toMap(ValueCompressionModel::getValueCompressionModelType, item -> item));
+
         boolean gorillaRemoved = false;
-        if (valueCompressionModels.getPmcMean() != null) {
-            double pmcMeanBytesPerDataPoint = calculateAmountBytesPerDataPoint(valueCompressionModels.getPmcMean());
+        ValueCompressionModel pmcMeanModel = typeToValueModel.get(ValueCompressionModelType.PMC_MEAN);
+        if (pmcMeanModel != null) {
+            double pmcMeanBytesPerDataPoint = calculateAmountBytesPerDataPoint(pmcMeanModel);
             if (pmcMeanBytesPerDataPoint <= gorillaBestBytePerDatapoint) {
-                valueCompressionModelsList.remove(valueCompressionModels.getGorilla());
+                valueCompressionModelsList.remove(typeToValueModel.get(ValueCompressionModelType.GORILLA));
                 gorillaRemoved = true;
             }
         }
-        if (valueCompressionModels.getSwing() != null && !gorillaRemoved) {
-            double swingBytesPerDataPoint = calculateAmountBytesPerDataPoint(valueCompressionModels.getSwing());
+        ValueCompressionModel swingModel = typeToValueModel.get(ValueCompressionModelType.PMC_MEAN);
+        if (swingModel != null && !gorillaRemoved) {
+            double swingBytesPerDataPoint = calculateAmountBytesPerDataPoint(swingModel);
             if (swingBytesPerDataPoint <= gorillaBestBytePerDatapoint) {
-                valueCompressionModelsList.remove(valueCompressionModels.getGorilla());
+                valueCompressionModelsList.remove(typeToValueModel.get(ValueCompressionModelType.GORILLA));
             }
         }
     }
 
     protected TimestampCompressionModel getBestTimeStampModel(List<TimestampCompressionModel> timestampCompressionModelsList) {
-        TimestampCompressionModelsWrapper timestampCompressionModelsWrapper = new TimestampCompressionModelsWrapper(timestampCompressionModelsList);
-
         //Can we ignore SIDiff or DeltaDelta
-        performShortCircutingTimestampModels(timestampCompressionModelsList, timestampCompressionModelsWrapper);
+        performShortCircutingTimestampModels(timestampCompressionModelsList);
 
         return timestampCompressionModelsList.stream()
                 .min(Comparator.comparing(this::calculateAmountBytesPerDataPoint))
                 .orElseThrow(() -> new RuntimeException("In ModelPicker:getBestTimeStampModel() - Should not happen"));
     }
 
-    private void performShortCircutingTimestampModels(List<TimestampCompressionModel> timestampCompressionModelsList, TimestampCompressionModelsWrapper timestampCompressionModelsWrapper) {
-        if (timestampCompressionModelsWrapper.getRegular() != null) {
-            double bytesPerDataPointRegular = calculateAmountBytesPerDataPoint(timestampCompressionModelsWrapper.getRegular());
-            if (bytesPerDataPointRegular < siDiffAndDeltaDeltaBestBytePerDataPoint) {
-                if (timestampCompressionModelsWrapper.getSiDiff() != null) {
-                    timestampCompressionModelsList.remove(timestampCompressionModelsWrapper.getSiDiff());
-                }
-                if (timestampCompressionModelsWrapper.getDeltaDelta() != null) {
-                    timestampCompressionModelsList.remove(timestampCompressionModelsWrapper.getDeltaDelta());
-                }
+    private void performShortCircutingTimestampModels(List<TimestampCompressionModel> timestampCompressionModelsList) {
+        Map<TimestampCompressionModelType, TimestampCompressionModel> typeToTimestampModel = timestampCompressionModelsList.stream()
+                .collect(Collectors.toMap(TimestampCompressionModel::getTimestampCompressionModelType, item -> item));
+
+        TimestampCompressionModel regularModel = typeToTimestampModel.get(TimestampCompressionModelType.REGULAR);
+
+        if (regularModel != null) {
+            double bytesPerDataPointRegular = calculateAmountBytesPerDataPoint(regularModel);
+            if (bytesPerDataPointRegular < siDiffAndDeltaDeltaBestBytesPerDataPoint) {
+                timestampCompressionModelsList.remove(typeToTimestampModel.get(TimestampCompressionModelType.SIDIFF));
+                timestampCompressionModelsList.remove(typeToTimestampModel.get(TimestampCompressionModelType.DELTADELTA));
             }
         }
     }

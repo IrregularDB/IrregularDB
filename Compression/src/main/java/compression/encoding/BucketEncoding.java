@@ -76,7 +76,7 @@ public class BucketEncoding {
 
     protected void encodeNumber(int reading) {
         boolean negativeNumber = reading < 0;
-        reading = negativeNumber ? -reading : reading;
+        reading = Math.abs(reading);
 
         if (!useSignedBits && negativeNumber) {
             throw new IllegalArgumentException("You tried to store a negative number without using signed bits");
@@ -96,7 +96,7 @@ public class BucketEncoding {
             encodeSignedBit(useSignedBits, negativeNumber);
             bitBuffer.writeIntUsingNBits(reading, BUCKET_3_BIT_SIZE);
         } else {
-            throw new IllegalArgumentException("Amount of bits greater than bucket allows (you probably tried to insert a negative number)");
+            throw new IllegalArgumentException("Amount of bits greater than bucket allows. This should not happen.");
         }
     }
 
@@ -140,7 +140,7 @@ public class BucketEncoding {
             }
             return lastInteger;
         } else {
-            int amtBitsInBucket = controlBitsToLength(controlBits, usesSignedBits);
+            int amtBitsInBucket = controlBitsToLength(controlBits);
             int amtNeededBits = usesSignedBits ? amtBitsInBucket + 1 : amtBitsInBucket;
             if (bitStream.hasNNext(amtNeededBits)) {
                 if (usesSignedBits) {
@@ -165,7 +165,7 @@ public class BucketEncoding {
         return integer;
     }
 
-    private static int controlBitsToLength(byte controlBits, boolean usesSignedBits) {
+    private static int controlBitsToLength(byte controlBits) {
         switch (controlBits) {
             case BUCKET_1_CONTROL_BITS -> {
                 return BUCKET_1_BIT_SIZE;

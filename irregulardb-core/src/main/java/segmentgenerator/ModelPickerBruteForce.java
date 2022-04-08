@@ -46,7 +46,7 @@ public class ModelPickerBruteForce extends ModelPicker{
 
     private Pair<TimestampCompressionModel, ValueCompressionModel> findBestFromAllPairs(List<Pair<TimestampCompressionModel, ValueCompressionModel>> allPairs) {
         Pair<TimestampCompressionModel,ValueCompressionModel> bestPair = null;
-        double currentBestBytePerDataPoint = Double.MAX_VALUE;
+        double currentBestBytesPerDataPoint = Double.MAX_VALUE;
 
         for (Pair<TimestampCompressionModel, ValueCompressionModel> pair : allPairs) {
             int minLength = Math.min(timestampModelsLengths.get(pair.f0()), valueModelsLengths.get(pair.f1()));
@@ -56,9 +56,9 @@ public class ModelPickerBruteForce extends ModelPicker{
             if (timestampBlob.isPresent() && valueBlob.isPresent()) {
                 double bytesPerDataPoint = calculateAmountBytesPerDataPoint(timestampBlob.get().capacity(), minLength)
                         + calculateAmountBytesPerDataPoint(valueBlob.get().capacity(), minLength);
-                if (bytesPerDataPoint < currentBestBytePerDataPoint) {
+                if (bytesPerDataPoint < currentBestBytesPerDataPoint) {
                     bestPair = pair;
-                    currentBestBytePerDataPoint = bytesPerDataPoint;
+                    currentBestBytesPerDataPoint = bytesPerDataPoint;
                 }
             }
         }

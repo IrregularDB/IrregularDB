@@ -7,6 +7,7 @@ import records.CompressionModel;
 import records.Pair;
 
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -65,9 +66,13 @@ public class ModelPickerBruteForce extends ModelPicker{
     }
 
     private List<Pair<TimestampCompressionModel, ValueCompressionModel>> getAllPairs(List<ValueCompressionModel> valueModels, List<TimestampCompressionModel> timestampModels) {
-        return IntStream.range(0, Math.min(valueModels.size(), timestampModels.size()))
-                .mapToObj(i -> new Pair<>(timestampModels.get(i), valueModels.get(i)))
-                .toList();
+        List<Pair<TimestampCompressionModel, ValueCompressionModel>> result = new ArrayList<>();
+        for (TimestampCompressionModel timestampModel : timestampModels) {
+            for (ValueCompressionModel valueModel : valueModels) {
+                result.add(new Pair<>(timestampModel, valueModel));
+            }
+        }
+        return result;
     }
 
 

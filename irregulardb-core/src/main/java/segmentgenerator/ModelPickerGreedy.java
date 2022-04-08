@@ -8,6 +8,7 @@ import compression.value.ValueCompressionModelType;
 import config.ConfigProperties;
 import records.CompressionModel;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -42,8 +43,11 @@ public class ModelPickerGreedy extends ModelPicker {
 
     @Override
     public CompressionModel findBestCompressionModel(List<ValueCompressionModel> valueCompressionModels, List<TimestampCompressionModel> timestampCompressionModels) {
-        ValueCompressionModel bestValueCompressionModel = getBestValueModel(valueCompressionModels);
-        TimestampCompressionModel bestTimestampCompressionModel = getBestTimeStampModel(timestampCompressionModels);
+        List<ValueCompressionModel> valueModels = new ArrayList<>(valueCompressionModels);
+        List<TimestampCompressionModel> timeStampModels = new ArrayList<>(timestampCompressionModels);
+
+        ValueCompressionModel bestValueCompressionModel = getBestValueModel(valueModels);
+        TimestampCompressionModel bestTimestampCompressionModel = getBestTimeStampModel(timeStampModels);
 
         if (bestValueCompressionModel.getLength() < bestTimestampCompressionModel.getLength()) {
             bestValueCompressionModel.reduceToSizeN(bestTimestampCompressionModel.getLength());
@@ -92,14 +96,14 @@ public class ModelPickerGreedy extends ModelPicker {
 
     protected TimestampCompressionModel getBestTimeStampModel(List<TimestampCompressionModel> timestampCompressionModelsList) {
         //Can we ignore SIDiff or DeltaDelta
-        performShortCircutingTimestampModels(timestampCompressionModelsList);
+        performShortCircuitingTimestampModels(timestampCompressionModelsList);
 
         return timestampCompressionModelsList.stream()
                 .min(Comparator.comparing(this::calculateAmountBytesPerDataPoint))
                 .orElseThrow(() -> new RuntimeException("In ModelPicker:getBestTimeStampModel() - Should not happen"));
     }
 
-    private void performShortCircutingTimestampModels(List<TimestampCompressionModel> timestampCompressionModelsList) {
+    private void performShortCircuitingTimestampModels(List<TimestampCompressionModel> timestampCompressionModelsList) {
         Map<TimestampCompressionModelType, TimestampCompressionModel> typeToTimestampModel = timestampCompressionModelsList.stream()
                 .collect(Collectors.toMap(TimestampCompressionModel::getTimestampCompressionModelType, item -> item));
 

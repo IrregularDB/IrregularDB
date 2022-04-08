@@ -21,7 +21,7 @@ public abstract class ModelPicker {
     }
 
     protected double calculateAmountBytesPerDataPoint(BaseModel baseModel) {
-        int amountBytesUsedForModel = baseModel.getBlobRepresentation().position();
+        int amountBytesUsedForModel = baseModel.getAmountBytesUsed();
         return calculateAmountBytesPerDataPoint(amountBytesUsedForModel, baseModel.getLength());
     }
 

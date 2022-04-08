@@ -54,13 +54,16 @@ public class ModelPickerBruteForce extends ModelPicker{
             Optional<ByteBuffer> valueBlob = modelPickerBlobBuffer.getBlobForModelWithLength(pair.f1(), minLength);
 
             if (timestampBlob.isPresent() && valueBlob.isPresent()) {
-                double bytesPerDataPoint = calculateAmountBytesPerDataPoint(timestampBlob.get().position(), minLength)
-                        + calculateAmountBytesPerDataPoint(valueBlob.get().position(), minLength);
+                double bytesPerDataPoint = calculateAmountBytesPerDataPoint(timestampBlob.get().capacity(), minLength)
+                        + calculateAmountBytesPerDataPoint(valueBlob.get().capacity(), minLength);
                 if (bytesPerDataPoint < currentBestBytePerDataPoint) {
                     bestPair = pair;
                     currentBestBytePerDataPoint = bytesPerDataPoint;
                 }
             }
+        }
+        if(bestPair == null) {
+            throw new RuntimeException("All model-pairs where illegal in the brute force model picker, which should not happen");
         }
         return bestPair;
     }

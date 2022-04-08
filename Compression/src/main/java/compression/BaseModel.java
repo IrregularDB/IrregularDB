@@ -49,7 +49,7 @@ public abstract class BaseModel {
      * @return returns amount of bytes used in the byte buffer to represent the model
      */
     public final int getAmountBytesUsed() {
-        return getBlobRepresentation().position();
+        return getBlobRepresentation().capacity();
     }
 
     /**

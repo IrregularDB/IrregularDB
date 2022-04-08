@@ -138,7 +138,11 @@ public class ConfigProperties extends Properties {
     }
 
     public ModelPickerFactory.ModelPickerType getModelPickerType(){
-        return ModelPickerFactory.ModelPickerType.valueOf(getProperty("model.picker"));
+        String modelPickerType = getProperty("model.picker");
+        if (modelPickerType == null) {
+            return ModelPickerFactory.ModelPickerType.GREEDY;
+        }
+        return ModelPickerFactory.ModelPickerType.valueOf(modelPickerType);
     }
 
     /* Private methods */

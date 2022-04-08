@@ -1,7 +1,7 @@
 package compression;
 
+import compression.encoding.BucketEncoding;
 import compression.encoding.GorillaValueEncoding;
-import compression.encoding.SignedBucketEncoder;
 import compression.encoding.SingleIntEncoding;
 import compression.timestamp.TimestampCompressionModelType;
 import compression.utility.BitStream.BitStream;
@@ -51,8 +51,7 @@ public class BlobDecompressor {
         }
         BitStream bitStream = new BitStreamNew(timestampBlob);
 
-        SignedBucketEncoder signedBucketEncoder = new SignedBucketEncoder();
-        List<Integer> deltaDeltaTimes = signedBucketEncoder.decodeSigned(bitStream);
+        List<Integer> deltaDeltaTimes = BucketEncoding.decode(bitStream, true);
 
         // First value in deltaDelta encoding is a delta value from start time
         Integer previousDelta = deltaDeltaTimes.get(0);
@@ -82,8 +81,7 @@ public class BlobDecompressor {
         timestamps.add(startTime);
 
         BitStream bitStream = new BitStreamNew(timestampBlob);
-        SignedBucketEncoder signedBucketEncoder = new SignedBucketEncoder();
-        List<Integer> decodedValues = signedBucketEncoder.decodeSigned(bitStream);
+        List<Integer> decodedValues = BucketEncoding.decode(bitStream, true);
 
         int si = decodedValues.get(0);
         long expectedTimestamp = startTime + si;

@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class BucketEncoding {
+    private final boolean useSignedBits;
 
     private static final byte SAME_VALUE_ENCODING = 0b00;
     private static final byte BUCKET_1_CONTROL_BITS = 0b01;
@@ -18,14 +19,19 @@ public class BucketEncoding {
     private static final int BUCKET_2_BIT_SIZE = 16;
     private static final int BUCKET_3_BIT_SIZE = 31;
     protected static final int AMT_CONTROL_BITS = 2;
+
+    public static final int NEGATIVE_SIGNED_BIT = 0;
+    public static final int POSITIVE_SIGNED_BIT = 1;
+
     protected final BitBuffer bitBuffer;
 
     public static int getSmallestNonZeroBucketSizeInBits(){
         return BUCKET_1_BIT_SIZE;
     }
 
-    public BucketEncoding(){
-        bitBuffer = new BitBufferNew(true);
+    public BucketEncoding(boolean useSignedBits){
+        this.bitBuffer = new BitBufferNew(true);
+        this.useSignedBits = useSignedBits;
     }
 
     /**
@@ -33,8 +39,11 @@ public class BucketEncoding {
      */
     public BitBuffer encode(List<Integer> readings) {
         // We finish the byte with 1's as we can then in the decoding detect end of stream
-        Integer previousReading = null;
-        for (Integer reading : readings) {
+        int previousReading = Integer.MIN_VALUE;
+        for (int reading : readings) {
+            if (reading == Integer.MIN_VALUE) {
+                throw new IllegalArgumentException("We cannot encode Integer.MIN_VALUE");
+            }
             encodeReading(reading, previousReading);
             previousReading = reading;
         }
@@ -56,8 +65,9 @@ public class BucketEncoding {
         return maxValues;
     }
 
-    private void encodeReading(Integer reading, Integer prevReading) {
-        if (reading.equals(prevReading)) {
+    private void encodeReading(int reading, int prevReading) {
+
+        if (reading == prevReading) {
             writeControlBitsToBuffer(SAME_VALUE_ENCODING, bitBuffer);
         } else {
             encodeNumber(reading);
@@ -65,20 +75,38 @@ public class BucketEncoding {
     }
 
     protected void encodeNumber(int reading) {
+        boolean negativeNumber = reading < 0;
+        reading = Math.abs(reading);
+
+        if (!useSignedBits && negativeNumber) {
+            throw new IllegalArgumentException("You tried to store a negative number without using signed bits");
+        }
 
         int amtSignificantBits = Integer.SIZE - Integer.numberOfLeadingZeros(reading);
-
         if (amtSignificantBits <= BUCKET_1_BIT_SIZE) {
             writeControlBitsToBuffer(BUCKET_1_CONTROL_BITS, bitBuffer);
+            encodeSignedBit(useSignedBits, negativeNumber);
             bitBuffer.writeIntUsingNBits(reading, BUCKET_1_BIT_SIZE);
         } else if (amtSignificantBits <= BUCKET_2_BIT_SIZE) {
             writeControlBitsToBuffer(BUCKET_2_CONTROL_BITS, bitBuffer);
+            encodeSignedBit(useSignedBits, negativeNumber);
             bitBuffer.writeIntUsingNBits(reading, BUCKET_2_BIT_SIZE);
         } else if (amtSignificantBits <= BUCKET_3_BIT_SIZE) {
             writeControlBitsToBuffer(BUCKET_3_CONTROL_BITS, bitBuffer);
+            encodeSignedBit(useSignedBits, negativeNumber);
             bitBuffer.writeIntUsingNBits(reading, BUCKET_3_BIT_SIZE);
         } else {
-            throw new IllegalArgumentException("Amount of bits greater than bucket allows (you probably tried to insert a negative number)");
+            throw new IllegalArgumentException("Amount of bits greater than bucket allows. This should not happen.");
+        }
+    }
+
+    private void encodeSignedBit(boolean useSignedBits, boolean negativeNumber) {
+        if (useSignedBits) {
+            if (negativeNumber) {
+                bitBuffer.writeIntUsingNBits(NEGATIVE_SIGNED_BIT, 1);
+            } else {
+                bitBuffer.writeIntUsingNBits(POSITIVE_SIGNED_BIT, 1);
+            }
         }
     }
 
@@ -86,13 +114,13 @@ public class BucketEncoding {
         bitBuffer.writeIntUsingNBits(controlBits, AMT_CONTROL_BITS);
     }
 
-    public static List<Integer> decode(BitStream bitStream) {
+    public static List<Integer> decode(BitStream bitStream, boolean usesSignedBits) {
         ArrayList<Integer> integers = new ArrayList<>();
 
-        int lastInteger = -1;
+        int lastInteger = Integer.MIN_VALUE;
 
         while (bitStream.hasNNext(AMT_CONTROL_BITS)) {
-            lastInteger = decodeInteger(lastInteger, bitStream);
+            lastInteger = decodeInteger(lastInteger, bitStream, usesSignedBits);
 
             if (lastInteger == Integer.MIN_VALUE){
                 //this indicates end of stream, and remaining bits of stream are without significance
@@ -103,7 +131,7 @@ public class BucketEncoding {
         return integers;
     }
 
-    protected static Integer decodeInteger(int lastInteger, BitStream bitStream){
+    private static Integer decodeInteger(int lastInteger, BitStream bitStream, boolean usesSignedBits){
         byte controlBits = (byte) bitStream.getNextNBitsAsInteger(AMT_CONTROL_BITS);
 
         if (SAME_VALUE_ENCODING == controlBits) {
@@ -113,8 +141,13 @@ public class BucketEncoding {
             return lastInteger;
         } else {
             int amtBitsInBucket = controlBitsToLength(controlBits);
-            if (bitStream.hasNNext(amtBitsInBucket)) {
-                return bitStream.getNextNBitsAsInteger(amtBitsInBucket);
+            int amtNeededBits = usesSignedBits ? amtBitsInBucket + 1 : amtBitsInBucket;
+            if (bitStream.hasNNext(amtNeededBits)) {
+                if (usesSignedBits) {
+                    return handleSignedValues(bitStream, amtBitsInBucket);
+                } else {
+                    return bitStream.getNextNBitsAsInteger(amtBitsInBucket);
+                }
             } else {
                 //this indicates end of stream, and remaining bits of stream are without significance
                 return Integer.MIN_VALUE;
@@ -122,7 +155,17 @@ public class BucketEncoding {
         }
     }
 
-    protected static int controlBitsToLength(byte controlBits) {
+    private static int handleSignedValues(BitStream bitStream, int amtBitsInBucket) {
+        byte signedBit = (byte) bitStream.getNextNBitsAsInteger(1);
+
+        int integer = bitStream.getNextNBitsAsInteger(amtBitsInBucket);
+        if (signedBit == NEGATIVE_SIGNED_BIT){
+            integer = integer * -1;
+        }
+        return integer;
+    }
+
+    private static int controlBitsToLength(byte controlBits) {
         switch (controlBits) {
             case BUCKET_1_CONTROL_BITS -> {
                 return BUCKET_1_BIT_SIZE;

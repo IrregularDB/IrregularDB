@@ -12,11 +12,11 @@ import java.util.List;
 
 class SignedBucketEncoderTest {
 
-    private SignedBucketEncoder signedBucketEncoder;
+    private BucketEncoding signedBucketEncoder;
 
     @BeforeEach
     void beforeEach(){
-         signedBucketEncoder = new SignedBucketEncoder();
+         signedBucketEncoder = new BucketEncoding(true);
     }
 
     @Test
@@ -25,7 +25,7 @@ class SignedBucketEncoderTest {
         BitBuffer bitBuffer = signedBucketEncoder.encode(List.of(valueToEncode));
         BitStream bitStream = bitBuffer.getBitStream();
 
-        BitPattern expectedBitPattern = new BitPattern("0 01 0 0000 1000");
+        BitPattern expectedBitPattern = new BitPattern("01 0 0 0000 1000");
 
         Assertions.assertEquals(expectedBitPattern.getIntRepresentation(),
                 bitStream.getNextNBitsAsInteger(expectedBitPattern.getAmtBits()));
@@ -37,7 +37,7 @@ class SignedBucketEncoderTest {
         BitBuffer bitBuffer = signedBucketEncoder.encode(List.of(valueToEncode));
         BitStream bitStream = bitBuffer.getBitStream();
 
-        BitPattern expectedBitPattern = new BitPattern("1 01 0 0000 1000");
+        BitPattern expectedBitPattern = new BitPattern("01 1 0 0000 1000");
 
         Assertions.assertEquals(expectedBitPattern.getIntRepresentation(),
                 bitStream.getNextNBitsAsInteger(expectedBitPattern.getAmtBits()));
@@ -48,7 +48,7 @@ class SignedBucketEncoderTest {
         int valueToEncode = -8;
         BitBuffer bitBuffer = signedBucketEncoder.encode(List.of(valueToEncode));
 
-        Integer decompressedInteger = signedBucketEncoder.decodeSigned(bitBuffer.getBitStream()).get(0);
+        Integer decompressedInteger = BucketEncoding.decode(bitBuffer.getBitStream(), true).get(0);
 
         Assertions.assertEquals(valueToEncode, decompressedInteger);
     }
@@ -58,7 +58,7 @@ class SignedBucketEncoderTest {
         int valueToEncode = 8;
         BitBuffer bitBuffer = signedBucketEncoder.encode(List.of(valueToEncode));
 
-        Integer decompressedInteger = signedBucketEncoder.decodeSigned(bitBuffer.getBitStream()).get(0);
+        Integer decompressedInteger = BucketEncoding.decode(bitBuffer.getBitStream(), true).get(0);
 
         Assertions.assertEquals(valueToEncode, decompressedInteger);
     }
@@ -75,12 +75,12 @@ class SignedBucketEncoderTest {
         BitStream bitStream = bitBuffer.getBitStream();
 
         List<BitPattern> expectedBitPatterns = new ArrayList<>();
-        expectedBitPatterns.add(new BitPattern("0 01 0 0000 0001"));
-        expectedBitPatterns.add(new BitPattern("0 01 0 0110 0100"));
-        expectedBitPatterns.add(new BitPattern("0 10 0000 0011 1110 1000"));
-        expectedBitPatterns.add(new BitPattern("0 10 0010 0111 0001 0000"));
-        //The blow two rows represent a single value, the split is nessesarry as this uses 34 bits.
-        expectedBitPatterns.add(new BitPattern("0 11"));
+        expectedBitPatterns.add(new BitPattern("01 0 0 0000 0001"));
+        expectedBitPatterns.add(new BitPattern("01 0 0 0110 0100"));
+        expectedBitPatterns.add(new BitPattern("10 0 0000 0011 1110 1000"));
+        expectedBitPatterns.add(new BitPattern("10 0 0010 0111 0001 0000"));
+        //The below two rows represent a single value, the split is necessary as this uses 34 bits.
+        expectedBitPatterns.add(new BitPattern("11 0"));
         expectedBitPatterns.add(new BitPattern("000 0000 0000 0001 1000 0110 1010 0000"));
 
         for (BitPattern expectedPattern : expectedBitPatterns){
@@ -96,11 +96,12 @@ class SignedBucketEncoderTest {
         BitStream bitStream = bitBuffer.getBitStream();
 
         List<BitPattern> expectedBitPatterns = new ArrayList<>();
-        expectedBitPatterns.add(new BitPattern("1 01 0 0000 0001"));
-        expectedBitPatterns.add(new BitPattern("1 01 0 0110 0100"));
-        expectedBitPatterns.add(new BitPattern("1 10 0000 0011 1110 1000"));
-        expectedBitPatterns.add(new BitPattern("1 10 0010 0111 0001 0000"));
-        expectedBitPatterns.add(new BitPattern("1 11"));
+        expectedBitPatterns.add(new BitPattern("01 1 0 0000 0001"));
+        expectedBitPatterns.add(new BitPattern("01 1 0 0110 0100"));
+        expectedBitPatterns.add(new BitPattern("10 1 0000 0011 1110 1000"));
+        expectedBitPatterns.add(new BitPattern("10 1 0010 0111 0001 0000"));
+        //The below two rows represent a single value, the split is necessary as this uses 34 bits.
+        expectedBitPatterns.add(new BitPattern("11 1"));
         expectedBitPatterns.add(new BitPattern("000 0000 0000 0001 1000 0110 1010 0000"));
 
         for (BitPattern expectedPattern : expectedBitPatterns){
@@ -117,12 +118,62 @@ class SignedBucketEncoderTest {
         BitStream bitStream = bitBuffer.getBitStream();
 
         List<BitPattern> expectedBitPatterns = new ArrayList<>();
-        expectedBitPatterns.add(new BitPattern("1 01 0 0000 0001"));
-        expectedBitPatterns.add(new BitPattern("0 01 0 0110 0100"));
-        expectedBitPatterns.add(new BitPattern("1 10 0000 0011 1110 1000"));
-        expectedBitPatterns.add(new BitPattern("0 10 0010 0111 0001 0000"));
-        expectedBitPatterns.add(new BitPattern("1 11"));
+        expectedBitPatterns.add(new BitPattern("01 1 0 0000 0001"));
+        expectedBitPatterns.add(new BitPattern("01 0 0 0110 0100"));
+        expectedBitPatterns.add(new BitPattern("10 1 0000 0011 1110 1000"));
+        expectedBitPatterns.add(new BitPattern("10 0 0010 0111 0001 0000"));
+        //The below two rows represent a single value, the split is necessary as this uses 34 bits.
+        expectedBitPatterns.add(new BitPattern("11 1"));
         expectedBitPatterns.add(new BitPattern("000 0000 0000 0001 1000 0110 1010 0000"));
+
+        for (BitPattern expectedPattern : expectedBitPatterns){
+            Assertions.assertEquals(expectedPattern.getIntRepresentation(),
+                    bitStream.getNextNBitsAsInteger(expectedPattern.getAmtBits()));
+        }
+    }
+
+    @Test
+    void encodingTheSameValue(){
+        List<Integer> valueToEncode = new ArrayList<>(List.of(1, 1));
+        BitBuffer bitBuffer = signedBucketEncoder.encode(valueToEncode);
+        BitStream bitStream = bitBuffer.getBitStream();
+
+        List<BitPattern> expectedBitPatterns = new ArrayList<>();
+        expectedBitPatterns.add(new BitPattern("01 1 0 0000 0001"));
+        expectedBitPatterns.add(new BitPattern("00"));
+
+        for (BitPattern expectedPattern : expectedBitPatterns){
+            Assertions.assertEquals(expectedPattern.getIntRepresentation(),
+                    bitStream.getNextNBitsAsInteger(expectedPattern.getAmtBits()));
+        }
+    }
+
+    @Test
+    void encodingTheSameValueNegative(){
+        List<Integer> valueToEncode = new ArrayList<>(List.of(-1, -1));
+        BitBuffer bitBuffer = signedBucketEncoder.encode(valueToEncode);
+        BitStream bitStream = bitBuffer.getBitStream();
+
+        List<BitPattern> expectedBitPatterns = new ArrayList<>();
+        expectedBitPatterns.add(new BitPattern("01 0 0 0000 0001"));
+        expectedBitPatterns.add(new BitPattern("00"));
+
+        for (BitPattern expectedPattern : expectedBitPatterns){
+            Assertions.assertEquals(expectedPattern.getIntRepresentation(),
+                    bitStream.getNextNBitsAsInteger(expectedPattern.getAmtBits()));
+        }
+    }
+
+    @Test
+    void encodingTheSameAbsoluteValue(){
+        List<Integer> valueToEncode = new ArrayList<>(List.of(1, -1));
+        BitBuffer bitBuffer = signedBucketEncoder.encode(valueToEncode);
+        BitStream bitStream = bitBuffer.getBitStream();
+
+        List<BitPattern> expectedBitPatterns = new ArrayList<>();
+        expectedBitPatterns.add(new BitPattern("01 1 0 0000 0001"));
+        // We don't see -1 and 1 as the same numbers so expect it to the entire value again
+        expectedBitPatterns.add(new BitPattern("01 0 0 0000 0001"));
 
         for (BitPattern expectedPattern : expectedBitPatterns){
             Assertions.assertEquals(expectedPattern.getIntRepresentation(),

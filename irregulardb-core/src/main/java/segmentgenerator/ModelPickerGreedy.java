@@ -36,7 +36,7 @@ public class ModelPickerGreedy extends ModelPicker {
         int smallestNonZeroBucketSizeInBits = BucketEncoding.getSmallestNonZeroBucketSizeInBits();
         int bitsForSmallestBucketSize = smallestNonZeroBucketSizeInBits + controlBits + signBits;
         // We have two values using the non-zero bucket (the SI/base-delta) and another non-zero value
-        int bitsUsedByModel = 2 * bitsForSmallestBucketSize + (lengthBound - 2) * controlBits; //TODO if simon no fix signed encoder add signBit
+        int bitsUsedByModel = 2 * bitsForSmallestBucketSize + (lengthBound - 2) * controlBits;
         double bytesUsedByModel = Math.ceil(bitsUsedByModel / (double) Byte.SIZE);
         return (bytesUsedByModel + overheadPerModel) / lengthBound;
     }

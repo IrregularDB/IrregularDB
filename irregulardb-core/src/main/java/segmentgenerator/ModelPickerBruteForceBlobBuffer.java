@@ -2,7 +2,9 @@ package segmentgenerator;
 
 import compression.BaseModel;
 import compression.timestamp.TimestampCompressionModel;
+import compression.timestamp.TimestampCompressionModelType;
 import compression.value.ValueCompressionModel;
+import compression.value.ValueCompressionModelType;
 
 import java.nio.ByteBuffer;
 import java.util.*;
@@ -13,40 +15,53 @@ import java.util.stream.Collectors;
  * Used to aid ModelPickerBruteForce
  */
 public class ModelPickerBruteForceBlobBuffer {
-
-    private final Map<BaseModel, Map<Integer, ByteBuffer>> compressionModelBlobBuffer;
+    private final Map<TimestampCompressionModelType, Map<Integer, ByteBuffer>> timestampModelsBlobBuffer;
+    private final Map<ValueCompressionModelType, Map<Integer, ByteBuffer>> valueModelsBlobBuffer;
 
     /**
      * Notice that the models will have reduceToSizeN called for each of them with the lowest size of the other type
      */
     public ModelPickerBruteForceBlobBuffer(List<ValueCompressionModel> valueModels, List<TimestampCompressionModel> timestampModels) {
-        this.compressionModelBlobBuffer = new HashMap<>();
+        this.timestampModelsBlobBuffer = new HashMap<>();
+        this.valueModelsBlobBuffer = new HashMap<>();
 
         // We use sets here to remove duplicates
         Set<Integer> valueModelLengths = valueModels.stream()
                 .map(BaseModel::getLength)
                 .collect(Collectors.toSet());
-        Set<Integer> timestampModelsLength = timestampModels.stream()
+        Set<Integer> timestampModelLengths = timestampModels.stream()
                 .map(BaseModel::getLength)
                 .collect(Collectors.toSet());
 
-        performCachingForList(valueModels, timestampModelsLength);
-        performCachingForList(timestampModels, valueModelLengths);
+        performCachingForTimestampModels(timestampModels, valueModelLengths);
+        performCachingForValueModels(valueModels, timestampModelLengths);
 
     }
 
-    private void performCachingForList(List<? extends BaseModel> models, Set<Integer> lengthsOfOther) {
-        List<Integer> reverseSortedLengths = lengthsOfOther.stream()
+    private void performCachingForTimestampModels(List<TimestampCompressionModel> timestampModels, Set<Integer> valueModelLengths) {
+        List<Integer> reverseSortedLengths = valueModelLengths.stream()
                 .sorted(Comparator.reverseOrder())
                 .toList();
-        for (BaseModel model : models) {
-            cacheBlobForAllLengths(model, reverseSortedLengths);
+
+        for (TimestampCompressionModel model : timestampModels) {
+            Map<Integer, ByteBuffer> lengthToByteBufferMap = getLengthToByteBufferMap(model, reverseSortedLengths);
+            this.timestampModelsBlobBuffer.put(model.getTimestampCompressionModelType(), lengthToByteBufferMap);
         }
     }
 
-    private void cacheBlobForAllLengths(BaseModel baseModel, List<Integer> reverseSortedUniqueLengths) {
+    private void performCachingForValueModels(List<ValueCompressionModel> valueModels, Set<Integer> timestampModelLengths) {
+        List<Integer> reverseSortedLengths = timestampModelLengths.stream()
+                .sorted(Comparator.reverseOrder())
+                .toList();
 
-        Map<Integer, ByteBuffer> lengthToByteBuffer = compressionModelBlobBuffer.computeIfAbsent(baseModel, model -> new HashMap<>());
+        for (ValueCompressionModel model : valueModels) {
+            Map<Integer, ByteBuffer> lengthToByteBufferMap = getLengthToByteBufferMap(model, reverseSortedLengths);
+            this.valueModelsBlobBuffer.put(model.getValueCompressionModelType(), lengthToByteBufferMap);
+        }
+    }
+
+    private Map<Integer, ByteBuffer> getLengthToByteBufferMap(BaseModel baseModel, List<Integer> reverseSortedUniqueLengths) {
+        Map<Integer, ByteBuffer> lengthToByteBuffer = new HashMap<>();
 
         lengthToByteBuffer.put(baseModel.getLength(), baseModel.getBlobRepresentation());
 
@@ -61,12 +76,23 @@ public class ModelPickerBruteForceBlobBuffer {
                 lengthToByteBuffer.put(lengthOfOtherModel, blobRepresentation);
             }
         }
+
+        return lengthToByteBuffer;
     }
 
-    public Optional<ByteBuffer> getBlobForModelWithLength(BaseModel baseModel, int length) {
-        Map<Integer, ByteBuffer> integerByteBufferMap = compressionModelBlobBuffer.get(baseModel);
-        if (integerByteBufferMap.containsKey(length)) {
-            return Optional.of(integerByteBufferMap.get(length));
+    public Optional<ByteBuffer> getBlobForTimestampModelWithLength(TimestampCompressionModelType modelType, int length) {
+        Map<Integer, ByteBuffer> lengthToByteBufferMap = timestampModelsBlobBuffer.get(modelType);
+        if (lengthToByteBufferMap.containsKey(length)) {
+            return Optional.of(lengthToByteBufferMap.get(length));
+        } else {
+            return Optional.empty();
+        }
+    }
+
+    public Optional<ByteBuffer> getBlobForValueModelWithLength(ValueCompressionModelType modelType, int length) {
+        Map<Integer, ByteBuffer> lengthToByteBufferMap = valueModelsBlobBuffer.get(modelType);
+        if (lengthToByteBufferMap.containsKey(length)) {
+            return Optional.of(lengthToByteBufferMap.get(length));
         } else {
             return Optional.empty();
         }

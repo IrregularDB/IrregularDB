@@ -47,8 +47,8 @@ class ModelPickerBruteForceBlobBufferTest {
             Integer timestampLength = timestampModelsLengths.get(pair.f0());
             Integer valueLength = valueModelsLengths.get(pair.f1());
             int minLength = Math.min(timestampLength,valueLength);
-            Optional<ByteBuffer> timestampBlob = modelPickerBruteForceBlobBuffer.getBlobForModelWithLength(pair.f0(), minLength);
-            Optional<ByteBuffer> valueBlob = modelPickerBruteForceBlobBuffer.getBlobForModelWithLength(pair.f1(), minLength);
+            Optional<ByteBuffer> timestampBlob = modelPickerBruteForceBlobBuffer.getBlobForTimestampModelWithLength(pair.f0().getTimestampCompressionModelType(), minLength);
+            Optional<ByteBuffer> valueBlob = modelPickerBruteForceBlobBuffer.getBlobForValueModelWithLength(pair.f1().getValueCompressionModelType(), minLength);
 
             if (timestampBlob.isPresent() && valueBlob.isPresent()) {
                 System.out.println("valid pair: <" + pair.f0().getTimestampCompressionModelType().name() + "[" + timestampModelsLengths.get(pair.f0()) + "] " + pair.f1().getValueCompressionModelType().name() + "[" + valueModelsLengths.get(pair.f1()) + "]" + ">" + "; size=" + minLength);

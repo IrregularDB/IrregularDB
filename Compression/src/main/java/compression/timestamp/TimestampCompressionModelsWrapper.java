@@ -1,4 +1,4 @@
-package compression.value;
+package compression.timestamp;
 
 import compression.timestamp.DeltaDeltaTimestampCompressionModel;
 import compression.timestamp.RegularTimestampCompressionModel;

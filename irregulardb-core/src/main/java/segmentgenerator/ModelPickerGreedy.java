@@ -2,7 +2,7 @@ package segmentgenerator;
 
 import compression.encoding.BucketEncoding;
 import compression.timestamp.TimestampCompressionModel;
-import compression.value.TimestampCompressionModelsWrapper;
+import compression.timestamp.TimestampCompressionModelsWrapper;
 import compression.value.ValueCompressionModel;
 import compression.value.ValueCompressionModelsWrapper;
 import config.ConfigProperties;

@@ -20,7 +20,7 @@ public class PMCMeanValueCompressionModel extends ValueCompressionModel {
     private int length;
 
     public PMCMeanValueCompressionModel(float errorBound) {
-        super(errorBound);
+        super(errorBound, "No data points where added to the PMC-mean value model before trying to get the value blob");
         this.resetModel();
     }
 
@@ -75,10 +75,6 @@ public class PMCMeanValueCompressionModel extends ValueCompressionModel {
 
     @Override
     protected ByteBuffer createByteBuffer() {
-        if (!canCreateByteBuffer()) {
-            throw new IllegalStateException("No data points where added to the PMC-mean value model before trying to get the value blob");
-        }
-
         // We convert to float as this is what we store (i.e. we support floating point precision)
         float mean = (this.sum / this.getLength());
         return ByteBuffer.allocate(4).putFloat(mean);

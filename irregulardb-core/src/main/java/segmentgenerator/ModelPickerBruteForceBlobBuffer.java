@@ -22,6 +22,7 @@ public class ModelPickerBruteForceBlobBuffer {
     public ModelPickerBruteForceBlobBuffer(List<ValueCompressionModel> valueModels, List<TimestampCompressionModel> timestampModels) {
         this.compressionModelBlobBuffer = new HashMap<>();
 
+        // We use sets here to remove duplicates
         Set<Integer> valueModelLengths = valueModels.stream()
                 .map(BaseModel::getLength)
                 .collect(Collectors.toSet());
@@ -49,15 +50,15 @@ public class ModelPickerBruteForceBlobBuffer {
 
         lengthToByteBuffer.put(baseModel.getLength(), baseModel.getBlobRepresentation());
 
-        for (Integer reverseSortedUniqueLength : reverseSortedUniqueLengths) {
-            if (reverseSortedUniqueLength >= baseModel.getLength()) {
+        for (Integer lengthOfOtherModel : reverseSortedUniqueLengths) {
+            if (lengthOfOtherModel >= baseModel.getLength()) {
                 continue;
             }
 
-            baseModel.reduceToSizeN(reverseSortedUniqueLength);
+            baseModel.reduceToSizeN(lengthOfOtherModel);
             if (baseModel.canCreateByteBuffer()) {
                 ByteBuffer blobRepresentation = baseModel.getBlobRepresentation();
-                lengthToByteBuffer.computeIfAbsent(reverseSortedUniqueLength, length -> blobRepresentation);
+                lengthToByteBuffer.put(lengthOfOtherModel, blobRepresentation);
             }
         }
     }

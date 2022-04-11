@@ -1,0 +1,28 @@
+    public static short combineTwoModelTypes(byte valueModelType, byte timestampModelType){
+        if (valueModelType < 0 || timestampModelType < 0) {
+            throw new IllegalArgumentException("The model types ids must be positive");
+        }
+        return (short) ((valueModelType << 8) | timestampModelType);
+    }
+
+
+
+0: PMC-mean         00000000
+1: SWING            00000001
+2: Gorilla          00000010
+
+0: regular          00000000
+1: delta delta      00000001
+2: sidiff           00000010
+
+    ###Timestamp least significant byte###
+
+pmc       & regular       00000000 00000000 = 0
+pmc       & delta delta   00000000 00000001 = 1
+pmc       & sidiff        00000000 00000010 = 2
+swing     & regular       00000001 00000000 = 256
+swing     & delta delta   00000001 00000001 = 257
+swing     & sidiff        00000001 00000010 = 258
+gorilla   & regular       00000010 00000000 = 512
+gorilla   & delta delta   00000010 00000001 = 513
+gorilla   & sidiff        00000010 00000010 = 514

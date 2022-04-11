@@ -63,13 +63,17 @@ public class ConfigProperties extends Properties {
         }
 
         List<String> listOfSources = Arrays.stream(csvSource.trim().split(","))
-                .map(String::trim).toList();
+                .map(String::trim)
+                .toList();
 
         Set<File> output = new HashSet<>();
 
         for (String source : listOfSources) {
             File f = new File(source);
-            if (f.isDirectory()) {
+            if (f.isFile()) {
+                output.add(f);
+            }
+            else if (f.isDirectory()) {
                 File[] files = f.listFiles();
                 if (files != null) {
                     for (File file : files){
@@ -79,10 +83,6 @@ public class ConfigProperties extends Properties {
                     }
                 }
             }
-            else if (f.isFile()) {
-                output.add(f);
-            }
-
         }
 
         return output;

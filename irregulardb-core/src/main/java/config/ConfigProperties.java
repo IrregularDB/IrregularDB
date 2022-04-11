@@ -55,41 +55,37 @@ public class ConfigProperties extends Properties {
         return Integer.parseInt(workingsets);
     }
 
-    public List<String> getFolderSources(){
-        String folderSource = getProperty("source.folder");
-        if (folderSource == null){
-            return Collections.emptyList();
-        }
-
-        List<String> folderSources = Arrays.stream(folderSource.trim().split(","))
-                .map(String::trim).toList();
-
-        List<String> csvSources = new ArrayList<>();
-
-        for (String folderPath : folderSources){
-            File[] files = new File(folderPath).listFiles();
-            if (files != null) {
-                for (File file : files){
-                    if (file.isFile()){
-                        csvSources.add(file.getName());
-                    }
-                }
-            }
-        }
-
-        return csvSources;
-    }
-
-    public List<String> getCsvSources() {
+    public Set<File> getCsvSources() {
         String csvSource = getProperty("source.csv");
         if (csvSource == null) {
             // no sources -> return empty list
-            return Collections.emptyList();
+            return Collections.emptySet();
         }
 
-        return Arrays.stream(csvSource.trim().split(","))
-                .map(String::trim)
-                .collect(Collectors.toList());
+        List<String> listOfSources = Arrays.stream(csvSource.trim().split(","))
+                .map(String::trim).toList();
+
+        Set<File> output = new HashSet<>();
+
+        for (String source : listOfSources) {
+            File f = new File(source);
+            if (f.isDirectory()) {
+                File[] files = f.listFiles();
+                if (files != null) {
+                    for (File file : files){
+                        if (file.isFile()){
+                            output.add(file);
+                        }
+                    }
+                }
+            }
+            else if (f.isFile()) {
+                output.add(f);
+            }
+
+        }
+
+        return output;
     }
 
     public List<ValueCompressionModelType> getValueModels() {

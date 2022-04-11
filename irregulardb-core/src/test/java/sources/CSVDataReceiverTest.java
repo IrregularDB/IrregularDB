@@ -11,6 +11,7 @@ import scheduling.WorkingSet;
 import segmentgenerator.TimeSeriesFactory;
 import storage.TestDatabaseConnectionFactory;
 
+import java.io.File;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 class CSVDataReceiverTest {
@@ -29,7 +30,8 @@ class CSVDataReceiverTest {
 
         WorkingSet workingSet = new WorkingSet(buffer, new TimeSeriesFactory(), new TestDatabaseConnectionFactory());
 
-        CSVDataReceiver csvDataReceiver = new CSVDataReceiver("src/test/resources/test.csv", workingSet, ",");
+        File file = new File("src/test/resources/testFolder/test1.csv");
+        CSVDataReceiver csvDataReceiver = new CSVDataReceiver(file, workingSet, ",");
 
         csvDataReceiver.receiveData();
 
@@ -39,10 +41,11 @@ class CSVDataReceiverTest {
             e.printStackTrace();
         }
 
+        // We first get the two data points:
         Assertions.assertEquals(timeSeriesReadingExpected1, buffer.poll());
         Assertions.assertEquals(timeSeriesReadingExpected2, buffer.poll());
-        // Hehe
 
+        // We then test that two finalized readings are gotten:
         TimeSeriesReading finalize1 = buffer.poll();
         Assertions.assertTrue(finalize1 instanceof FinalizeTimeSeriesReading);
         Assertions.assertEquals(timeSeriesReadingExpected1.getTag(), finalize1.getTag());
@@ -54,4 +57,11 @@ class CSVDataReceiverTest {
         Assertions.assertNull(buffer.poll());
     }
 
+
+    @Test
+    public void creatingReceiverFromDirectory() {
+
+
+
+    }
 }

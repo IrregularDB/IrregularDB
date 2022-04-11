@@ -3,7 +3,8 @@ package config;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import java.util.List;
+import java.io.File;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -16,9 +17,34 @@ class ConfigPropertiesTest {
 
     @Test
     public void testFolderSources(){
-        List<String> folderSources = ConfigProperties.getInstance().getFolderSources();
+        ConfigProperties instance = ConfigProperties.getInstance();
+        instance.setProperty("source.csv", "./src/test/resources/testFolder");
 
-        assertEquals(10, folderSources.size());
+        List<File> sources = new ArrayList<>(ConfigProperties.getInstance().getCsvSources());
+        Collections.sort(sources); // Sorted alphabetically
+
+        assertEquals(2, sources.size());
+        assertEquals(new File(".\\src\\test\\resources\\testFolder\\test1.csv"), sources.get(0));
+        assertEquals(new File(".\\src\\test\\resources\\testFolder\\test2.csv"), sources.get(1));
     }
+
+    @Test
+    public void testMixedSources(){
+        ConfigProperties instance = ConfigProperties.getInstance();
+        instance.setProperty("source.csv", "./src/test/resources/testFolder, " +
+                "src/test/resources/integration-test/01.csv");
+
+        List<File> sources = new ArrayList<>(ConfigProperties.getInstance().getCsvSources());
+        Collections.sort(sources); // Sorted alphabetically
+
+        assertEquals(3, sources.size());
+        assertEquals(new File(".\\src\\test\\resources\\testFolder\\test1.csv"), sources.get(0));
+        assertEquals(new File(".\\src\\test\\resources\\testFolder\\test2.csv"), sources.get(1));
+        assertEquals(new File("src/test/resources/integration-test/01.csv"), sources.get(2));
+
+
+    }
+
+
 
 }

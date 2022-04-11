@@ -56,12 +56,4 @@ class CSVDataReceiverTest {
 
         Assertions.assertNull(buffer.poll());
     }
-
-
-    @Test
-    public void creatingReceiverFromDirectory() {
-
-
-
-    }
 }

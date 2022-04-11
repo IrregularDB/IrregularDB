@@ -55,6 +55,31 @@ public class ConfigProperties extends Properties {
         return Integer.parseInt(workingsets);
     }
 
+    public List<String> getFolderSources(){
+        String folderSource = getProperty("source.folder");
+        if (folderSource == null){
+            return Collections.emptyList();
+        }
+
+        List<String> folderSources = Arrays.stream(folderSource.trim().split(","))
+                .map(String::trim).toList();
+
+        List<String> csvSources = new ArrayList<>();
+
+        for (String folderPath : folderSources){
+            File[] files = new File(folderPath).listFiles();
+            if (files != null) {
+                for (File file : files){
+                    if (file.isFile()){
+                        csvSources.add(file.getName());
+                    }
+                }
+            }
+        }
+
+        return csvSources;
+    }
+
     public List<String> getCsvSources() {
         String csvSource = getProperty("source.csv");
         if (csvSource == null) {

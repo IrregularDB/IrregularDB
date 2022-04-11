@@ -18,7 +18,8 @@ public class Main {
 
     private static void initializeDataReceiverSpawners(Partitioner partitioner) {
         List<String> csvSources = ConfigProperties.getInstance().getCsvSources();
-
+        csvSources.addAll(ConfigProperties.getInstance().getFolderSources());
+        
         if (!csvSources.isEmpty()){
             DataReceiverSpawner dataReceiverSpawner = new CSVDataReceiverSpawner(partitioner, csvSources);
             dataReceiverSpawner.spawn();

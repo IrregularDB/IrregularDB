@@ -55,16 +55,37 @@ public class ConfigProperties extends Properties {
         return Integer.parseInt(workingsets);
     }
 
-    public List<String> getCsvSources() {
+    public Set<File> getCsvSources() {
         String csvSource = getProperty("source.csv");
         if (csvSource == null) {
             // no sources -> return empty list
-            return Collections.emptyList();
+            return Collections.emptySet();
         }
 
-        return Arrays.stream(csvSource.trim().split(","))
+        List<String> listOfSources = Arrays.stream(csvSource.trim().split(","))
                 .map(String::trim)
-                .collect(Collectors.toList());
+                .toList();
+
+        Set<File> output = new HashSet<>();
+
+        for (String source : listOfSources) {
+            File f = new File(source);
+            if (f.isFile()) {
+                output.add(f);
+            }
+            else if (f.isDirectory()) {
+                File[] files = f.listFiles();
+                if (files != null) {
+                    for (File file : files){
+                        if (file.isFile()){
+                            output.add(file);
+                        }
+                    }
+                }
+            }
+        }
+
+        return output;
     }
 
     public List<ValueCompressionModelType> getValueModels() {

@@ -5,7 +5,9 @@ import scheduling.WorkingSetFactory;
 import sources.CSVDataReceiverSpawner;
 import sources.DataReceiverSpawner;
 
+import java.io.File;
 import java.util.List;
+import java.util.Set;
 
 public class Main {
 
@@ -17,7 +19,7 @@ public class Main {
     }
 
     private static void initializeDataReceiverSpawners(Partitioner partitioner) {
-        List<String> csvSources = ConfigProperties.getInstance().getCsvSources();
+        Set<File> csvSources = ConfigProperties.getInstance().getCsvSources();
 
         if (!csvSources.isEmpty()){
             DataReceiverSpawner dataReceiverSpawner = new CSVDataReceiverSpawner(partitioner, csvSources);

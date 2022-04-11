@@ -9,25 +9,24 @@ import java.io.*;
 public class CSVDataReceiver extends DataReceiver {
 
     private final String elementDelimiter;
-    private final String absoluteFilePath;
+    private final File csvFile;
 
-    public CSVDataReceiver(String absoluteFilePath, WorkingSet workingSet, String elementDelimiter) {
+    public CSVDataReceiver(File csvFile, WorkingSet workingSet, String elementDelimiter) {
         super(workingSet);
         this.elementDelimiter = elementDelimiter;
-        this.absoluteFilePath = absoluteFilePath;
+        this.csvFile = csvFile;
     }
 
     @Override
     public void receiveData() {
         try {
-            File file = new File(absoluteFilePath);
-            FileReader fileReader = new FileReader(file);
+            FileReader fileReader = new FileReader(csvFile);
             BufferedReader bufferedReader = new BufferedReader(fileReader);
 
             readFile(bufferedReader);
 
             close();
-            System.out.println("CSVReceiver for " + absoluteFilePath + " has completed delivering its data");
+            System.out.println("CSVReceiver for " + csvFile.getAbsolutePath() + " has completed delivering its data");
         } catch (IOException e) {
             e.printStackTrace();
         }

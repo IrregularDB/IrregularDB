@@ -3,28 +3,24 @@ package sources;
 import scheduling.Partitioner;
 import scheduling.WorkingSet;
 
-import java.util.Collections;
-import java.util.List;
+import java.io.File;
+import java.util.Set;
 
 public class CSVDataReceiverSpawner extends DataReceiverSpawner{
 
     private static final String CSV_DELIMITER = ",";
 
-    private final List<String> csvPaths;
+    private final Set<File> csvFiles;
 
     
-    public CSVDataReceiverSpawner(Partitioner partitioner, List<String> csvPaths) {
+    public CSVDataReceiverSpawner(Partitioner partitioner, Set<File> csvFiles) {
         super(partitioner);
-        this.csvPaths = csvPaths;
-    }
-
-    public CSVDataReceiverSpawner(Partitioner partitioner, String csvPath) {
-        this(partitioner, Collections.singletonList(csvPath));
+        this.csvFiles = csvFiles;
     }
     
     @Override
     public void spawn() {
-        for (String csvPath : this.csvPaths) {
+        for (File csvPath : this.csvFiles) {
             WorkingSet workingSet = super.partitioner.workingSetToSpawnReceiverFor();
 
             CSVDataReceiver csvDataReceiver = new CSVDataReceiver(csvPath, workingSet, CSV_DELIMITER);

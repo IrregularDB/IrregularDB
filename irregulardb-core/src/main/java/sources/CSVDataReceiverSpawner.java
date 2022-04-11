@@ -8,7 +8,7 @@ import java.util.Set;
 
 public class CSVDataReceiverSpawner extends DataReceiverSpawner{
 
-    private static final String CSV_DELIMITER = ",";
+    private static final String CSV_DELIMITER = " ";
 
     private final Set<File> csvFiles;
 

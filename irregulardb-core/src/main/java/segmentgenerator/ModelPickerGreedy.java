@@ -50,9 +50,9 @@ public class ModelPickerGreedy extends ModelPicker {
         TimestampCompressionModel bestTimestampCompressionModel = getBestTimeStampModel(timeStampModels);
 
         if (bestValueCompressionModel.getLength() < bestTimestampCompressionModel.getLength()) {
-            bestValueCompressionModel.reduceToSizeN(bestTimestampCompressionModel.getLength());
-        } else {
             bestTimestampCompressionModel.reduceToSizeN(bestValueCompressionModel.getLength());
+        } else {
+            bestValueCompressionModel.reduceToSizeN(bestTimestampCompressionModel.getLength());
         }
         return new CompressionModel(
                 bestValueCompressionModel.getValueCompressionModelType(),

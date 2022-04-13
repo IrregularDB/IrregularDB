@@ -17,19 +17,17 @@ public class SegmentSummary {
     public SegmentSummary(List<DataPoint> dataPointsUsedInASegment){
         this.segmentKey = null;
 
-        this.minValue = Math.nextDown(
-                    (float)dataPointsUsedInASegment.stream()
+        this.minValue = (float)dataPointsUsedInASegment.stream()
                             .mapToDouble(DataPoint::value)
                             .min()
                             .getAsDouble()
-        );
+        ;
 
-        this.maxValue = Math.nextUp(
-                (float)dataPointsUsedInASegment.stream()
+        this.maxValue = (float)dataPointsUsedInASegment.stream()
                         .mapToDouble(DataPoint::value)
                         .max()
                         .getAsDouble()
-        );
+        ;
     }
 
     public SegmentKey getSegmentKey() {

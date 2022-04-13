@@ -1,3 +1,4 @@
+DROP TABLE IF EXISTS TimestampValueModelTypes;
 DROP TABLE IF EXISTS SegmentSummary;
 DROP TABLE IF EXISTS Segment;
 DROP TABLE IF EXISTS TimeSeries;
@@ -36,3 +37,24 @@ CREATE TABLE SegmentSummary(
     CONSTRAINT pk_segmentSummary_timeId_startTime
         PRIMARY KEY (time_series_id, start_time)
 );
+
+CREATE TABLE TimestampValueModelTypes(
+    timestampValueModelShort smallint,
+    timestampModel varchar(500),
+    valueModel varchar(500)
+);
+
+INSERT INTO TimestampValueModelTypes(timestampValueModelShort, valuemodel, timestampmodel) VALUES
+    (0, 'PMC-Mean', 'Regular'),
+    (1, 'PMC-Mean', 'Delta Delta'),
+    (2, 'PMC-Mean', 'SI-Difference');
+
+INSERT INTO TimestampValueModelTypes(timestampValueModelShort, valuemodel, timestampmodel) VALUES
+    (256, 'Swing', 'Regular'),
+    (257, 'Swing', 'Delta Delta'),
+    (258, 'Swing', 'SI-Difference');
+
+INSERT INTO TimestampValueModelTypes(timestampValueModelShort, valuemodel, timestampmodel) VALUES
+    (512, 'Gorilla', 'Regular'),
+    (513, 'Gorilla', 'Delta Delta'),
+    (514, 'Gorilla', 'SI-Difference');

@@ -1,6 +1,7 @@
 package compression.timestamp;
 
 import compression.encoding.SingleIntEncoding;
+import compression.utility.LongToInt;
 import records.DataPoint;
 
 import java.nio.ByteBuffer;
@@ -8,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class RegularTimestampCompressionModel extends TimestampCompressionModel {
-    private int si;
+    private Integer si;
     private boolean earlierAppendFailed;
     private List<Long> timestamps;
     private long nextExpectedTimestamp;
@@ -20,7 +21,7 @@ public class RegularTimestampCompressionModel extends TimestampCompressionModel 
 
     @Override
     protected void resetModel() {
-        this.si = -1; // We use -1 to represent that no SI has been calculated yet.
+        this.si = null; // We use null to represent that no SI has been calculated yet.
         this.earlierAppendFailed = false;
         this.timestamps = new ArrayList<>();
         this.nextExpectedTimestamp = Long.MIN_VALUE;
@@ -44,25 +45,29 @@ public class RegularTimestampCompressionModel extends TimestampCompressionModel 
 
         // Special handling for first two time stamps:
         if (this.getLength() < 2) {
-            handleFirstTwoDataPoints(timeStamp);
-            withinThreshold = true;
+            withinThreshold = handleFirstTwoDataPoints(timeStamp);
         } else {
             withinThreshold = handleOtherDataPoints(timeStamp);
-
             this.nextExpectedTimestamp += si;
-            if (!withinThreshold)
-                earlierAppendFailed = true;
         }
+        if (!withinThreshold)
+            earlierAppendFailed = true;
         return withinThreshold;
     }
 
-    private void handleFirstTwoDataPoints(long timestamp) {
+    private boolean handleFirstTwoDataPoints(long timestamp) {
         if (timestamps.size() == 0) {
             timestamps.add(timestamp);
+            return true;
         } else {
-            si = calculateDifference(timestamps.get(timestamps.size() - 1), timestamp);
-            timestamps.add(timestamp);
-            nextExpectedTimestamp = timestamp + si;
+            si = LongToInt.calculateDifference(timestamps.get(0), timestamp);
+            if (si == null) { // The SI could not be fitted into an integer.
+                return false;
+            } else {
+                timestamps.add(timestamp);
+                nextExpectedTimestamp = timestamp + si;
+                return true;
+            }
         }
     }
 
@@ -112,13 +117,13 @@ public class RegularTimestampCompressionModel extends TimestampCompressionModel 
         return true;
     }
 
-    private static boolean isTimestampWithinThreshold(long timestamp, long nextExpectedTimestamp, Integer threshold) {
-        int actualDifference = calculateDifference(timestamp, nextExpectedTimestamp);
-        return actualDifference <= threshold;
-    }
-
-    private static int calculateDifference(long timestamp1, long timestamp2) {
-        return Math.abs(Math.toIntExact(timestamp2 - timestamp1));
+    private boolean isTimestampWithinThreshold(long timestamp, long nextExpectedTimestamp, Integer threshold) {
+        Integer actualDifference = LongToInt.calculateDifference(timestamp, nextExpectedTimestamp);
+        if (actualDifference == null) {
+            return false;
+        } else {
+            return actualDifference <= threshold;
+        }
     }
 
     @Override

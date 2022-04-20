@@ -69,6 +69,7 @@ public class SIDiffTimestampCompressionModel extends TimestampCompressionModel {
     }
 
     private int calculateDifference(long currentTimestamp, long approximation, List<Integer> maxValuesOfBuckets, int allowedDerivation) {
+        // TODO: fix the problem of if these differences are too large to be stored in an integer then we cannot append/store the timestamp (happens when gaps occur)
         int difference = Math.toIntExact(currentTimestamp - approximation);
         int absoluteDifference = Math.abs(difference);
 

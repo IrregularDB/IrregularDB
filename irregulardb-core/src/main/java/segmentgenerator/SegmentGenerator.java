@@ -10,8 +10,6 @@ import java.util.List;
 
 public class SegmentGenerator {
 
-    private static final int LENGTH_BOUND = ConfigProperties.getInstance().getModelLengthBound();
-
     private final CompressionModelManager compressionModelManager;
     private final int timeSeriesId;
     private List<DataPoint> notYetEmitted;
@@ -19,7 +17,7 @@ public class SegmentGenerator {
     public SegmentGenerator(CompressionModelManager compressionModelManager, int timeSeriesId) {
         this.compressionModelManager = compressionModelManager;
         this.timeSeriesId = timeSeriesId;
-        this.notYetEmitted = new ArrayList<>(LENGTH_BOUND + 1);
+        this.notYetEmitted = new ArrayList<>();
     }
 
     /**
@@ -31,7 +29,7 @@ public class SegmentGenerator {
         notYetEmitted.add(dataPoint);
         boolean appendSuccess = compressionModelManager.tryAppendDataPointToAllModels(dataPoint);
 
-        return appendSuccess && notYetEmitted.size() < LENGTH_BOUND;
+        return appendSuccess;
     }
 
     public Segment constructSegmentFromBuffer() {

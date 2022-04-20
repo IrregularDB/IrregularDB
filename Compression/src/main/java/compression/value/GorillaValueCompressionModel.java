@@ -11,8 +11,13 @@ import java.util.List;
 public class GorillaValueCompressionModel extends ValueCompressionModel {
     List<Float> values;
 
-    public GorillaValueCompressionModel() {
-        super(null, "No data points where added to the Gorilla value model before trying to get the value blob");
+    public GorillaValueCompressionModel(int lengthBound) {
+        super(null,
+                "No data points where added to the Gorilla value model before trying to get the value blob",
+                true,
+                lengthBound
+        );
+
         this.resetModel();
     }
 

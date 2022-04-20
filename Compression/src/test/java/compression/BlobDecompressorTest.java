@@ -83,7 +83,7 @@ class BlobDecompressorTest {
 
     void setupGorillaValueModel(List<DataPoint> dataPoints) {
         valueModelType = ValueCompressionModelType.GORILLA;
-        ValueCompressionModel gorillaModel = new GorillaValueCompressionModel();
+        ValueCompressionModel gorillaModel = new GorillaValueCompressionModel(Integer.MAX_VALUE);
         gorillaModel.resetAndAppendAll(dataPoints);
         valueBlob = gorillaModel.getBlobRepresentation();
     }
@@ -282,7 +282,7 @@ class BlobDecompressorTest {
 
     @Test
     public void testDeltaDeltaTimestampCompression(){
-        TimestampCompressionModel deltaDeltaTimestampCompression = new DeltaDeltaTimestampCompressionModel(0);
+        TimestampCompressionModel deltaDeltaTimestampCompression = new DeltaDeltaTimestampCompressionModel(0, Integer.MAX_VALUE);
 
         List<DataPoint> dataPoints = new ArrayList<>();
         dataPoints.add(new DataPoint(0, 5.0F));
@@ -307,7 +307,7 @@ class BlobDecompressorTest {
 
     @Test
     public void testDeltaDeltaRandomDataPoints(){
-        TimestampCompressionModel deltaDeltaTimestampCompression = new DeltaDeltaTimestampCompressionModel(0);
+        TimestampCompressionModel deltaDeltaTimestampCompression = new DeltaDeltaTimestampCompressionModel(0, Integer.MAX_VALUE);
 
         List<DataPoint> dataPoints = createXRandomDataPoints(10);
         deltaDeltaTimestampCompression.resetAndAppendAll(dataPoints);
@@ -328,7 +328,7 @@ class BlobDecompressorTest {
      */
     @Test
     public void testSIDiffRandomDataPointsNoErrorBound(){
-        TimestampCompressionModel SIDiffTimestampCompression = new SIDiffTimestampCompressionModel(0);
+        TimestampCompressionModel SIDiffTimestampCompression = new SIDiffTimestampCompressionModel(0, Integer.MAX_VALUE);
 
         List<DataPoint> dataPoints = createXRandomDataPoints(10);
         SIDiffTimestampCompression.resetAndAppendAll(dataPoints);
@@ -345,7 +345,7 @@ class BlobDecompressorTest {
 
     @Test
     public void testSIDiffNoErrorBound(){
-        TimestampCompressionModel SIDiffTimestampCompression = new SIDiffTimestampCompressionModel(0);
+        TimestampCompressionModel SIDiffTimestampCompression = new SIDiffTimestampCompressionModel(0, Integer.MAX_VALUE);
 
         List<DataPoint> dataPoints = new ArrayList<>();
         dataPoints.add(new DataPoint(0, 5.0F));
@@ -375,7 +375,7 @@ class BlobDecompressorTest {
     @Test
     public void testSIDiffRandomDataPoints10PercentError(){
         int threshold = 10;
-        TimestampCompressionModel SIDiffTimestampCompression = new SIDiffTimestampCompressionModel(threshold);
+        TimestampCompressionModel SIDiffTimestampCompression = new SIDiffTimestampCompressionModel(threshold, Integer.MAX_VALUE);
 
         List<DataPoint> dataPoints = createXRandomDataPoints(10);
         SIDiffTimestampCompression.resetAndAppendAll(dataPoints);
@@ -394,7 +394,7 @@ class BlobDecompressorTest {
     @Test
     public void testSIDiff10PercentError(){
         int threshold = 10;
-        TimestampCompressionModel SIDiffTimestampCompression = new SIDiffTimestampCompressionModel(threshold);
+        TimestampCompressionModel SIDiffTimestampCompression = new SIDiffTimestampCompressionModel(threshold, Integer.MAX_VALUE);
 
         List<DataPoint> dataPoints = new ArrayList<>();
         dataPoints.add(new DataPoint(0, 5.0F));
@@ -419,7 +419,7 @@ class BlobDecompressorTest {
     @Test
     public void testSIDiffThatTheyGetMovedBucketsDown(){
         Integer threshold = 250;
-        TimestampCompressionModel SIDiffTimestampCompression = new SIDiffTimestampCompressionModel(threshold);
+        TimestampCompressionModel SIDiffTimestampCompression = new SIDiffTimestampCompressionModel(threshold, Integer.MAX_VALUE);
 
         // We have 5 data points and last time stamp is 10000 so we get:
         // SI = 2500

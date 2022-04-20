@@ -15,7 +15,7 @@ public class PostgresConnection implements DatabaseConnection {
 
     private final Connection connection;
     private final List<Pair<Segment, SegmentSummary>> insertBuffer;
-    private final int AMT_TO_BUFFER = 1000;
+    private final int AMT_TO_BUFFER = 100;
 
     public PostgresConnection() {
         try {

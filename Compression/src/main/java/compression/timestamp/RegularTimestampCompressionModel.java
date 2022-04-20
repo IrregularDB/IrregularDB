@@ -15,7 +15,11 @@ public class RegularTimestampCompressionModel extends TimestampCompressionModel 
     private long nextExpectedTimestamp;
 
     public RegularTimestampCompressionModel(Integer threshold) {
-        super(threshold, "Regular time stamp model needs at least two data points before you are able to get the time stamp blob");
+        super(threshold,
+                "Regular time stamp model needs at least two data points before you are able to get the time stamp blob",
+                false,
+                0
+                );
         this.resetModel();
     }
 

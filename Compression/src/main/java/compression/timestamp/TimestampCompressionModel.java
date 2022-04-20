@@ -5,8 +5,8 @@ import compression.BaseModel;
 public abstract class TimestampCompressionModel extends BaseModel {
     private final Integer threshold;
 
-    public TimestampCompressionModel(Integer threshold, String cantConstructBlobErrorMessage) {
-        super(cantConstructBlobErrorMessage);
+    public TimestampCompressionModel(Integer threshold, String cantConstructBlobErrorMessage, boolean adhereToLengthBound, int lengthBound) {
+        super(cantConstructBlobErrorMessage, adhereToLengthBound, lengthBound);
         this.threshold = threshold;
     }
 

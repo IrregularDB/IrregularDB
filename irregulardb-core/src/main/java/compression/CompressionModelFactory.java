@@ -11,7 +11,8 @@ import java.util.stream.Collectors;
 
 public class CompressionModelFactory {
 
-    static ConfigProperties config = ConfigProperties.getInstance();
+    private static ConfigProperties config = ConfigProperties.getInstance();
+    private static int lengthBound = config.getModelLengthBound();
 
 
     public static List<TimestampCompressionModel> getTimestampCompressionModels(String tag){
@@ -42,7 +43,7 @@ public class CompressionModelFactory {
             case PMC_MEAN:
                 return new PMCMeanValueCompressionModel(errorBound);
             case GORILLA:
-                return new GorillaValueCompressionModel();
+                return new GorillaValueCompressionModel(lengthBound);
             case SWING:
                 return new SwingValueCompressionModel(errorBound);
             default:
@@ -56,9 +57,9 @@ public class CompressionModelFactory {
             case REGULAR:
                 return new RegularTimestampCompressionModel(threshold);
             case DELTADELTA:
-                return new DeltaDeltaTimestampCompressionModel(threshold);
+                return new DeltaDeltaTimestampCompressionModel(threshold,lengthBound);
             case SIDIFF:
-                return new SIDiffTimestampCompressionModel(threshold);
+                return new SIDiffTimestampCompressionModel(threshold,lengthBound);
             default:
                 throw new RuntimeException("Type not defined");
         }

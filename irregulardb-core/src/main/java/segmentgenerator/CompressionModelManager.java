@@ -36,18 +36,18 @@ public class CompressionModelManager {
                 .filter(model -> !model.append(dataPoint))
                 .toList();
 
-        for (ValueCompressionModel activeValueModel : valueModelsNowInactive) {
-            this.activeValueModels.remove(activeValueModel);
-            this.inactiveValueModels.add(activeValueModel);
+        for (ValueCompressionModel inactiveValueModel : valueModelsNowInactive) {
+            this.activeValueModels.remove(inactiveValueModel);
+            this.inactiveValueModels.add(inactiveValueModel);
         }
 
         List<TimestampCompressionModel> timeModelsNowInactive = this.activeTimestampModels.stream()
                 .filter(model -> !model.append(dataPoint))
                 .toList();
 
-        for (TimestampCompressionModel activeTimestampModel : timeModelsNowInactive) {
-            this.activeTimestampModels.remove(activeTimestampModel);
-            this.inactiveTimestampModels.add(activeTimestampModel);
+        for (TimestampCompressionModel inactiveTimestampModel : timeModelsNowInactive) {
+            this.activeTimestampModels.remove(inactiveTimestampModel);
+            this.inactiveTimestampModels.add(inactiveTimestampModel);
         }
         return (!this.activeValueModels.isEmpty()) && (!this.activeTimestampModels.isEmpty());
     }

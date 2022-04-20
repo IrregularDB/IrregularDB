@@ -60,7 +60,7 @@ public class RegularTimestampCompressionModel extends TimestampCompressionModel 
             timestamps.add(timestamp);
             return true;
         } else {
-            si = LongToInt.calculateDifference(timestamps.get(0), timestamp);
+            si = LongToInt.calculateDifference(timestamp, timestamps.get(0));
             if (si == null) { // The SI could not be fitted into an integer.
                 return false;
             } else {
@@ -118,11 +118,11 @@ public class RegularTimestampCompressionModel extends TimestampCompressionModel 
     }
 
     private boolean isTimestampWithinThreshold(long timestamp, long nextExpectedTimestamp, Integer threshold) {
-        Integer actualDifference = LongToInt.calculateDifference(timestamp, nextExpectedTimestamp);
-        if (actualDifference == null) {
+        Integer difference = LongToInt.calculateDifference(nextExpectedTimestamp, timestamp);
+        if (difference == null) {
             return false;
         } else {
-            return actualDifference <= threshold;
+            return Math.abs(difference) <= threshold;
         }
     }
 

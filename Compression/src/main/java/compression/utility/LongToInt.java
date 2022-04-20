@@ -7,12 +7,12 @@ public class LongToInt {
      * Returns null when they could not bet fitted.
      */
     public static Integer calculateDifference(long timestamp1, long timestamp2) {
-        long diff = timestamp2 - timestamp1;
+        long diff = timestamp1 - timestamp2;
         return castToInt(diff);
     }
 
 
-    private static Integer castToInt(long l) {
+    public static Integer castToInt(long l) {
         if (l < Integer.MIN_VALUE || l > Integer.MAX_VALUE) {
             return null;
         } else {

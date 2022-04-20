@@ -1,6 +1,7 @@
 package compression.timestamp;
 
 import compression.encoding.BucketEncoding;
+import compression.utility.LongToInt;
 import records.DataPoint;
 
 import java.nio.ByteBuffer;
@@ -43,16 +44,22 @@ public class DeltaDeltaTimestampCompressionModel extends TimestampCompressionMod
             previousTimestamp = dataPoint.timestamp();
         } else if (this.deltaDeltaTimestamps.size() == 0 && previousDelta == null) {
             // Handle second data point by storing its delta
-            int delta = calculateDelta(dataPoint);
-            int approximatedDelta = tryApplyThreshold(delta);
-
+            long delta = calculateDelta(dataPoint.timestamp(), previousTimestamp);
+            Integer intRepresentationOfDelta = LongToInt.castToInt(delta);
+            if (intRepresentationOfDelta == null) { // Delta was too large.
+                return false;
+            }
+            int approximatedDelta = tryApplyThreshold(intRepresentationOfDelta);
             previousDelta = approximatedDelta;
             previousTimestamp = previousTimestamp + previousDelta;
             deltaDeltaTimestamps.add(approximatedDelta);
         } else {
-            int deltaOfDelta = calculateDelta(dataPoint) - previousDelta;
+            long delta = calculateDelta(dataPoint.timestamp(), previousTimestamp);
+            Integer deltaOfDelta = LongToInt.calculateDifference(delta, previousDelta);
+            if (deltaOfDelta == null) { // Delta-of-delta was too large.
+                return false;
+            }
             int approximatedDeltaOfDelta = tryApplyThreshold(deltaOfDelta);
-
             previousDelta = previousDelta + approximatedDeltaOfDelta;
             previousTimestamp = previousTimestamp + previousDelta;
             deltaDeltaTimestamps.add(approximatedDeltaOfDelta);
@@ -60,8 +67,8 @@ public class DeltaDeltaTimestampCompressionModel extends TimestampCompressionMod
         return true;
     }
 
-    private int calculateDelta(DataPoint dataPoint) {
-        return (int) (dataPoint.timestamp() - previousTimestamp);
+    private long calculateDelta(long currTimestamp, long previousTimestamp) {
+        return currTimestamp - previousTimestamp;
     }
 
     private Integer tryApplyThreshold(int value) {

@@ -101,7 +101,7 @@ public class ModelPickerGreedy extends ModelPicker {
 
     protected TimestampCompressionModel getBestTimeStampModel(List<TimestampCompressionModel> timestampCompressionModelsList) {
         //Can we ignore SIDiff or DeltaDelta
-        performShortCircuitingTimestampModels(timestampCompressionModelsList);
+//        performShortCircuitingTimestampModels(timestampCompressionModelsList);
 
         Pair<Double, TimestampCompressionModel> bestModel = new Pair<>(Double.MAX_VALUE, null);
         for (TimestampCompressionModel timestampCompressionModel : timestampCompressionModelsList) {

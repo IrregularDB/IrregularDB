@@ -5,6 +5,7 @@ import compression.timestamp.TimestampCompressionModel;
 import compression.value.ValueCompressionModel;
 import records.DataPoint;
 
+import java.sql.Time;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -59,23 +60,28 @@ public class CompressionModelManager {
         activeTimestampModels.addAll(inactiveTimestampModels);
         inactiveTimestampModels.clear();
 
-        List<ValueCompressionModel> valueModelsNowInactive = activeValueModels.stream()
-                .filter(model -> !model.resetAndAppendAll(notYetEmitted))
-                .toList();
-
-        for (ValueCompressionModel inactiveValueModel : valueModelsNowInactive) {
-            activeValueModels.remove(inactiveValueModel);
-            inactiveValueModels.add(inactiveValueModel);
+        List<ValueCompressionModel> valueModelsToMakeInactive = new ArrayList<>();
+        for (ValueCompressionModel model : activeValueModels) {
+            if (!model.resetAndAppendAll(notYetEmitted)) {
+                valueModelsToMakeInactive.add(model);
+            }
+        }
+        for (ValueCompressionModel valueCompressionModel : valueModelsToMakeInactive) {
+            activeValueModels.remove(valueCompressionModel);
+            inactiveValueModels.add(valueCompressionModel);
         }
 
-        List<TimestampCompressionModel> timeModelsNowInactive = activeTimestampModels.stream()
-                .filter(model -> !model.resetAndAppendAll(notYetEmitted))
-                .toList();
-
-        for (TimestampCompressionModel inactiveTimestampModel : timeModelsNowInactive) {
-            activeTimestampModels.remove(inactiveTimestampModel);
-            inactiveTimestampModels.add(inactiveTimestampModel);
+        List<TimestampCompressionModel> timeModelToMakeInactive = new ArrayList<>();
+        for (TimestampCompressionModel model : activeTimestampModels) {
+            if (!model.resetAndAppendAll(notYetEmitted)) {
+                timeModelToMakeInactive.add(model);
+            }
         }
+        for (TimestampCompressionModel timestampCompressionModel : timeModelToMakeInactive) {
+            activeTimestampModels.remove(timestampCompressionModel);
+            inactiveTimestampModels.add(timestampCompressionModel);
+        }
+
         return !activeValueModels.isEmpty() && !activeTimestampModels.isEmpty();
     }
 

@@ -56,10 +56,12 @@ public class WorkingSet {
             this.timeSeriesTagToTimeSeries.remove(timeSeriesReadingKey);
             System.out.println("Time series " + timeSeriesReadingKey + " has finalized\n");
         } else{
-            if (!timeSeriesTagToTimeSeries.containsKey(timeSeriesReadingKey)) {
-                timeSeriesTagToTimeSeries.put(timeSeriesReadingKey, createTimeSeriesForNewKey(timeSeriesReadingKey));
+            TimeSeries timeSeries = timeSeriesTagToTimeSeries.get(timeSeriesReadingKey);
+            if (timeSeries == null) {
+                timeSeries = createTimeSeriesForNewKey(timeSeriesReadingKey);
+                timeSeriesTagToTimeSeries.put(timeSeriesReadingKey, timeSeries);
             }
-            timeSeriesTagToTimeSeries.get(timeSeriesReadingKey).processDataPoint(timeSeriesReading.getDataPoint());
+            timeSeries.processDataPoint(timeSeriesReading.getDataPoint());
         }
 
         return true;

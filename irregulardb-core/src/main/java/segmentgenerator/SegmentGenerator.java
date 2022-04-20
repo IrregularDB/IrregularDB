@@ -44,27 +44,22 @@ public class SegmentGenerator {
             throw new RuntimeException("Segment generated with size 0");
         }
 
+        Segment segment = generateSegment(
+                bestCompressionModel,
+                notYetEmitted.get(0).timestamp(),
+                notYetEmitted.get(bestCompressionModel.length() - 1).timestamp()
+        );
+        prepareForNextSegment(segment.dataPointsUsed().size());
 
-        try {
-
-            Segment segment = generateSegment(
-                    bestCompressionModel,
-                    notYetEmitted.get(0).timestamp(),
-                    notYetEmitted.get(bestCompressionModel.length() - 1).timestamp()
-            );
-            prepareForNextSegment(segment.dataPointsUsed().size());
-
-            return segment;
-        } catch (IndexOutOfBoundsException e) {
-            throw e;
-        }
-
+        return segment;
     }
 
     private void prepareForNextSegment(int amountOfDataPointsUsedInSegment) {
         removeNOldestFromBuffer(amountOfDataPointsUsedInSegment);
         boolean success = compressionModelManager.resetAndTryAppendBuffer(notYetEmitted);
         if (!success) {
+            // TODO: FIX THIS PROBLEM OF HANDLING DATA POINTS WHERE TIME STAMP DIFFERENCE IS LARGER THAN INT_MAX
+            //   IT IS NOT AN EDGE CASE
             throw new RuntimeException("We have hit an edge case where more than one segment must be generated to accommodate the new data point");
         }
     }

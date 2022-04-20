@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import records.DataPoint;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
@@ -183,6 +184,32 @@ class DeltaDeltaTimestampCompressionTest {
     }
 
 
+    @Test
+    void testingToLargeDifferenceInTimeStamps(){
+        List<Long> timestamps = Arrays.asList(1303382821000L, 1303382822000L, 1303382823000L, 1306097664000L, 1306097665000L);
+
+        boolean success = deltaDeltaTimestampCompressionModel.resetAndAppendAll(createDataPointsFromTimestamps(timestamps));
+        Assertions.assertFalse(success);
+        // We expect to be able to handle the first 3 data points as they have a difference of 1000 between them
+        // so they can be fitted. Then for the 3rd and 4th point we get:
+        //   PREVIOUS DELTA: 1000
+        //   DELTA-OF-DELTA: 2714840000 (which is larger than INT-max)
+        Assertions.assertEquals(3, deltaDeltaTimestampCompressionModel.getLength());
+    }
+
+    @Test
+    void testingToLargeDifferenceForInitialDelta(){
+        List<Long> timestamps = Arrays.asList(1303382823000L, 1306097664000L);
+
+        boolean success = deltaDeltaTimestampCompressionModel.resetAndAppendAll(createDataPointsFromTimestamps(timestamps));
+        Assertions.assertFalse(success);
+        // We expect to be able to handle only the first data point as the DELTA value between these two timestamps is
+        // larger than INT_MAX
+        Assertions.assertEquals(1, deltaDeltaTimestampCompressionModel.getLength());
+        // DeltaDelta supports having a model of size 1
+        Assertions.assertTrue(deltaDeltaTimestampCompressionModel.canCreateByteBuffer());
+    }
+
     // Helper that creates random data points in increasing order
     private DataPoint createDataPoint(){
         previousLong += random.nextLong(100L);
@@ -198,4 +225,16 @@ class DeltaDeltaTimestampCompressionTest {
         return dataPointList;
     }
 
+    private List<DataPoint> createDataPointsFromTimestamps(List<Long> timestamps) {
+        List<DataPoint> dataPoints = new ArrayList<>();
+        for (Long timestamp : timestamps) {
+            dataPoints.add(createDataPointForTimestamp(timestamp));
+        }
+        return dataPoints;
+    }
+
+    private DataPoint createDataPointForTimestamp(long timeStamp) {
+        // We use -1 for our data points as value because this model does not care about the values of the data points
+        return new DataPoint(timeStamp, -1);
+    }
 }

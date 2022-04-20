@@ -32,40 +32,50 @@ public class CompressionModelManager {
 
     public boolean tryAppendDataPointToAllModels(DataPoint dataPoint) {
         // Partition models by append success
-        Map<Boolean, List<ValueCompressionModel>> valueModelsAppended = activeValueModels.stream()
-                .collect(Collectors.partitioningBy(valueModel -> valueModel.append(dataPoint)));
+        List<ValueCompressionModel> valueModelsNowInactive = activeValueModels.stream()
+                .filter(model -> !model.append(dataPoint))
+                .toList();
 
-        // Update local lists in active and inactive
-        this.activeValueModels = valueModelsAppended.get(true);
-        this.inactiveValueModels.addAll(valueModelsAppended.get(false));
+        for (ValueCompressionModel activeValueModel : valueModelsNowInactive) {
+            this.activeValueModels.remove(activeValueModel);
+            this.inactiveValueModels.add(activeValueModel);
+        }
 
-        // Same for time stamp models
-        Map<Boolean, List<TimestampCompressionModel>> timestampModelAppended = activeTimestampModels.stream()
-                .collect(Collectors.partitioningBy(timestampModel -> timestampModel.append(dataPoint)));
+        List<TimestampCompressionModel> timeModelsNowInactive = this.activeTimestampModels.stream()
+                .filter(model -> !model.append(dataPoint))
+                .toList();
 
-        this.activeTimestampModels = timestampModelAppended.get(true);
-        this.inactiveTimestampModels.addAll(timestampModelAppended.get(false));
-
+        for (TimestampCompressionModel activeTimestampModel : timeModelsNowInactive) {
+            this.activeTimestampModels.remove(activeTimestampModel);
+            this.inactiveTimestampModels.add(activeTimestampModel);
+        }
         return (!this.activeValueModels.isEmpty()) && (!this.activeTimestampModels.isEmpty());
     }
 
     public boolean resetAndTryAppendBuffer(List<DataPoint> notYetEmitted) {
-        this.activeValueModels.addAll(inactiveValueModels);
-        this.activeTimestampModels.addAll(inactiveTimestampModels);
+        activeValueModels.addAll(inactiveValueModels);
+        inactiveValueModels.clear();
 
-        Map<Boolean, List<ValueCompressionModel>> valueModelsAppended = activeValueModels.stream()
-                .collect(Collectors.partitioningBy(valueModel -> valueModel.resetAndAppendAll(notYetEmitted)));
-        // Update local lists in active and inactive
-        this.activeValueModels = valueModelsAppended.get(true);
-        this.inactiveValueModels = valueModelsAppended.get(false);
+        activeTimestampModels.addAll(inactiveTimestampModels);
+        inactiveTimestampModels.clear();
 
-        // Same for time stamp models
-        Map<Boolean, List<TimestampCompressionModel>> timestampModelAppended = activeTimestampModels.stream()
-                .collect(Collectors.partitioningBy(timestampModel -> timestampModel.resetAndAppendAll(notYetEmitted)));
+        List<ValueCompressionModel> valueModelsNowInactive = activeValueModels.stream()
+                .filter(model -> !model.resetAndAppendAll(notYetEmitted))
+                .toList();
 
-        this.activeTimestampModels = timestampModelAppended.get(true);
-        this.inactiveTimestampModels = timestampModelAppended.get(false);
+        for (ValueCompressionModel inactiveValueModel : valueModelsNowInactive) {
+            activeValueModels.remove(inactiveValueModel);
+            inactiveValueModels.add(inactiveValueModel);
+        }
 
+        List<TimestampCompressionModel> timeModelsNowInactive = activeTimestampModels.stream()
+                .filter(model -> !model.resetAndAppendAll(notYetEmitted))
+                .toList();
+
+        for (TimestampCompressionModel inactiveTimestampModel : timeModelsNowInactive) {
+            activeTimestampModels.remove(inactiveTimestampModel);
+            inactiveTimestampModels.add(inactiveTimestampModel);
+        }
         return !activeValueModels.isEmpty() && !activeTimestampModels.isEmpty();
     }
 

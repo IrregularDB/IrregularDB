@@ -145,31 +145,57 @@ class RegularTimestampCompressionModelTest {
 
     @Test
     void sunshineThresholdTest(){
-        List<Long> integers = List.of(100L, 205L, 300L);
+        List<Long> timestamps = List.of(100L, 205L, 300L);
 
         this.regularModel = new RegularTimestampCompressionModel(10);
-        boolean success = regularModel.resetAndAppendAll(createDataPointsFromTimestamps(integers));
+        boolean success = regularModel.resetAndAppendAll(createDataPointsFromTimestamps(timestamps));
 
         Assertions.assertTrue(success);
     }
 
     @Test
     void sunshineErrorTest(){
-        List<Long> integers = List.of(100L, 205L, 310L, 1000L);
+        List<Long> timestamps = List.of(100L, 205L, 310L, 1000L);
 
         this.regularModel = new RegularTimestampCompressionModel(10);
-        boolean success = regularModel.resetAndAppendAll(createDataPointsFromTimestamps(integers));
+        boolean success = regularModel.resetAndAppendAll(createDataPointsFromTimestamps(timestamps));
 
         Assertions.assertFalse(success);
     }
 
     @Test
     void sunshineErrorTestWithHigherThreshold(){
-        List<Long> integers = List.of(100L, 205L, 310L, 1000L);
+        List<Long> timestamps = List.of(100L, 205L, 310L, 1000L);
 
         this.regularModel = new RegularTimestampCompressionModel(10000);
-        boolean success = regularModel.resetAndAppendAll(createDataPointsFromTimestamps(integers));
+        boolean success = regularModel.resetAndAppendAll(createDataPointsFromTimestamps(timestamps));
 
         Assertions.assertTrue(success);
+    }
+
+    @Test
+    void testingToLargeDifferenceInTimeStamps(){
+        List<Long> timestamps = Arrays.asList(1303382821000L, 1303382822000L, 1303382823000L, 1306097664000L, 1306097665000L);
+
+        boolean success = regularModel.resetAndAppendAll(createDataPointsFromTimestamps(timestamps));
+        Assertions.assertFalse(success);
+        // We expect to be able to handle the first 3 data points as they have a difference of 1000 between them
+        // so they can be fitted.
+        // Then for the 3rd and 4th point we get:
+        //   Expected:   1303382824000L
+        //   Actual:     1306097664000L
+        //   Difference: 2714841000 (which is larger than INT-max)
+        Assertions.assertEquals(3, regularModel.getLength());
+    }
+
+    @Test
+    void testingToLargeDifferenceForInitialSI(){
+        List<Long> timestamps = Arrays.asList(1303382823000L, 1306097664000L);
+
+        boolean success = regularModel.resetAndAppendAll(createDataPointsFromTimestamps(timestamps));
+        Assertions.assertFalse(success);
+        // We expect to be able to handle only the first data point
+        Assertions.assertEquals(1, regularModel.getLength());
+        Assertions.assertFalse(regularModel.canCreateByteBuffer());
     }
 }

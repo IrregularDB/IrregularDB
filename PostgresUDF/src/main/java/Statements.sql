@@ -44,3 +44,5 @@ select * from datapointview dp
     join timeseries ts
         on dp.timeseriesid = ts.id
 ;
+
+select count(*) from segment;

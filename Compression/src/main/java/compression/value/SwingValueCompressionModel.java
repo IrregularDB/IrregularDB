@@ -13,7 +13,7 @@ import java.util.List;
 
 public class SwingValueCompressionModel extends ValueCompressionModel {
     private DataPoint initialDataPoint;
-    private List<DataPoint> dataPoints;
+    private int currentSize;
     private boolean earlierAppendFailed;
     private LinearFunction upperBound;
     private LinearFunction lowerBound;
@@ -28,14 +28,14 @@ public class SwingValueCompressionModel extends ValueCompressionModel {
 
     @Override
     protected void resetModel() {
-        initialDataPoint = null;
-        dataPoints = new ArrayList<>();
-        earlierAppendFailed = false;
+        this.initialDataPoint = null;
+        this.currentSize = 0;
+        this.earlierAppendFailed = false;
     }
 
     @Override
     public int getLength() {
-        return dataPoints.size();
+        return currentSize;
     }
 
     @Override
@@ -58,7 +58,7 @@ public class SwingValueCompressionModel extends ValueCompressionModel {
             }
         }
         if (withinErrorBound) {
-            dataPoints.add(dataPoint);
+            currentSize++;
         }
         return withinErrorBound;
     }
@@ -113,6 +113,6 @@ public class SwingValueCompressionModel extends ValueCompressionModel {
 
     @Override
     protected void reduceToSize(int n) {
-        dataPoints.subList(n, this.getLength()).clear();
+        currentSize = n;
     }
 }

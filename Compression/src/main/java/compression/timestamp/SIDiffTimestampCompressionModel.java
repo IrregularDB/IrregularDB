@@ -9,6 +9,7 @@ import java.util.List;
 
 public class SIDiffTimestampCompressionModel extends TimestampCompressionModel {
     private final BucketEncoding signedBucketEncoder;
+    private Long firstTimestamp;
     private List<Long> timestamps;
 
     public SIDiffTimestampCompressionModel(Integer threshold, int lengthBound) {
@@ -25,6 +26,7 @@ public class SIDiffTimestampCompressionModel extends TimestampCompressionModel {
     @Override
     protected void resetModel() {
         this.timestamps = new ArrayList<>();
+        this.firstTimestamp = null;
     }
 
     @Override
@@ -34,8 +36,18 @@ public class SIDiffTimestampCompressionModel extends TimestampCompressionModel {
 
     @Override
     protected boolean appendDataPoint(DataPoint dataPoint) {
-        timestamps.add(dataPoint.timestamp());
-        return true;
+        if (firstTimestamp == null) {
+            firstTimestamp = dataPoint.timestamp();
+        }
+
+        long difference = dataPoint.timestamp() - firstTimestamp;
+        if (difference < Integer.MAX_VALUE) {
+            timestamps.add(dataPoint.timestamp());
+            return true;
+        } else {
+            // Safety added, which should make it so that SI-diff does not try to store values bigger than INT_MAX
+            return false;
+        }
     }
 
     @Override
@@ -44,7 +56,6 @@ public class SIDiffTimestampCompressionModel extends TimestampCompressionModel {
         int si = calculateSI();
         readings.add(si);
 
-        long firstTimestamp = timestamps.get(0);
         int allowedDerivation = getThreshold();
         List<Integer> maxValuesOfBuckets = signedBucketEncoder.getMaxAbsoluteValuesOfResizeableBuckets();
 

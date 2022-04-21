@@ -22,7 +22,7 @@ public class CSVDataReceiverSpawner extends DataReceiverSpawner{
     public void spawn() {
         for (File csvPath : this.csvFiles) {
             WorkingSet workingSet = super.partitioner.workingSetToSpawnReceiverFor();
-            while (workingSet.getActiveTimeSeries() > MAX_ACTIVE_RECEIVERS_FOR_CSV){
+            while (workingSet.getAmtActiveTimeSeries() > MAX_ACTIVE_RECEIVERS_FOR_CSV){
                 try {
                     Thread.sleep(50);
                 } catch (InterruptedException e) {

@@ -9,8 +9,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class BucketEncoding {
-    private final boolean useSignedBits;
-
     private static final byte SAME_VALUE_ENCODING = 0b00;
     private static final byte BUCKET_1_CONTROL_BITS = 0b01;
     private static final byte BUCKET_2_CONTROL_BITS = 0b10;
@@ -24,34 +22,29 @@ public class BucketEncoding {
     public static final int NEGATIVE_SIGNED_BIT = 0;
     public static final int POSITIVE_SIGNED_BIT = 1;
 
-    protected final BitBuffer bitBuffer;
+    private BucketEncoding() {};
 
     public static int getSmallestNonZeroBucketSizeInBits(){
         return BUCKET_1_BIT_SIZE;
     }
 
-    public BucketEncoding(boolean useSignedBits){
-        this.bitBuffer = new BitBufferNew(true);
-        this.useSignedBits = useSignedBits;
-    }
-
-    public ByteBuffer getByteBuffer() {
-        return this.bitBuffer.getFinishedByteBuffer();
-    }
-
     /**
      * @param readings we only support positive numbers
      */
-    public void encode(List<Integer> readings) {
+    public static ByteBuffer encode(List<Integer> readings, boolean useSignedBits) {
+        BitBuffer bitBuffer = new BitBufferNew(true);
+
         // We finish the byte with 1's as we can then in the decoding detect end of stream
         int previousReading = Integer.MIN_VALUE;
         for (int reading : readings) {
             if (reading == Integer.MIN_VALUE) {
                 throw new IllegalArgumentException("We cannot encode Integer.MIN_VALUE");
             }
-            encodeReading(reading, previousReading);
+            encodeReading(reading, previousReading, bitBuffer, useSignedBits);
             previousReading = reading;
         }
+
+        return bitBuffer.getFinishedByteBuffer();
     }
 
     /**
@@ -68,16 +61,16 @@ public class BucketEncoding {
         return maxValues;
     }
 
-    private void encodeReading(int reading, int prevReading) {
+    private static void encodeReading(int reading, int prevReading, BitBuffer bitBuffer, boolean useSignedBits) {
 
         if (reading == prevReading) {
             writeControlBitsToBuffer(SAME_VALUE_ENCODING, bitBuffer);
         } else {
-            encodeNumber(reading);
+            encodeNumber(reading, bitBuffer, useSignedBits);
         }
     }
 
-    protected void encodeNumber(int reading) {
+    protected static void encodeNumber(int reading, BitBuffer bitBuffer, boolean useSignedBits) {
         boolean negativeNumber = reading < 0;
         reading = Math.abs(reading);
 
@@ -88,22 +81,22 @@ public class BucketEncoding {
         int amtSignificantBits = Integer.SIZE - Integer.numberOfLeadingZeros(reading);
         if (amtSignificantBits <= BUCKET_1_BIT_SIZE) {
             writeControlBitsToBuffer(BUCKET_1_CONTROL_BITS, bitBuffer);
-            encodeSignedBit(useSignedBits, negativeNumber);
+            encodeSignedBit(useSignedBits, negativeNumber, bitBuffer);
             bitBuffer.writeIntUsingNBits(reading, BUCKET_1_BIT_SIZE);
         } else if (amtSignificantBits <= BUCKET_2_BIT_SIZE) {
             writeControlBitsToBuffer(BUCKET_2_CONTROL_BITS, bitBuffer);
-            encodeSignedBit(useSignedBits, negativeNumber);
+            encodeSignedBit(useSignedBits, negativeNumber, bitBuffer);
             bitBuffer.writeIntUsingNBits(reading, BUCKET_2_BIT_SIZE);
         } else if (amtSignificantBits <= BUCKET_3_BIT_SIZE) {
             writeControlBitsToBuffer(BUCKET_3_CONTROL_BITS, bitBuffer);
-            encodeSignedBit(useSignedBits, negativeNumber);
+            encodeSignedBit(useSignedBits, negativeNumber, bitBuffer);
             bitBuffer.writeIntUsingNBits(reading, BUCKET_3_BIT_SIZE);
         } else {
             throw new IllegalArgumentException("Amount of bits greater than bucket allows. This should not happen.");
         }
     }
 
-    private void encodeSignedBit(boolean useSignedBits, boolean negativeNumber) {
+    private static void encodeSignedBit(boolean useSignedBits, boolean negativeNumber, BitBuffer bitBuffer) {
         if (useSignedBits) {
             if (negativeNumber) {
                 bitBuffer.writeIntUsingNBits(NEGATIVE_SIGNED_BIT, 1);

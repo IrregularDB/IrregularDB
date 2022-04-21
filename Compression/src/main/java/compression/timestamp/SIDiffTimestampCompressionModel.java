@@ -65,9 +65,7 @@ public class SIDiffTimestampCompressionModel extends TimestampCompressionModel {
             approximation += si;
         }
 
-        BucketEncoding signedBucketEncoder = new BucketEncoding(true);
-        signedBucketEncoder.encode(readings);
-        return signedBucketEncoder.getByteBuffer();
+        return BucketEncoding.encode(readings, true);
     }
 
     @Override

@@ -84,9 +84,7 @@ public class DeltaDeltaTimestampCompressionModel extends TimestampCompressionMod
 
     @Override
     protected ByteBuffer createByteBuffer() {
-        BucketEncoding signedBucketEncoder = new BucketEncoding(true);
-        signedBucketEncoder.encode(this.deltaDeltaTimestamps);
-        return signedBucketEncoder.getByteBuffer();
+        return BucketEncoding.encode(this.deltaDeltaTimestamps, true);
     }
 
     @Override

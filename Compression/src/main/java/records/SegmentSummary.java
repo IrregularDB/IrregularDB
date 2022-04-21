@@ -7,11 +7,13 @@ public class SegmentSummary {
     private final SegmentKey segmentKey;
     private final float minValue;
     private final float maxValue;
+    private final int amtDataPoints;
 
-    public SegmentSummary(SegmentKey segmentKey, float minValue, float maxValue) {
+    public SegmentSummary(SegmentKey segmentKey, float minValue, float maxValue,int amtDataPoints) {
         this.segmentKey = segmentKey;
         this.minValue = minValue;
         this.maxValue = maxValue;
+        this.amtDataPoints = amtDataPoints;
     }
 
     public SegmentSummary(List<DataPoint> dataPointsUsedInASegment){
@@ -28,6 +30,8 @@ public class SegmentSummary {
                         .max()
                         .getAsDouble()
         ;
+
+        this.amtDataPoints = dataPointsUsedInASegment.size();
     }
 
     public SegmentKey getSegmentKey() {
@@ -40,5 +44,9 @@ public class SegmentSummary {
 
     public float getMaxValue() {
         return maxValue;
+    }
+
+    public int getAmtDataPoints() {
+        return amtDataPoints;
     }
 }

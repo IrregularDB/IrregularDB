@@ -68,7 +68,6 @@ public class SegmentGenerator {
 
     private void removeNOldestFromBuffer(int dataPointsUsedForPrevSegment) {
         notYetEmitted.subList(0, dataPointsUsedForPrevSegment).clear();
-//        this.notYetEmitted = notYetEmitted.subList(dataPointsUsedForPrevSegment, notYetEmitted.size());
     }
 
     private Segment generateSegment(CompressionModel compressionModel, long startTime, long endTime) {
@@ -80,7 +79,7 @@ public class SegmentGenerator {
                 compressionModel.valueCompressionModel(),
                 (byte) compressionModel.timestampType().ordinal(),
                 compressionModel.timestampCompressionModel(),
-                new ArrayList<>(this.notYetEmitted.subList(0, compressionModel.length())) // Should be decompressed values
+                new ArrayList<>(this.notYetEmitted.subList(0, compressionModel.length())) // TODO: Should be decompressed values
         );
     }
 

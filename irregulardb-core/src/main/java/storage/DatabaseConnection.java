@@ -20,5 +20,5 @@ public interface DatabaseConnection {
      */
     int getTimeSeriesId(String timeSeriesTag);
 
-    void flushCache();
+    void flushBatchToDB();
 }

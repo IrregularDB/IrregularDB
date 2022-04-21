@@ -35,7 +35,7 @@ public class PostgresConnection implements DatabaseConnection {
         if (insertBuffer.size() < BATCH_SIZE) {
             return;
         } else {
-            flushCache();
+            flushBatchToDB();
         }
     }
 
@@ -101,7 +101,7 @@ public class PostgresConnection implements DatabaseConnection {
     }
 
     @Override
-    public void flushCache() {
+    public void flushBatchToDB() {
         try {
             final String INSERT_SEGMENT_STATEMENT = "INSERT INTO Segment(time_series_id, start_time, end_time, value_timestamp_model_type, value_model_blob, timestamp_model_blob) VALUES (?,?,?,?,?,?)";
             PreparedStatement preparedStatement = connection.prepareStatement(INSERT_SEGMENT_STATEMENT, Statement.RETURN_GENERATED_KEYS);

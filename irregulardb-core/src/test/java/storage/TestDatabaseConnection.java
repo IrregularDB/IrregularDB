@@ -19,7 +19,7 @@ public class TestDatabaseConnection implements DatabaseConnection{
     }
 
     @Override
-    public void flushCache() {
+    public void flushBatchToDB() {
         throw new RuntimeException("Not implemented");
     }
 }

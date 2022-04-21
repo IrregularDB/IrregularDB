@@ -96,7 +96,7 @@ public class PostgresConnection implements DatabaseConnection {
             final String INSERT_SEGMENT_STATEMENT = "INSERT INTO Segment(time_series_id, start_time, end_time, value_timestamp_model_type, value_model_blob, timestamp_model_blob) VALUES (?,?,?,?,?,?)";
             PreparedStatement insertSegmentStatement = connection.prepareStatement(INSERT_SEGMENT_STATEMENT, Statement.RETURN_GENERATED_KEYS);
 
-            final String INSERT_SEGMENT_SUMMARY_STATEMENT = "INSERT INTO SegmentSummary(time_series_id, start_time, minValue, maxvalue) VALUES (?,?,?,?)";
+            final String INSERT_SEGMENT_SUMMARY_STATEMENT = "INSERT INTO SegmentSummary(time_series_id, start_time, minValue, maxvalue, amtDataPoints) VALUES (?,?,?,?,?)";
             PreparedStatement insertSegmentSummaryStatement = connection.prepareStatement(INSERT_SEGMENT_SUMMARY_STATEMENT);
 
             boolean anySegmentSummaryUsed = false;

@@ -98,21 +98,24 @@ public class PostgresConnection implements DatabaseConnection {
             final String INSERT_SEGMENT_SUMMARY_STATEMENT = "INSERT INTO SegmentSummary(time_series_id, start_time, minValue, maxvalue) VALUES (?,?,?,?)";
             PreparedStatement insertSegmentSummaryStatement = connection.prepareStatement(INSERT_SEGMENT_SUMMARY_STATEMENT);
 
+            boolean anySegmentSummaryUsed = false;
             for (Pair<Segment, SegmentSummary> segmentSegmentSummaryPair : insertBuffer) {
                 prepareStatementForInsertSegment(segmentSegmentSummaryPair.f0(), insertSegmentStatement);
                 insertSegmentStatement.addBatch();
                 insertSegmentStatement.clearParameters();
 
-                if (segmentSegmentSummaryPair.f1() != null) {
+                if (segmentSegmentSummaryPair.f1() != null) { // Handling of summary
                     prepareStatementForInsertSegmentSummary(segmentSegmentSummaryPair, insertSegmentSummaryStatement);
                     insertSegmentSummaryStatement.addBatch();
                     insertSegmentSummaryStatement.clearParameters();
+                    anySegmentSummaryUsed = true;
                 }
             }
 
             insertSegmentStatement.executeBatch();
-            insertSegmentSummaryStatement.executeBatch();
-
+            if (anySegmentSummaryUsed) {
+                insertSegmentSummaryStatement.executeBatch();
+            }
             insertBuffer.clear();
         } catch (SQLException e) {
             throw new RuntimeException(e);

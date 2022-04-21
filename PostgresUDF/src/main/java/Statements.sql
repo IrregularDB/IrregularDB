@@ -45,6 +45,8 @@ select * from datapointview dp
         on dp.timeseriesid = ts.id
 ;
 
+select count(*) from segment;
+
 select count(*), t.valuemodel, t.timestampmodel from segment s
     join timestampvaluemodeltypes t on s.value_timestamp_model_type = t.timestampvaluemodelshort
     group by t.valuemodel, t.timestampmodel

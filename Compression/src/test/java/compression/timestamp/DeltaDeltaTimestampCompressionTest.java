@@ -6,6 +6,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import records.DataPoint;
 
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -20,12 +21,12 @@ class DeltaDeltaTimestampCompressionTest {
     private DeltaDeltaTimestampCompressionModel deltaDeltaTimestampCompressionModel;
 
     @BeforeEach
-    void beforeEach(){
+    void beforeEach() {
         deltaDeltaTimestampCompressionModel = new DeltaDeltaTimestampCompressionModel(0, Integer.MAX_VALUE);
     }
 
     @Test
-    public void testModelAppendsTwice(){
+    public void testModelAppendsTwice() {
         boolean append1 = deltaDeltaTimestampCompressionModel.append(createDataPoint());
         boolean append2 = deltaDeltaTimestampCompressionModel.append(createDataPoint());
 
@@ -34,7 +35,7 @@ class DeltaDeltaTimestampCompressionTest {
     }
 
     @Test
-    public void testModelResets(){
+    public void testModelResets() {
         deltaDeltaTimestampCompressionModel.append(createDataPoint());
         deltaDeltaTimestampCompressionModel.append(createDataPoint());
         deltaDeltaTimestampCompressionModel.append(createDataPoint());
@@ -48,7 +49,7 @@ class DeltaDeltaTimestampCompressionTest {
     }
 
     @Test
-    public void testReduceSizeToN(){
+    public void testReduceSizeToN() {
         dataPoints.forEach(dp -> deltaDeltaTimestampCompressionModel.append(dp));
         deltaDeltaTimestampCompressionModel.reduceToSizeN(5);
         int actualAmountOfTimestamps = deltaDeltaTimestampCompressionModel.getLength();
@@ -58,7 +59,7 @@ class DeltaDeltaTimestampCompressionTest {
     }
 
     @Test
-    public void testReduceSizeWithNumberOfTimestamps(){
+    public void testReduceSizeWithNumberOfTimestamps() {
         dataPoints.forEach(dp -> deltaDeltaTimestampCompressionModel.append(dp));
         int expectedAmountTimestamps = dataPoints.size();
         deltaDeltaTimestampCompressionModel.reduceToSizeN(expectedAmountTimestamps);
@@ -67,19 +68,19 @@ class DeltaDeltaTimestampCompressionTest {
     }
 
     @Test
-    public void testReduceSizeWithZeroThrowsException(){
+    public void testReduceSizeWithZeroThrowsException() {
         dataPoints.forEach(dp -> deltaDeltaTimestampCompressionModel.append(dp));
         Assertions.assertThrows(IllegalArgumentException.class, () -> deltaDeltaTimestampCompressionModel.reduceToSizeN(0));
     }
 
     @Test
-    public void testReduceSizeWithMoreThanListSizeThrowsException(){
+    public void testReduceSizeWithMoreThanListSizeThrowsException() {
         dataPoints.forEach(dp -> deltaDeltaTimestampCompressionModel.append(dp));
         Assertions.assertThrows(IllegalArgumentException.class, () -> deltaDeltaTimestampCompressionModel.reduceToSizeN(20));
     }
 
     @Test
-    public void testPushedWithinThreshold(){
+    public void testPushedWithinThreshold() {
         final int threshold = 10;
         List<DataPoint> dataPoints = List.of(
                 new DataPoint(50, -1),
@@ -107,7 +108,7 @@ class DeltaDeltaTimestampCompressionTest {
     }
 
     @Test
-    public void testPushedDeltaDeltas(){
+    public void testPushedDeltaDeltas() {
         final int threshold = 10;
         List<DataPoint> dataPoints = List.of(
                 new DataPoint(50, -1),
@@ -185,7 +186,7 @@ class DeltaDeltaTimestampCompressionTest {
 
 
     @Test
-    void testingToLargeDifferenceInTimeStamps(){
+    void testingToLargeDifferenceInTimeStamps() {
         List<Long> timestamps = Arrays.asList(1303382821000L, 1303382822000L, 1303382823000L, 1306097664000L, 1306097665000L);
 
         boolean success = deltaDeltaTimestampCompressionModel.resetAndAppendAll(createDataPointsFromTimestamps(timestamps));
@@ -198,7 +199,7 @@ class DeltaDeltaTimestampCompressionTest {
     }
 
     @Test
-    void testingToLargeDifferenceForInitialDelta(){
+    void testingToLargeDifferenceForInitialDelta() {
         List<Long> timestamps = Arrays.asList(1303382823000L, 1306097664000L);
 
         boolean success = deltaDeltaTimestampCompressionModel.resetAndAppendAll(createDataPointsFromTimestamps(timestamps));
@@ -210,16 +211,82 @@ class DeltaDeltaTimestampCompressionTest {
         Assertions.assertTrue(deltaDeltaTimestampCompressionModel.canCreateByteBuffer());
     }
 
+    @Test
+    void testingByteBufferWorkingWeird() {
+        List<Long> timeStamps = getSpecificTestTimeStamps();
+        List<DataPoint> dataPoints = createDataPointsFromTimestamps(timeStamps);
+
+        deltaDeltaTimestampCompressionModel = new DeltaDeltaTimestampCompressionModel(100, 50);
+        deltaDeltaTimestampCompressionModel.resetAndAppendAll(dataPoints);
+
+        ByteBuffer blobRepresentation = deltaDeltaTimestampCompressionModel.getBlobRepresentation();
+        int size = blobRepresentation.capacity();
+    }
+
+    private List<Long> getSpecificTestTimeStamps() {
+        return List.of(1303101158000L,
+                1303101162000L,
+                1303101166000L,
+                1303101169000L,
+                1303101173000L,
+                1303101177000L,
+                1303101180000L,
+                1303101184000L,
+                1303101187000L,
+                1303101191000L,
+                1303101194000L,
+                1303101198000L,
+                1303101202000L,
+                1303101205000L,
+                1303101214000L,
+                1303101218000L,
+                1303101221000L,
+                1303101225000L,
+                1303101229000L,
+                1303101233000L,
+                1303101236000L,
+                1303101240000L,
+                1303101244000L,
+                1303101247000L,
+                1303101251000L,
+                1303101255000L,
+                1303101259000L,
+                1303101262000L,
+                1303101266000L,
+                1303101275000L,
+                1303101278000L,
+                1303101282000L,
+                1303101286000L,
+                1303101289000L,
+                1303101293000L,
+                1303101296000L,
+                1303101300000L,
+                1303101303000L,
+                1303101307000L,
+                1303101310000L,
+                1303101313000L,
+                1303101317000L,
+                1303101321000L,
+                1303101324000L,
+                1303101328000L,
+                1303101337000L,
+                1303101340000L,
+                1303101344000L,
+                1303101348000L,
+                1303101352000L);
+    }
+
+
     // Helper that creates random data points in increasing order
-    private DataPoint createDataPoint(){
+    private DataPoint createDataPoint() {
         previousLong += random.nextLong(100L);
         previousFloat += random.nextFloat(100.00f);
         return new DataPoint(previousLong, previousFloat);
     }
 
-    private List<DataPoint> createTenDataPoints(){
+    private List<DataPoint> createTenDataPoints() {
         List<DataPoint> dataPointList = new ArrayList<>();
-        for(int i = 0; i < 10; i++){
+        for (int i = 0; i < 10; i++) {
             dataPointList.add(createDataPoint());
         }
         return dataPointList;

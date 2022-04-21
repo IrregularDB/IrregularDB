@@ -21,8 +21,12 @@ public abstract class ModelPicker {
     }
 
     protected double calculateAmountBytesPerDataPoint(BaseModel baseModel) {
-        int amountBytesUsedForModel = baseModel.getAmountBytesUsed();
-        return calculateAmountBytesPerDataPoint(amountBytesUsedForModel, baseModel.getLength());
+        if (baseModel.canCreateByteBuffer()) {
+            int amountBytesUsedForModel = baseModel.getAmountBytesUsed();
+            return calculateAmountBytesPerDataPoint(amountBytesUsedForModel, baseModel.getLength());
+        } else {
+            return Double.MAX_VALUE;
+        }
     }
 
     private static int calculateOverheadPerModel() {

@@ -4,6 +4,7 @@ import compression.utility.BitBuffer.BitBuffer;
 import compression.utility.BitBuffer.BitBufferNew;
 import compression.utility.BitStream.BitStream;
 
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,10 +35,14 @@ public class BucketEncoding {
         this.useSignedBits = useSignedBits;
     }
 
+    public ByteBuffer getByteBuffer() {
+        return this.bitBuffer.getFinishedByteBuffer();
+    }
+
     /**
      * @param readings we only support positive numbers
      */
-    public BitBuffer encode(List<Integer> readings) {
+    public void encode(List<Integer> readings) {
         // We finish the byte with 1's as we can then in the decoding detect end of stream
         int previousReading = Integer.MIN_VALUE;
         for (int reading : readings) {
@@ -47,14 +52,12 @@ public class BucketEncoding {
             encodeReading(reading, previousReading);
             previousReading = reading;
         }
-
-        return bitBuffer;
     }
 
     /**
      * we don't add the last bucket as it is the largest bucket
      */
-    public List<Integer> getMaxAbsoluteValuesOfResizeableBuckets() {
+    public static List<Integer> getMaxAbsoluteValuesOfResizeableBuckets() {
         List<Integer> maxValues = new ArrayList<>();
 
         // We have bucket_0, which is same value

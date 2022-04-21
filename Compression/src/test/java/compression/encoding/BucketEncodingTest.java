@@ -2,6 +2,7 @@ package compression.encoding;
 
 import compression.utility.BitBuffer.BitBuffer;
 import compression.utility.BitStream.BitStream;
+import compression.utility.BitStream.BitStreamNew;
 import org.junit.jupiter.api.Assertions;
 import utility.BitPattern;
 import utility.BitUtil;
@@ -20,15 +21,15 @@ class BucketEncodingTest {
     }
 
     BitStream getBitStreamForReadings(List<Integer> readings) {
-        BitBuffer encoding = bucketEncoding.encode(readings);
-        return encoding.getBitStream();
+        bucketEncoding.encode(readings);
+        return new BitStreamNew(bucketEncoding.getByteBuffer());
     }
 
     @Test
     void getMaxValues() {
         List<Integer> expectedValues = List.of(0, 511, 65535);
 
-        assertEquals(expectedValues, bucketEncoding.getMaxAbsoluteValuesOfResizeableBuckets());
+        assertEquals(expectedValues, BucketEncoding.getMaxAbsoluteValuesOfResizeableBuckets());
     }
 
     @Test

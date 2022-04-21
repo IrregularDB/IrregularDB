@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SIDiffTimestampCompressionModel extends TimestampCompressionModel {
-    private final BucketEncoding signedBucketEncoder;
     private Long firstTimestamp;
     private List<Long> timestamps;
 
@@ -19,7 +18,6 @@ public class SIDiffTimestampCompressionModel extends TimestampCompressionModel {
                 lengthBound
                 );
         // We make this a field so that we don't have to allocate a new signed bucket encoder each time get byte buffer is called
-        signedBucketEncoder = new BucketEncoding(true);
         this.resetModel();
     }
 
@@ -57,7 +55,7 @@ public class SIDiffTimestampCompressionModel extends TimestampCompressionModel {
         readings.add(si);
 
         int allowedDerivation = getThreshold();
-        List<Integer> maxValuesOfBuckets = signedBucketEncoder.getMaxAbsoluteValuesOfResizeableBuckets();
+        List<Integer> maxValuesOfBuckets = BucketEncoding.getMaxAbsoluteValuesOfResizeableBuckets();
 
         long approximation = firstTimestamp + (long) si;
         // We skip the first timestamp as it is stored on the segment
@@ -66,7 +64,10 @@ public class SIDiffTimestampCompressionModel extends TimestampCompressionModel {
             readings.add(difference);
             approximation += si;
         }
-        return signedBucketEncoder.encode(readings).getFinishedByteBuffer();
+
+        BucketEncoding signedBucketEncoder = new BucketEncoding(true);
+        signedBucketEncoder.encode(readings);
+        return signedBucketEncoder.getByteBuffer();
     }
 
     @Override

@@ -19,8 +19,6 @@ public class WorkingSet {
     private final TimeSeriesFactory timeSeriesFactory;
     private final DatabaseConnection databaseConnection;
 
-    private int dataPointCounter = 0;
-
     public WorkingSet(Queue<TimeSeriesReading> buffer, TimeSeriesFactory timeSeriesFactory, DatabaseConnectionFactory databaseConnectionFactory) {
         this.buffer = buffer;
         this.timeSeriesTagToTimeSeries = new HashMap<>();
@@ -46,10 +44,6 @@ public class WorkingSet {
     }
 
     private boolean processNextDataPoint() {
-        if (dataPointCounter % 1000 == 0) {
-            System.out.println("Datapoints processed: " + dataPointCounter);
-        }
-
         TimeSeriesReading timeSeriesReading = buffer.poll();
         if (timeSeriesReading == null) {
             return false;
@@ -70,7 +64,6 @@ public class WorkingSet {
             }
             timeSeries.processDataPoint(timeSeriesReading.getDataPoint());
         }
-        dataPointCounter++;
         return true;
     }
 

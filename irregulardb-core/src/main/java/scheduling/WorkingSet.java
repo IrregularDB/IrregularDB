@@ -14,6 +14,8 @@ import java.util.Queue;
 
 public class WorkingSet {
 
+    public static final int MAX_ACTIVE_RECEIVERS_FOR_CSV = 10;
+
     private final Queue<TimeSeriesReading> buffer;
     private final Map<String, TimeSeries> timeSeriesTagToTimeSeries;
     private final TimeSeriesFactory timeSeriesFactory;
@@ -24,6 +26,10 @@ public class WorkingSet {
         this.timeSeriesTagToTimeSeries = new HashMap<>();
         this.timeSeriesFactory = timeSeriesFactory;
         this.databaseConnection = databaseConnectionFactory.createDataBaseConnection();
+    }
+
+    public int getActiveTimeSeries(){
+        return timeSeriesTagToTimeSeries.keySet().size(); //TODO potential multithreading problem on getting size of key set
     }
 
     public void accept(TimeSeriesReading timeSeriesReading){

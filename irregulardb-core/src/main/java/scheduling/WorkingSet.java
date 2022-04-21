@@ -28,7 +28,7 @@ public class WorkingSet {
         this.databaseConnection = databaseConnectionFactory.createDataBaseConnection();
     }
 
-    public int getActiveTimeSeries(){
+    public int getAmtActiveTimeSeries(){
         return timeSeriesTagToTimeSeries.keySet().size(); //TODO potential multithreading problem on getting size of key set
     }
 

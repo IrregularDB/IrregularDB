@@ -8,21 +8,20 @@ import utility.BitPattern;
 import utility.BitUtil;
 import org.junit.jupiter.api.Test;
 
+import java.nio.ByteBuffer;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class BucketEncodingTest {
 
-    BucketEncoding bucketEncoding = new BucketEncoding(false);
-
     String removeSpace(String string) {
         return string.replace(" ", "");
     }
 
     BitStream getBitStreamForReadings(List<Integer> readings) {
-        bucketEncoding.encode(readings);
-        return new BitStreamNew(bucketEncoding.getByteBuffer());
+        ByteBuffer byteBuffer = BucketEncoding.encode(readings, false);
+        return new BitStreamNew(byteBuffer);
     }
 
     @Test
@@ -158,7 +157,7 @@ class BucketEncodingTest {
 
         List<Integer> readings = List.of(i1);
 
-        Assertions.assertThrows(IllegalArgumentException.class, () -> bucketEncoding.encode(readings));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> BucketEncoding.encode(readings, false));
     }
 
     @Test

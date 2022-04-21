@@ -7,11 +7,15 @@ import java.util.List;
 
 public abstract class BaseModel {
     private final String cantConstructBlobErrorMessage;
+    private final int lengthBound;
 
     private ByteBuffer byteBuffer; //Used as a cache for a blob
+    protected final boolean adhereToLengthBound;
 
-    public BaseModel(String cantConstructBlobErrorMessage) {
+    public BaseModel(String cantConstructBlobErrorMessage, boolean adhereToLengthBound, int lengthBound) {
         this.cantConstructBlobErrorMessage = cantConstructBlobErrorMessage;
+        this.adhereToLengthBound = adhereToLengthBound;
+        this.lengthBound = lengthBound;
         byteBuffer = null;
     }
 
@@ -40,7 +44,11 @@ public abstract class BaseModel {
 
     public final boolean append(DataPoint dataPoint) {
         this.byteBuffer = null;
-        return this.appendDataPoint(dataPoint);
+        if (adhereToLengthBound && getLength() >= lengthBound) {
+            return false;
+        } else {
+            return this.appendDataPoint(dataPoint);
+        }
     }
 
     protected abstract boolean appendDataPoint(DataPoint dataPoint);

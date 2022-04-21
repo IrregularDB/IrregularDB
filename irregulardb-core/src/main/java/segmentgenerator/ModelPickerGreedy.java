@@ -7,11 +7,9 @@ import compression.value.ValueCompressionModel;
 import compression.value.ValueCompressionModelType;
 import config.ConfigProperties;
 import records.CompressionModel;
+import records.Pair;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class ModelPickerGreedy extends ModelPicker {
@@ -67,14 +65,21 @@ public class ModelPickerGreedy extends ModelPicker {
         //Check if it is allowed to ignore gorilla
         performShortCircuitingValueModels(valueCompressionModelsList);
 
-        return valueCompressionModelsList.stream()
-                .min(Comparator.comparing(this::calculateAmountBytesPerDataPoint))
-                .orElseThrow(() -> new RuntimeException("In ModelPicker:getBestValueModel() - models list.empty should not happen"));
+        Pair<Double, ValueCompressionModel> bestModel = new Pair<>(Double.MAX_VALUE, null);
+        for (ValueCompressionModel valueCompressionModel : valueCompressionModelsList) {
+            double bytesPerPoint = calculateAmountBytesPerDataPoint(valueCompressionModel);
+            if (bytesPerPoint < bestModel.f0()) {
+                bestModel = new Pair<>(bytesPerPoint, valueCompressionModel);
+            }
+        }
+        return bestModel.f1();
     }
 
     private void performShortCircuitingValueModels(List<ValueCompressionModel> valueCompressionModelsList) {
-        Map<ValueCompressionModelType, ValueCompressionModel> typeToValueModel = valueCompressionModelsList.stream()
-                .collect(Collectors.toMap(ValueCompressionModel::getValueCompressionModelType, item -> item));
+        Map<ValueCompressionModelType, ValueCompressionModel> typeToValueModel = new HashMap<>();
+        for (ValueCompressionModel valueCompressionModel : valueCompressionModelsList) {
+            typeToValueModel.put(valueCompressionModel.getValueCompressionModelType(), valueCompressionModel);
+        }
 
         boolean gorillaRemoved = false;
         ValueCompressionModel pmcMeanModel = typeToValueModel.get(ValueCompressionModelType.PMC_MEAN);
@@ -98,14 +103,21 @@ public class ModelPickerGreedy extends ModelPicker {
         //Can we ignore SIDiff or DeltaDelta
         performShortCircuitingTimestampModels(timestampCompressionModelsList);
 
-        return timestampCompressionModelsList.stream()
-                .min(Comparator.comparing(this::calculateAmountBytesPerDataPoint))
-                .orElseThrow(() -> new RuntimeException("In ModelPicker:getBestTimeStampModel() - Should not happen"));
+        Pair<Double, TimestampCompressionModel> bestModel = new Pair<>(Double.MAX_VALUE, null);
+        for (TimestampCompressionModel timestampCompressionModel : timestampCompressionModelsList) {
+            double bytesPerPoint = calculateAmountBytesPerDataPoint(timestampCompressionModel);
+            if (bytesPerPoint < bestModel.f0()) {
+                bestModel = new Pair<>(bytesPerPoint, timestampCompressionModel);
+            }
+        }
+        return bestModel.f1();
     }
 
     private void performShortCircuitingTimestampModels(List<TimestampCompressionModel> timestampCompressionModelsList) {
-        Map<TimestampCompressionModelType, TimestampCompressionModel> typeToTimestampModel = timestampCompressionModelsList.stream()
-                .collect(Collectors.toMap(TimestampCompressionModel::getTimestampCompressionModelType, item -> item));
+        Map<TimestampCompressionModelType, TimestampCompressionModel> typeToTimestampModel = new HashMap<>();
+        for (TimestampCompressionModel timestampCompressionModel : timestampCompressionModelsList) {
+            typeToTimestampModel.put(timestampCompressionModel.getTimestampCompressionModelType(), timestampCompressionModel);
+        }
 
         TimestampCompressionModel regularModel = typeToTimestampModel.get(TimestampCompressionModelType.REGULAR);
 
@@ -117,5 +129,4 @@ public class ModelPickerGreedy extends ModelPicker {
             }
         }
     }
-
 }

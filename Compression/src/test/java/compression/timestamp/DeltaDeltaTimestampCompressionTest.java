@@ -21,7 +21,7 @@ class DeltaDeltaTimestampCompressionTest {
 
     @BeforeEach
     void beforeEach(){
-        deltaDeltaTimestampCompressionModel = new DeltaDeltaTimestampCompressionModel(0);
+        deltaDeltaTimestampCompressionModel = new DeltaDeltaTimestampCompressionModel(0, Integer.MAX_VALUE);
     }
 
     @Test
@@ -90,7 +90,7 @@ class DeltaDeltaTimestampCompressionTest {
                 new DataPoint(330, -1)
         );
 
-        deltaDeltaTimestampCompressionModel = new DeltaDeltaTimestampCompressionModel(threshold);
+        deltaDeltaTimestampCompressionModel = new DeltaDeltaTimestampCompressionModel(threshold, Integer.MAX_VALUE);
         deltaDeltaTimestampCompressionModel.resetAndAppendAll(dataPoints);
 
         List<Long> decompressedTimestamps = BlobDecompressor.decompressTimestamps(TimestampCompressionModelType.DELTADELTA,
@@ -118,7 +118,7 @@ class DeltaDeltaTimestampCompressionTest {
                 new DataPoint(330, -1)
         );
 
-        deltaDeltaTimestampCompressionModel = new DeltaDeltaTimestampCompressionModel(threshold);
+        deltaDeltaTimestampCompressionModel = new DeltaDeltaTimestampCompressionModel(threshold, Integer.MAX_VALUE);
         deltaDeltaTimestampCompressionModel.resetAndAppendAll(dataPoints);
 
         List<Long> decompressedTimestamps = BlobDecompressor.decompressTimestamps(TimestampCompressionModelType.DELTADELTA,
@@ -147,7 +147,7 @@ class DeltaDeltaTimestampCompressionTest {
                 new DataPoint(66812, -1)// deltadelta = 65535 + 5// prevValue(711) + prevDelta(711 - 150) + bucketMax(65535) + 5
         );
 
-        deltaDeltaTimestampCompressionModel = new DeltaDeltaTimestampCompressionModel(threshold);
+        deltaDeltaTimestampCompressionModel = new DeltaDeltaTimestampCompressionModel(threshold, Integer.MAX_VALUE);
         deltaDeltaTimestampCompressionModel.resetAndAppendAll(dataPoints);
 
         List<Long> decompressedTimestamps = BlobDecompressor.decompressTimestamps(TimestampCompressionModelType.DELTADELTA,
@@ -171,7 +171,7 @@ class DeltaDeltaTimestampCompressionTest {
                 new DataPoint(50, -1)
         );
 
-        deltaDeltaTimestampCompressionModel = new DeltaDeltaTimestampCompressionModel(threshold);
+        deltaDeltaTimestampCompressionModel = new DeltaDeltaTimestampCompressionModel(threshold, Integer.MAX_VALUE);
         deltaDeltaTimestampCompressionModel.resetAndAppendAll(dataPoints);
 
         List<Long> decompressedTimestamps = BlobDecompressor.decompressTimestamps(TimestampCompressionModelType.DELTADELTA,

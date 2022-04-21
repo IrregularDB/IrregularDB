@@ -20,7 +20,11 @@ public class PMCMeanValueCompressionModel extends ValueCompressionModel {
     private int length;
 
     public PMCMeanValueCompressionModel(float errorBound) {
-        super(errorBound, "No data points where added to the PMC-mean value model before trying to get the value blob");
+        super(errorBound,
+                "No data points where added to the PMC-mean value model before trying to get the value blob",
+                false,
+                0
+                );
         this.resetModel();
     }
 

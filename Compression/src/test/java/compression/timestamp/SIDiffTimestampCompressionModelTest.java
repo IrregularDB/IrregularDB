@@ -38,7 +38,7 @@ class SIDiffTimestampCompressionModelTest {
 
     @BeforeEach
     void beforeEach(){
-        siDiffTimestampModelType = new SIDiffTimestampCompressionModel(0);
+        siDiffTimestampModelType = new SIDiffTimestampCompressionModel(0, Integer.MAX_VALUE);
         random = new Random();
     }
 

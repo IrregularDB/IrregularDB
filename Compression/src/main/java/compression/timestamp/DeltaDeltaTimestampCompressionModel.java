@@ -15,8 +15,12 @@ public class DeltaDeltaTimestampCompressionModel extends TimestampCompressionMod
     private Long previousTimestamp = null;
     private Integer previousDelta;
 
-    public DeltaDeltaTimestampCompressionModel(Integer threshold) {
-        super(threshold, "DeltaDelta time stamp model needs at least one data point before you are able to get the time stamp blob");
+    public DeltaDeltaTimestampCompressionModel(Integer threshold, int lengthBound) {
+        super(threshold,
+                "DeltaDelta time stamp model needs at least one data point before you are able to get the time stamp blob",
+                true,
+                lengthBound
+                );
         // We make this a field so that we don't have to allocate a new signed bucket encoder each time get byte buffer is called
         signedBucketEncoder = new BucketEncoding(true);
         this.maxBucketValues = signedBucketEncoder.getMaxAbsoluteValuesOfResizeableBuckets();

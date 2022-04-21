@@ -1,18 +1,13 @@
 package segmentgenerator;
 
-import config.ConfigProperties;
 import records.CompressionModel;
 import records.Segment;
-import compression.timestamp.TimestampCompressionModel;
-import compression.value.ValueCompressionModel;
 import records.DataPoint;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class SegmentGenerator {
-
-    private static final int LENGTH_BOUND = ConfigProperties.getInstance().getModelLengthBound();
 
     private final CompressionModelManager compressionModelManager;
     private final int timeSeriesId;
@@ -33,7 +28,7 @@ public class SegmentGenerator {
         notYetEmitted.add(dataPoint);
         boolean appendSuccess = compressionModelManager.tryAppendDataPointToAllModels(dataPoint);
 
-        return appendSuccess && notYetEmitted.size() < LENGTH_BOUND;
+        return appendSuccess;
     }
 
     public List<Segment> constructSegmentsFromBuffer() {
@@ -72,7 +67,7 @@ public class SegmentGenerator {
     }
 
     private void removeNOldestFromBuffer(int dataPointsUsedForPrevSegment) {
-        this.notYetEmitted = notYetEmitted.subList(dataPointsUsedForPrevSegment, notYetEmitted.size());
+        notYetEmitted.subList(0, dataPointsUsedForPrevSegment).clear();
     }
 
     private Segment generateSegment(CompressionModel compressionModel, long startTime, long endTime) {
@@ -84,7 +79,7 @@ public class SegmentGenerator {
                 compressionModel.valueCompressionModel(),
                 (byte) compressionModel.timestampType().ordinal(),
                 compressionModel.timestampCompressionModel(),
-                this.notYetEmitted.subList(0, compressionModel.length())
+                new ArrayList<>(this.notYetEmitted.subList(0, compressionModel.length())) // TODO: Should be decompressed values
         );
     }
 

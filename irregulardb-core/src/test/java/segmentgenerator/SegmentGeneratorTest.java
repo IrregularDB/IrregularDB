@@ -73,12 +73,11 @@ class SegmentGeneratorTest {
 
         SegmentGenerator segmentGenerator = new SegmentGenerator(testCompressionModelManagerRegularPMCMean, 1);
 
-        long amountSuccess = nPmcMeanDataPoints.stream()
-                .map(segmentGenerator::acceptDataPoint)
-                .filter(a -> a)
+        long amountAcceptedDataPoints = nPmcMeanDataPoints.stream()
+                .filter(segmentGenerator::acceptDataPoint)
                 .count();
 
-        Assertions.assertEquals(nPmcMeanDataPoints.size() - 1, amountSuccess);
+        Assertions.assertEquals(nPmcMeanDataPoints.size(), amountAcceptedDataPoints);
     }
 
     private List<DataPoint> getNPmcMeanDataPoints(int startTime, int timeIncrement, float value, int amount) {

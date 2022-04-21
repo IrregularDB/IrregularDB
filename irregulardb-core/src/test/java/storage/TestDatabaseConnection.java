@@ -17,4 +17,9 @@ public class TestDatabaseConnection implements DatabaseConnection{
             default -> throw new IllegalArgumentException("Not supported");
         };
     }
+
+    @Override
+    public void flushCache() {
+        throw new RuntimeException("Not implemented");
+    }
 }

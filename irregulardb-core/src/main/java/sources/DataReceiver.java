@@ -2,6 +2,7 @@ package sources;
 import records.FinalizeTimeSeriesReading;
 import records.TimeSeriesReading;
 import scheduling.WorkingSet;
+import utility.Stopwatch;
 
 import java.util.HashSet;
 import java.util.List;
@@ -18,8 +19,13 @@ public abstract class DataReceiver {
     }
 
     protected void sendTimeSeriesReadingToBuffer(TimeSeriesReading timeSeriesReading){
-
+        int sizeBefore = timeSeriesTagsEmitted.size();
         timeSeriesTagsEmitted.add(timeSeriesReading.getTag());
+        if (sizeBefore != timeSeriesTagsEmitted.size()) {
+            // New tag is added
+            Stopwatch.putStartTime(timeSeriesReading.getTag());
+        }
+
         this.workingSet.accept(timeSeriesReading);
     }
 

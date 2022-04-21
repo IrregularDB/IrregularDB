@@ -7,6 +7,8 @@ import records.Segment;
 import records.SegmentSummary;
 import storage.DatabaseConnection;
 
+import java.util.List;
+
 public class TimeSeries {
     private final String timeSeriesTag;
     private final DatabaseConnection databaseConnection;
@@ -36,15 +38,17 @@ public class TimeSeries {
     }
 
     private boolean getSegmentAndSendToDB(){
-        Segment segment = segmentGenerator.constructSegmentFromBuffer();
-        if (segment == null) {
+        List<Segment> segments = segmentGenerator.constructSegmentsFromBuffer();
+        if (segments == null) {
             return false;
         } else {
-            SegmentSummary segmentSummary = null;
-            if (computeSegmentSummary) {
-                 segmentSummary = new SegmentSummary(segment.dataPointsUsed());
+            for (Segment segment : segments) {
+                SegmentSummary segmentSummary = null;
+                if (computeSegmentSummary) {
+                    segmentSummary = new SegmentSummary(segment.dataPointsUsed());
+                }
+                sendToDb(segment, segmentSummary);
             }
-            sendToDb(segment, segmentSummary);
             return true;
         }
     }

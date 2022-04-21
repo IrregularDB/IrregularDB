@@ -54,3 +54,21 @@ select count(*), t.valuemodel, t.timestampmodel from segment s
 select t.tag, summary.* from (select s.time_series_id, sum(s.amtdatapoints)
     from segmentsummary s
     group by s.time_series_id) summary join timeseries t on t.id = summary.time_series_id;
+
+
+select t.tag, summary.* from (select s.time_series_id, avg(s.amtdatapoints) as avgAmtDataPoints
+                              from segmentsummary s
+                              group by s.time_series_id) summary join timeseries t on t.id = summary.time_series_id;
+
+
+
+select count(*), t.valuemodel, t.timestampmodel from segment s
+      join timestampvaluemodeltypes t on s.value_timestamp_model_type = t.timestampvaluemodelshort
+      group by t.valuemodel, t.timestampmodel;
+
+-- Query used to check the segments with length 49
+select count(*), t.valuemodel, t.timestampmodel from (select * from
+(select s.time_series_id, s.start_time, s.amtdatapoints
+from segmentsummary s
+where s.amtdatapoints = 49) summary join segment s on s.time_series_id = summary.time_series_id and s.start_time = summary.start_time) s join timestampvaluemodeltypes t on s.value_timestamp_model_type = t.timestampvaluemodelshort
+group by t.valuemodel, t.timestampmodel;

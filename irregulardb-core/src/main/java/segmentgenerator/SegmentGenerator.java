@@ -1,6 +1,7 @@
 package segmentgenerator;
 
 import compression.BlobDecompressor;
+import config.ConfigProperties;
 import records.CompressionModel;
 import records.Segment;
 import records.DataPoint;
@@ -9,10 +10,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SegmentGenerator {
-
     private final CompressionModelManager compressionModelManager;
     private final int timeSeriesId;
-    private List<DataPoint> notYetEmitted;
+    private final List<DataPoint> notYetEmitted;
+    private static final boolean usesSegmentSummary = ConfigProperties.getInstance().populateSegmentSummary();
+
 
     public SegmentGenerator(CompressionModelManager compressionModelManager, int timeSeriesId) {
         this.compressionModelManager = compressionModelManager;
@@ -22,7 +24,7 @@ public class SegmentGenerator {
 
     /**
      *
-     * @param dataPoint
+     * @param dataPoint to be appended to models
      * @return on false as the return value, generateSegment must be the next method invoked by the caller
      */
     public boolean acceptDataPoint(DataPoint dataPoint) {
@@ -70,6 +72,13 @@ public class SegmentGenerator {
     }
 
     private Segment generateSegment(CompressionModel compressionModel, long startTime, long endTime) {
+        List<DataPoint> dataPoints = null;
+        if (usesSegmentSummary) {
+            dataPoints = BlobDecompressor.decompressBlobs(compressionModel.timestampType(),
+                    compressionModel.timestampCompressionModel(), compressionModel.valueType(),
+                    compressionModel.valueCompressionModel(), startTime, endTime);
+        }
+
         return new Segment(
                 this.timeSeriesId,
                 startTime,
@@ -78,8 +87,7 @@ public class SegmentGenerator {
                 compressionModel.valueCompressionModel(),
                 (byte) compressionModel.timestampType().ordinal(),
                 compressionModel.timestampCompressionModel(),
-                BlobDecompressor.decompressBlobs(compressionModel.timestampType(), compressionModel.timestampCompressionModel(), compressionModel.valueType(), compressionModel.valueCompressionModel())
-        );
+                dataPoints);
     }
 
 }

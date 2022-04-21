@@ -36,35 +36,39 @@ public class SegmentGenerator {
         return appendSuccess && notYetEmitted.size() < LENGTH_BOUND;
     }
 
-    public Segment constructSegmentFromBuffer() {
+    public List<Segment> constructSegmentsFromBuffer() {
         if (this.notYetEmitted.size() == 0) {
             return null;
         }
+        List<Segment> segments = new ArrayList<>();
+        int amtDataPointsUsed;
 
-        CompressionModel bestCompressionModel = this.compressionModelManager.getBestCompressionModel();
+        do {
+            CompressionModel bestCompressionModel = this.compressionModelManager.getBestCompressionModel();
 
-        //find size of each model and reduce the largest down to the size of the smallest
-        if (bestCompressionModel.length() == 0) {
-            throw new RuntimeException("Segment generated with size 0");
-        }
+            //find size of each model and reduce the largest down to the size of the smallest
+            if (bestCompressionModel.length() == 0) {
+                throw new RuntimeException("Segment generated with size 0");
+            }
 
-        Segment segment = generateSegment(
-                bestCompressionModel,
-                notYetEmitted.get(0).timestamp(),
-                notYetEmitted.get(bestCompressionModel.length()- 1).timestamp()
-        );
+            Segment segment = generateSegment(
+                    bestCompressionModel,
+                    notYetEmitted.get(0).timestamp(),
+                    notYetEmitted.get(bestCompressionModel.length()- 1).timestamp()
+            );
+            segments.add(segment);
+            amtDataPointsUsed = segment.dataPointsUsed().size();
+        } while (!prepareForNextSegment(amtDataPointsUsed));
 
-        prepareForNextSegment(segment.dataPointsUsed().size());
-
-        return segment;
+        return segments;
     }
 
-    private void prepareForNextSegment(int amountOfDataPointsUsedInSegment) {
+    /**
+     * @return if this method returns false then another segment must be generated.
+     */
+    private boolean prepareForNextSegment(int amountOfDataPointsUsedInSegment) {
         removeNOldestFromBuffer(amountOfDataPointsUsedInSegment);
-        boolean success = compressionModelManager.resetAndTryAppendBuffer(notYetEmitted);
-        if (!success) {
-            throw new RuntimeException("We have hit an edge case where more than one segment must be generated to accommodate the new data point");
-        }
+        return compressionModelManager.resetAndTryAppendBuffer(notYetEmitted);
     }
 
     private void removeNOldestFromBuffer(int dataPointsUsedForPrevSegment) {

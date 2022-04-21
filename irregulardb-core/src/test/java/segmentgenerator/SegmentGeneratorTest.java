@@ -50,7 +50,8 @@ class SegmentGeneratorTest {
 
         boolean isLastDataPointAccepted = segmentGenerator.acceptDataPoint(lastDataPoint);
 
-        Segment segment = segmentGenerator.constructSegmentFromBuffer();
+        List<Segment> segments = segmentGenerator.constructSegmentsFromBuffer();
+        Segment segment = segments.get(0);
         List<DataPoint> dataPointsUsedForSegment = segment.dataPointsUsed();
 
 

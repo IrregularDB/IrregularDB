@@ -1,5 +1,6 @@
 package segmentgenerator;
 
+import compression.BlobDecompressor;
 import records.CompressionModel;
 import records.Segment;
 import records.DataPoint;
@@ -26,9 +27,7 @@ public class SegmentGenerator {
      */
     public boolean acceptDataPoint(DataPoint dataPoint) {
         notYetEmitted.add(dataPoint);
-        boolean appendSuccess = compressionModelManager.tryAppendDataPointToAllModels(dataPoint);
-
-        return appendSuccess;
+        return compressionModelManager.tryAppendDataPointToAllModels(dataPoint);
     }
 
     public List<Segment> constructSegmentsFromBuffer() {
@@ -79,7 +78,7 @@ public class SegmentGenerator {
                 compressionModel.valueCompressionModel(),
                 (byte) compressionModel.timestampType().ordinal(),
                 compressionModel.timestampCompressionModel(),
-                new ArrayList<>(this.notYetEmitted.subList(0, compressionModel.length())) // TODO: Should be decompressed values
+                BlobDecompressor.decompressBlobs(compressionModel.timestampType(), compressionModel.timestampCompressionModel(), compressionModel.valueType(), compressionModel.valueCompressionModel())
         );
     }
 

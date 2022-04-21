@@ -127,6 +127,8 @@ public class PostgresConnection implements DatabaseConnection {
                 DROP TABLE IF EXISTS TimestampValueModelTypes;
                 DROP TABLE IF EXISTS SegmentSummary;
                 DROP TABLE IF EXISTS Segment;
+                DROP TABLE IF EXISTS TimeSeries;
+                DROP SEQUENCE IF EXISTS TimeSeriesIdSequence;
                                 
                 create sequence TimeSeriesIdSequence;
                                 

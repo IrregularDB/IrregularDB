@@ -166,6 +166,10 @@ public class ConfigProperties extends Properties {
         return ModelPickerFactory.ModelPickerType.valueOf(modelPickerType);
     }
 
+    public int getJDBCBatchSize(){
+        return Integer.parseInt(getProperty("database.jdbc.batch_size", "100"));
+    }
+
     /* Private methods */
     private void parseAllTimestampThresholds() {
         for (Enumeration<?> e = propertyNames(); e.hasMoreElements(); ) {
@@ -187,4 +191,6 @@ public class ConfigProperties extends Properties {
             }
         }
     }
+
+
 }

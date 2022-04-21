@@ -15,7 +15,7 @@ public class PostgresConnection implements DatabaseConnection {
 
     private final Connection connection;
     private final List<Pair<Segment, SegmentSummary>> insertBuffer;
-    private final int BATCH_SIZE = 100;
+    private final int BATCH_SIZE = ConfigProperties.getInstance().getJDBCBatchSize();
 
     public PostgresConnection() {
         try {

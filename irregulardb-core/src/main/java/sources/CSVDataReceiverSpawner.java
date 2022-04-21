@@ -20,6 +20,10 @@ public class CSVDataReceiverSpawner extends DataReceiverSpawner{
     
     @Override
     public void spawn() {
+        new Thread(this::startCSVReceivers).start();
+    }
+
+    private void startCSVReceivers() {
         for (File csvPath : this.csvFiles) {
             WorkingSet workingSet = super.partitioner.workingSetToSpawnReceiverFor();
             while (workingSet.getAmtActiveTimeSeries() > MAX_ACTIVE_RECEIVERS_FOR_CSV){

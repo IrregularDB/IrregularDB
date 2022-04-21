@@ -39,34 +39,23 @@ public class PostgresConnection implements DatabaseConnection {
         }
     }
 
-    private void insertSegmentSummary(SegmentSummary segmentSummary, ResultSet generatedKeys) throws SQLException {
-        if (generatedKeys.next()) {
-            int time_series_id = generatedKeys.getInt("time_series_id");
-            long start_time = generatedKeys.getLong("start_time");
+    private void prepareStatementForInsertSegmentSummary(Pair<Segment, SegmentSummary> segmentAndSummaryPair, PreparedStatement preparedStatement) throws SQLException {
+        Segment segment = segmentAndSummaryPair.f0();
+        SegmentSummary segmentSummary = segmentAndSummaryPair.f1();
 
-            PreparedStatement preparedStatementForInsertSegmentSummary = getPreparedStatementForInsertSegmentSummary(time_series_id, start_time, segmentSummary);
-            preparedStatementForInsertSegmentSummary.execute();
-        }
-    }
-
-    private PreparedStatement getPreparedStatementForInsertSegmentSummary(int timeSeriedId, long startTime, SegmentSummary segmentSummary) throws SQLException {
-        final String INSERT_SEGMENT_SUMMARY_STATEMENT = "INSERT INTO SegmentSummary(time_series_id, start_time, minValue, maxvalue) VALUES (?,?,?,?)";
-        PreparedStatement preparedStatement = connection.prepareStatement(INSERT_SEGMENT_SUMMARY_STATEMENT);
-        preparedStatement.setInt(1, timeSeriedId);
-        preparedStatement.setLong(2, startTime);
+        preparedStatement.setInt(1, segment.timeSeriesId());
+        preparedStatement.setLong(2, segment.startTime());
         preparedStatement.setFloat(3, segmentSummary.getMinValue());
         preparedStatement.setFloat(4, segmentSummary.getMaxValue());
-        return preparedStatement;
     }
 
-    private PreparedStatement getPreparedStatementForInsertSegment(Segment segment, PreparedStatement preparedStatement) throws SQLException {
+    private void prepareStatementForInsertSegment(Segment segment, PreparedStatement preparedStatement) throws SQLException {
         preparedStatement.setInt(1, segment.timeSeriesId());
         preparedStatement.setLong(2, segment.startTime());
         preparedStatement.setInt(3, (int) (segment.endTime() - segment.startTime()));
         preparedStatement.setShort(4, ModelTypeUtil.combineTwoModelTypes(segment.valueModelType(), segment.timestampModelType())); // we are now combining the two model types
         preparedStatement.setBytes(5, segment.valueBlob().array());
         preparedStatement.setBytes(6, segment.timestampBlob().array());
-        return preparedStatement;
     }
 
 
@@ -104,18 +93,26 @@ public class PostgresConnection implements DatabaseConnection {
     public void flushBatchToDB() {
         try {
             final String INSERT_SEGMENT_STATEMENT = "INSERT INTO Segment(time_series_id, start_time, end_time, value_timestamp_model_type, value_model_blob, timestamp_model_blob) VALUES (?,?,?,?,?,?)";
-            PreparedStatement preparedStatement = connection.prepareStatement(INSERT_SEGMENT_STATEMENT, Statement.RETURN_GENERATED_KEYS);
+            PreparedStatement insertSegmentStatement = connection.prepareStatement(INSERT_SEGMENT_STATEMENT, Statement.RETURN_GENERATED_KEYS);
+
+            final String INSERT_SEGMENT_SUMMARY_STATEMENT = "INSERT INTO SegmentSummary(time_series_id, start_time, minValue, maxvalue) VALUES (?,?,?,?)";
+            PreparedStatement insertSegmentSummaryStatement = connection.prepareStatement(INSERT_SEGMENT_SUMMARY_STATEMENT);
 
             for (Pair<Segment, SegmentSummary> segmentSegmentSummaryPair : insertBuffer) {
-                getPreparedStatementForInsertSegment(segmentSegmentSummaryPair.f0(), preparedStatement);
-                preparedStatement.addBatch();
-                preparedStatement.clearParameters();
+                prepareStatementForInsertSegment(segmentSegmentSummaryPair.f0(), insertSegmentStatement);
+                insertSegmentStatement.addBatch();
+                insertSegmentStatement.clearParameters();
+
+                if (segmentSegmentSummaryPair.f1() != null) {
+                    prepareStatementForInsertSegmentSummary(segmentSegmentSummaryPair, insertSegmentSummaryStatement);
+                    insertSegmentSummaryStatement.addBatch();
+                    insertSegmentSummaryStatement.clearParameters();
+                }
             }
 
-            preparedStatement.executeBatch();
-            /*if (segmentSummary != null) {
-                   insertSegmentSummary(segmentSummary, insertSegmentStatement.getGeneratedKeys());
-            }*/
+            insertSegmentStatement.executeBatch();
+            insertSegmentSummaryStatement.executeBatch();
+
             insertBuffer.clear();
         } catch (SQLException e) {
             throw new RuntimeException(e);

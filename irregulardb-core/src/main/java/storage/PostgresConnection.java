@@ -15,7 +15,7 @@ public class PostgresConnection implements DatabaseConnection {
 
     private final Connection connection;
     private final List<Pair<Segment, SegmentSummary>> insertBuffer;
-    private final int AMT_TO_BUFFER = 100;
+    private final int BATCH_SIZE = 100;
 
     public PostgresConnection() {
         try {
@@ -32,29 +32,10 @@ public class PostgresConnection implements DatabaseConnection {
     @Override
     public void insertSegment(Segment segment, SegmentSummary segmentSummary) {
         insertBuffer.add(new Pair<>(segment, segmentSummary));
-        if (insertBuffer.size() < AMT_TO_BUFFER) {
+        if (insertBuffer.size() < BATCH_SIZE) {
             return;
-        }
-        try {
-
-            final String INSERT_SEGMENT_STATEMENT = "INSERT INTO Segment(time_series_id, start_time, end_time, value_timestamp_model_type, value_model_blob, timestamp_model_blob) VALUES (?,?,?,?,?,?)";
-            PreparedStatement preparedStatement = connection.prepareStatement(INSERT_SEGMENT_STATEMENT, Statement.RETURN_GENERATED_KEYS);
-
-            for (Pair<Segment, SegmentSummary> segmentSegmentSummaryPair : insertBuffer) {
-                getPreparedStatementForInsertSegment(segmentSegmentSummaryPair.f0(), preparedStatement);
-                preparedStatement.addBatch();
-                preparedStatement.clearParameters();
-            }
-
-            preparedStatement.executeBatch();
-
-//            if (segmentSummary != null) {
-//                insertSegmentSummary(segmentSummary, insertSegmentStatement.getGeneratedKeys());
-//            }
-
-            insertBuffer.clear();
-        } catch (SQLException e) {
-            System.out.println("Couldn't insert segment: " + segment.toString() + "\n\n" + e.getMessage());
+        } else {
+            flushCache();
         }
     }
 
@@ -119,4 +100,25 @@ public class PostgresConnection implements DatabaseConnection {
         return -1;
     }
 
+    @Override
+    public void flushCache() {
+        try {
+            final String INSERT_SEGMENT_STATEMENT = "INSERT INTO Segment(time_series_id, start_time, end_time, value_timestamp_model_type, value_model_blob, timestamp_model_blob) VALUES (?,?,?,?,?,?)";
+            PreparedStatement preparedStatement = connection.prepareStatement(INSERT_SEGMENT_STATEMENT, Statement.RETURN_GENERATED_KEYS);
+
+            for (Pair<Segment, SegmentSummary> segmentSegmentSummaryPair : insertBuffer) {
+                getPreparedStatementForInsertSegment(segmentSegmentSummaryPair.f0(), preparedStatement);
+                preparedStatement.addBatch();
+                preparedStatement.clearParameters();
+            }
+
+            preparedStatement.executeBatch();
+            /*if (segmentSummary != null) {
+                   insertSegmentSummary(segmentSummary, insertSegmentStatement.getGeneratedKeys());
+            }*/
+            insertBuffer.clear();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

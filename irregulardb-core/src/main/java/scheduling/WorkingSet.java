@@ -6,6 +6,7 @@ import segmentgenerator.TimeSeries;
 import segmentgenerator.TimeSeriesFactory;
 import storage.DatabaseConnection;
 import storage.DatabaseConnectionFactory;
+import utility.Stopwatch;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -48,18 +49,18 @@ public class WorkingSet {
             return false;
         }
 
-        String timeSeriesReadingKey = timeSeriesReading.getTag();
+        String tag = timeSeriesReading.getTag();
 
         if (timeSeriesReading instanceof FinalizeTimeSeriesReading){
-            TimeSeries timeSeriesToClose = this.timeSeriesTagToTimeSeries.get(timeSeriesReadingKey);
+            TimeSeries timeSeriesToClose = this.timeSeriesTagToTimeSeries.get(tag);
             timeSeriesToClose.close();
-            this.timeSeriesTagToTimeSeries.remove(timeSeriesReadingKey);
-            System.out.println("Time series " + timeSeriesReadingKey + " has finalized\n");
+            this.timeSeriesTagToTimeSeries.remove(tag);
+            Stopwatch.getDurationForTag(tag);
         } else{
-            TimeSeries timeSeries = timeSeriesTagToTimeSeries.get(timeSeriesReadingKey);
+            TimeSeries timeSeries = timeSeriesTagToTimeSeries.get(tag);
             if (timeSeries == null) {
-                timeSeries = createTimeSeriesForNewKey(timeSeriesReadingKey);
-                timeSeriesTagToTimeSeries.put(timeSeriesReadingKey, timeSeries);
+                timeSeries = createTimeSeriesForNewKey(tag);
+                timeSeriesTagToTimeSeries.put(tag, timeSeries);
             }
             timeSeries.processDataPoint(timeSeriesReading.getDataPoint());
         }

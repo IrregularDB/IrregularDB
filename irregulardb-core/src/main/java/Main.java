@@ -4,6 +4,7 @@ import scheduling.Partitioner;
 import scheduling.WorkingSetFactory;
 import sources.CSVDataReceiverSpawner;
 import sources.DataReceiverSpawner;
+import utility.Stopwatch;
 
 import java.io.File;
 import java.util.List;
@@ -16,6 +17,7 @@ public class Main {
         Partitioner partitioner = new IncrementPartitioner(new WorkingSetFactory(), ConfigProperties.getInstance().getConfiguredNumberOfWorkingSets());
 
         initializeDataReceiverSpawners(partitioner);
+        Stopwatch.setInitialStartTime();
     }
 
     private static void initializeDataReceiverSpawners(Partitioner partitioner) {

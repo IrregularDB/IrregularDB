@@ -25,7 +25,7 @@ public class CSVDataReceiver extends DataReceiver {
 
             readFile(bufferedReader);
 
-            close();
+            super.close();
             System.out.println("CSVReceiver for " + csvFile.getAbsolutePath() + " has completed delivering its data");
         } catch (IOException e) {
             e.printStackTrace();

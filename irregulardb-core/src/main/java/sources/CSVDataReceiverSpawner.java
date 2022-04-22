@@ -22,9 +22,14 @@ public class CSVDataReceiverSpawner extends DataReceiverSpawner{
     }
 
     private void startCSVReceivers() {
-        for (File csvPath : this.csvFiles) {
+        for (File csvFile : this.csvFiles) {
+            if (!csvFile.exists()) {
+                System.out.println("Could not find the file with the path: " + csvFile.getAbsolutePath());
+                continue;
+            }
+
             WorkingSet workingSet = super.partitioner.workingSetToSpawnReceiverFor();
-            CSVDataReceiver csvDataReceiver = new CSVDataReceiver(csvPath, workingSet, CSV_DELIMITER);
+            CSVDataReceiver csvDataReceiver = new CSVDataReceiver(csvFile, workingSet, CSV_DELIMITER);
             runReceiverInThread(csvDataReceiver);
         }
     }

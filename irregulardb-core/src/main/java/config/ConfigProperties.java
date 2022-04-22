@@ -175,6 +175,10 @@ public class ConfigProperties extends Properties {
         return Integer.parseInt(getProperty("workingset.max_buffer_size_before_throttle", "1000000"));
     }
 
+    public int getReceiverCSVThrottleSleepTime(){
+        return Integer.parseInt(getProperty("receiver.csv.throttle_sleep_time", "50"));
+    }
+
     /* Private methods */
     private void parseAllTimestampThresholds() {
         for (Enumeration<?> e = propertyNames(); e.hasMoreElements(); ) {

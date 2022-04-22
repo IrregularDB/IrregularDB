@@ -43,11 +43,7 @@ public class TimeSeries {
             return false;
         } else {
             for (Segment segment : segments) {
-                SegmentSummary segmentSummary = null;
-                if (computeSegmentSummary) {
-                    segmentSummary = new SegmentSummary(segment.dataPointsUsed());
-                }
-                sendToDb(segment, segmentSummary);
+                this.databaseConnection.insertSegment(segment);
             }
             return true;
         }
@@ -55,9 +51,5 @@ public class TimeSeries {
 
     public String getTimeSeriesTag() {
         return timeSeriesTag;
-    }
-
-    private void sendToDb(Segment segment, SegmentSummary segmentSummary) {
-        this.databaseConnection.insertSegment(segment, segmentSummary);
     }
 }

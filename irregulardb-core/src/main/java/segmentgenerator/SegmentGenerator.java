@@ -2,9 +2,7 @@ package segmentgenerator;
 
 import compression.BlobDecompressor;
 import config.ConfigProperties;
-import records.CompressionModel;
-import records.Segment;
-import records.DataPoint;
+import records.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -72,22 +70,23 @@ public class SegmentGenerator {
     }
 
     private Segment generateSegment(CompressionModel compressionModel, long startTime, long endTime) {
-        List<DataPoint> dataPoints = null;
+        SegmentKey segmentKey = new SegmentKey(this.timeSeriesId, startTime);
+        SegmentSummary segmentSummary = null;
         if (usesSegmentSummary) {
-            dataPoints = BlobDecompressor.decompressBlobs(compressionModel.timestampType(),
+            List<DataPoint> decompressedDataPoints = BlobDecompressor.decompressBlobs(compressionModel.timestampType(),
                     compressionModel.timestampCompressionModel(), compressionModel.valueType(),
                     compressionModel.valueCompressionModel(), startTime, endTime);
+            segmentSummary = new SegmentSummary(decompressedDataPoints, segmentKey);
         }
 
         return new Segment(
-                this.timeSeriesId,
-                startTime,
+                segmentKey,
                 endTime,
                 (byte) compressionModel.valueType().ordinal(),
                 compressionModel.valueCompressionModel(),
                 (byte) compressionModel.timestampType().ordinal(),
                 compressionModel.timestampCompressionModel(),
-                dataPoints);
+                segmentSummary);
     }
 
 }

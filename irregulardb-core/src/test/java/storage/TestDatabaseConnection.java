@@ -6,8 +6,7 @@ import records.SegmentSummary;
 public class TestDatabaseConnection implements DatabaseConnection{
 
     @Override
-    public void insertSegment(Segment segment, SegmentSummary segmentSummary) {
-    }
+    public void insertSegment(Segment segment) { }
 
     @Override
     public int getTimeSeriesId(String timeSeriesTag) {

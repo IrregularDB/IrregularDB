@@ -10,6 +10,8 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import records.DataPoint;
 import records.Segment;
+import records.SegmentKey;
+import records.SegmentSummary;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -37,7 +39,16 @@ class SegmentGeneratorTest {
 
         List<DataPoint> allDataPoints = new ArrayList<>(dataPoints);
         allDataPoints.add(lastDataPoint);
-        Segment expectedSegment = new Segment(1, 1, 6, (byte) ValueCompressionModelType.PMC_MEAN.ordinal(), constructValueDataBlob(allDataPoints), (byte) TimestampCompressionModelType.REGULAR.ordinal(), constructTimestampDataBlob(allDataPoints), dataPoints);
+        SegmentKey segmentKey = new SegmentKey(1, 1);
+        Segment expectedSegment = new Segment(
+                segmentKey,
+                6,
+                (byte) ValueCompressionModelType.PMC_MEAN.ordinal(),
+                constructValueDataBlob(allDataPoints),
+                (byte) TimestampCompressionModelType.REGULAR.ordinal(),
+                constructTimestampDataBlob(allDataPoints),
+                new SegmentSummary(dataPoints, segmentKey)
+        );
 
         TestCompressionModelManagerRegularPMCMean testCompressionModelManagerRegularPMCMean = new TestCompressionModelManagerRegularPMCMean(List.of(new PMCMeanValueCompressionModel(0)), List.of(new RegularTimestampCompressionModel(0)));
 
@@ -52,16 +63,11 @@ class SegmentGeneratorTest {
 
         List<Segment> segments = segmentGenerator.constructSegmentsFromBuffer();
         Segment segment = segments.get(0);
-        List<DataPoint> dataPointsUsedForSegment = segment.dataPointsUsed();
 
 
         Assertions.assertEquals(dataPoints.size(), amountSuccess);
         Assertions.assertFalse(isLastDataPointAccepted);
         Assertions.assertEquals(expectedSegment, segment);
-
-        for (int i = 0; i < dataPoints.size(); i++) {
-            Assertions.assertEquals(dataPoints.get(i), dataPointsUsedForSegment.get(i));
-        }
     }
 
     @Test

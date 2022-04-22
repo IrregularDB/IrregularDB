@@ -34,7 +34,7 @@ public class WorkingSet {
 
     /**
      * @param timeSeriesReading, is stored in the buffer no matter the return value
-     * @return when true cantinue sending in datapoints, when false throttle data sending
+     * @return when true continue sending in data points, when false throttle data sending
      */
     public boolean accept(TimeSeriesReading timeSeriesReading){
         this.buffer.add(timeSeriesReading);

@@ -30,7 +30,9 @@ public class PostgresConnection implements DatabaseConnection {
     }
 
     @Override
-    public void insertSegment(Segment segment, SegmentSummary segmentSummary) {
+    public void insertSegment(Segment segment) {
+        SegmentSummary segmentSummary = segment.segmentSummary();
+
         insertBuffer.add(new Pair<>(segment, segmentSummary));
         if (insertBuffer.size() < BATCH_SIZE) {
             return;
@@ -39,21 +41,19 @@ public class PostgresConnection implements DatabaseConnection {
         }
     }
 
-    private void prepareStatementForInsertSegmentSummary(Pair<Segment, SegmentSummary> segmentAndSummaryPair, PreparedStatement preparedStatement) throws SQLException {
-        Segment segment = segmentAndSummaryPair.f0();
-        SegmentSummary segmentSummary = segmentAndSummaryPair.f1();
-
-        preparedStatement.setInt(1, segment.timeSeriesId());
-        preparedStatement.setLong(2, segment.startTime());
+    private void prepareStatementForInsertSegmentSummary(SegmentSummary segmentSummary, PreparedStatement preparedStatement) throws SQLException {
+        preparedStatement.setInt(1, segmentSummary.getSegmentKey().timeSeriesId());
+        preparedStatement.setLong(2, segmentSummary.getSegmentKey().startTime());
         preparedStatement.setFloat(3, segmentSummary.getMinValue());
         preparedStatement.setFloat(4, segmentSummary.getMaxValue());
         preparedStatement.setInt(5, segmentSummary.getAmtDataPoints());
     }
 
     private void prepareStatementForInsertSegment(Segment segment, PreparedStatement preparedStatement) throws SQLException {
-        preparedStatement.setInt(1, segment.timeSeriesId());
-        preparedStatement.setLong(2, segment.startTime());
-        preparedStatement.setInt(3, (int) (segment.endTime() - segment.startTime()));
+        long startTime = segment.segmentKey().startTime();
+        preparedStatement.setInt(1, segment.segmentKey().timeSeriesId());
+        preparedStatement.setLong(2, startTime);
+        preparedStatement.setInt(3, (int) (segment.endTime() - startTime));
         preparedStatement.setShort(4, ModelTypeUtil.combineTwoModelTypes(segment.valueModelType(), segment.timestampModelType())); // we are now combining the two model types
         preparedStatement.setBytes(5, segment.valueBlob().array());
         preparedStatement.setBytes(6, segment.timestampBlob().array());
@@ -106,7 +106,7 @@ public class PostgresConnection implements DatabaseConnection {
                 insertSegmentStatement.clearParameters();
 
                 if (segmentSegmentSummaryPair.f1() != null) { // Handling of summary
-                    prepareStatementForInsertSegmentSummary(segmentSegmentSummaryPair, insertSegmentSummaryStatement);
+                    prepareStatementForInsertSegmentSummary(segmentSegmentSummaryPair.f1(), insertSegmentSummaryStatement);
                     insertSegmentSummaryStatement.addBatch();
                     insertSegmentSummaryStatement.clearParameters();
                     anySegmentSummaryUsed = true;

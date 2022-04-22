@@ -7,9 +7,9 @@ import scheduling.WorkingSet;
 import java.io.*;
 
 public class CSVDataReceiver extends DataReceiver {
-
     private final String elementDelimiter;
     private final File csvFile;
+    private final static int AMT_TIME_TO_SLEEP = 50;
 
     public CSVDataReceiver(File csvFile, WorkingSet workingSet, String elementDelimiter) {
         super(workingSet);
@@ -39,7 +39,7 @@ public class CSVDataReceiver extends DataReceiver {
 
             if (!sendTimeSeriesReadingToBuffer(timeSeriesReading)) {
                 try {
-                    Thread.sleep(50);
+                    Thread.sleep(AMT_TIME_TO_SLEEP);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }

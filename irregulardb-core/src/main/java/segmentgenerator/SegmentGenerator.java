@@ -53,7 +53,7 @@ public class SegmentGenerator {
                     notYetEmitted.get(bestCompressionModel.length()- 1).timestamp()
             );
             segments.add(segment);
-            amtDataPointsUsed = segment.dataPointsUsed().size();
+            amtDataPointsUsed = bestCompressionModel.length();
         } while (!prepareForNextSegment(amtDataPointsUsed));
 
         return segments;

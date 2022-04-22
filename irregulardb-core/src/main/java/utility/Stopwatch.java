@@ -19,11 +19,11 @@ public class Stopwatch {
         initialStartTime = System.currentTimeMillis();
     }
 
-    public static void putStartTime(String tag) {
+    public synchronized static void putStartTime(String tag) {
         startTimesByTag.put(tag, System.currentTimeMillis());
     }
 
-    public static void getDurationForTag(String tag) {
+    public synchronized static void getDurationForTag(String tag) {
         long startTime = startTimesByTag.remove(tag);
 
         long endTime = System.currentTimeMillis();

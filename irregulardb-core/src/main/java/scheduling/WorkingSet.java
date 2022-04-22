@@ -12,25 +12,24 @@ import utility.Stopwatch;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Queue;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class WorkingSet {
 
-    public static final int MAX_SIZE_OF_BUFFER_BEFORE_RECEIVER_THROTTELING = ConfigProperties.getInstance().getMaxBufferSizeBeforeThrottle();
+    public static final int MAX_SIZE_OF_BUFFER_BEFORE_RECEIVER_THROTTLING = ConfigProperties.getInstance().getMaxBufferSizeBeforeThrottle();
 
     private final Queue<TimeSeriesReading> buffer;
     private final Map<String, TimeSeries> timeSeriesTagToTimeSeries;
     private final TimeSeriesFactory timeSeriesFactory;
     private final DatabaseConnection databaseConnection;
+    private final AtomicInteger bufferSize;
 
     public WorkingSet(Queue<TimeSeriesReading> buffer, TimeSeriesFactory timeSeriesFactory, DatabaseConnectionFactory databaseConnectionFactory) {
         this.buffer = buffer;
+        this.bufferSize = new AtomicInteger(0);
         this.timeSeriesTagToTimeSeries = new HashMap<>();
         this.timeSeriesFactory = timeSeriesFactory;
         this.databaseConnection = databaseConnectionFactory.createDataBaseConnection();
-    }
-
-    public int getAmtActiveTimeSeries(){
-        return timeSeriesTagToTimeSeries.keySet().size(); //TODO potential multithreading problem on getting size of key set
     }
 
     /**
@@ -39,7 +38,8 @@ public class WorkingSet {
      */
     public boolean accept(TimeSeriesReading timeSeriesReading){
         this.buffer.add(timeSeriesReading);
-        return MAX_SIZE_OF_BUFFER_BEFORE_RECEIVER_THROTTELING > buffer.size();
+        int currSize = this.bufferSize.incrementAndGet();
+        return currSize < MAX_SIZE_OF_BUFFER_BEFORE_RECEIVER_THROTTLING;
     }
 
     public void run(){
@@ -60,7 +60,7 @@ public class WorkingSet {
         if (timeSeriesReading == null) {
             return false;
         }
-
+        this.bufferSize.decrementAndGet();
         String tag = timeSeriesReading.getTag();
 
         if (!(timeSeriesReading instanceof FinalizeTimeSeriesReading)){

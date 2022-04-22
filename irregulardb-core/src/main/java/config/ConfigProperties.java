@@ -170,6 +170,11 @@ public class ConfigProperties extends Properties {
         return Integer.parseInt(getProperty("database.jdbc.batch_size", "100"));
     }
 
+
+    public int getMaxBufferSizeBeforeThrottle(){
+        return Integer.parseInt(getProperty("workingset.max_buffer_size_before_throttle", "1000000"));
+    }
+
     /* Private methods */
     private void parseAllTimestampThresholds() {
         for (Enumeration<?> e = propertyNames(); e.hasMoreElements(); ) {

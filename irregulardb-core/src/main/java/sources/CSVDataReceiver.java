@@ -36,7 +36,15 @@ public class CSVDataReceiver extends DataReceiver {
         String line;
         while ((line = bufferedReader.readLine()) != null) {
             TimeSeriesReading timeSeriesReading = parseLine(line);
-            sendTimeSeriesReadingToBuffer(timeSeriesReading);
+
+            if (!sendTimeSeriesReadingToBuffer(timeSeriesReading)) {
+                try {
+                    Thread.sleep(50);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+
         }
     }
 

@@ -1,5 +1,6 @@
 package scheduling;
 
+import config.ConfigProperties;
 import records.FinalizeTimeSeriesReading;
 import records.TimeSeriesReading;
 import segmentgenerator.TimeSeries;
@@ -14,7 +15,7 @@ import java.util.Queue;
 
 public class WorkingSet {
 
-    public static final int MAX_ACTIVE_RECEIVERS_FOR_CSV = 10;
+    public static final int MAX_SIZE_OF_BUFFER_BEFORE_RECEIVER_THROTTELING = ConfigProperties.getInstance().getMaxBufferSizeBeforeThrottle();
 
     private final Queue<TimeSeriesReading> buffer;
     private final Map<String, TimeSeries> timeSeriesTagToTimeSeries;
@@ -32,8 +33,13 @@ public class WorkingSet {
         return timeSeriesTagToTimeSeries.keySet().size(); //TODO potential multithreading problem on getting size of key set
     }
 
-    public void accept(TimeSeriesReading timeSeriesReading){
+    /**
+     * @param timeSeriesReading, is stored in the buffer no matter the return value
+     * @return when true cantinue sending in datapoints, when false throttle data sending
+     */
+    public boolean accept(TimeSeriesReading timeSeriesReading){
         this.buffer.add(timeSeriesReading);
+        return MAX_SIZE_OF_BUFFER_BEFORE_RECEIVER_THROTTELING > buffer.size();
     }
 
     public void run(){

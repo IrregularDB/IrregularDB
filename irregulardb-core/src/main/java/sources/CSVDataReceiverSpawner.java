@@ -6,8 +6,6 @@ import scheduling.WorkingSet;
 import java.io.File;
 import java.util.Set;
 
-import static scheduling.WorkingSet.MAX_ACTIVE_RECEIVERS_FOR_CSV;
-
 public class CSVDataReceiverSpawner extends DataReceiverSpawner{
 
     private static final String CSV_DELIMITER = " ";
@@ -26,15 +24,6 @@ public class CSVDataReceiverSpawner extends DataReceiverSpawner{
     private void startCSVReceivers() {
         for (File csvPath : this.csvFiles) {
             WorkingSet workingSet = super.partitioner.workingSetToSpawnReceiverFor();
-            while (workingSet.getAmtActiveTimeSeries() > MAX_ACTIVE_RECEIVERS_FOR_CSV){
-                try {
-                    Thread.sleep(50);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                workingSet = super.partitioner.workingSetToSpawnReceiverFor();
-            }
-
             CSVDataReceiver csvDataReceiver = new CSVDataReceiver(csvPath, workingSet, CSV_DELIMITER);
             runReceiverInThread(csvDataReceiver);
         }

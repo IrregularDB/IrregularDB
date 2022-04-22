@@ -16,7 +16,6 @@ public class SocketProducer {
     private final List<TimeSeriesReading> timeSeriesReadings;
     private final String serverIp;
     private final int serverPort;
-    private DataOutputStream dataOutputStream;
 
     public SocketProducer(List<TimeSeriesReading> timeSeriesReadings, String serverIp, int serverPort) {
         this.timeSeriesReadings = timeSeriesReadings;
@@ -27,14 +26,14 @@ public class SocketProducer {
     public void connectAndSendData(){
         try {
             Socket socket = new Socket(serverIp, serverPort);
-            this.dataOutputStream = new DataOutputStream(socket.getOutputStream());
+            DataOutputStream dataOutputStream = new DataOutputStream(socket.getOutputStream());
             String lastTag = null;
             for (TimeSeriesReading timeSeriesReading : timeSeriesReadings) {
                 if (!timeSeriesReading.getTag().equals(lastTag)) {
                     lastTag = timeSeriesReading.getTag();
-                    writeFullTimeSeriesReadingToSocket(timeSeriesReading);
+                    writeFullTimeSeriesReadingToSocket(timeSeriesReading, dataOutputStream);
                 } else {
-                    writeOnlyDataPointToSocket(timeSeriesReading.getDataPoint());
+                    writeOnlyDataPointToSocket(timeSeriesReading.getDataPoint(), dataOutputStream);
                 }
             }
             dataOutputStream.writeByte(INDICATE_END_OF_STREAM);
@@ -47,7 +46,7 @@ public class SocketProducer {
         }
     }
 
-    private void writeFullTimeSeriesReadingToSocket(TimeSeriesReading reading) throws IOException {
+    private void writeFullTimeSeriesReadingToSocket(TimeSeriesReading reading, DataOutputStream dataOutputStream) throws IOException {
         dataOutputStream.write(SocketDataReceiver.INDICATES_NEW_TAG);
         byte[] timeSeriesTagAsBytes = reading.getTag().getBytes(StandardCharsets.UTF_8);
         dataOutputStream.writeInt(timeSeriesTagAsBytes.length);
@@ -57,7 +56,7 @@ public class SocketProducer {
         dataOutputStream.writeFloat(reading.getDataPoint().value());
     }
 
-    private void writeOnlyDataPointToSocket(DataPoint dataPoint) throws IOException {
+    private void writeOnlyDataPointToSocket(DataPoint dataPoint, DataOutputStream dataOutputStream) throws IOException {
         dataOutputStream.write(SocketDataReceiver.INDICATES_NO_NEW_TAG);
         dataOutputStream.writeLong(dataPoint.timestamp());
         dataOutputStream.writeFloat(dataPoint.value());

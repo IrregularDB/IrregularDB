@@ -21,8 +21,12 @@ public abstract class ModelPicker {
     }
 
     protected double calculateAmountBytesPerDataPoint(BaseModel baseModel) {
-        int amountBytesUsedForModel = baseModel.getAmountBytesUsed();
-        return calculateAmountBytesPerDataPoint(amountBytesUsedForModel, baseModel.getLength());
+        if (baseModel.canCreateByteBuffer()) {
+            int amountBytesUsedForModel = baseModel.getAmountBytesUsed();
+            return calculateAmountBytesPerDataPoint(amountBytesUsedForModel, baseModel.getLength());
+        } else {
+            return Double.MAX_VALUE;
+        }
     }
 
     private static int calculateOverheadPerModel() {
@@ -41,6 +45,7 @@ public abstract class ModelPicker {
             //start_time = 8 bytes
             //min_value = 4 byte
             //max_value = 4 byte
+            // TODO: if we keep amount data points on the summary then add it here
             overhead += 4 + 8 + 4 + 4;
         }
         return overhead / 2; // there are two models to share the overhead

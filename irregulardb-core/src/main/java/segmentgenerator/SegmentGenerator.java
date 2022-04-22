@@ -1,17 +1,18 @@
 package segmentgenerator;
 
-import records.CompressionModel;
-import records.Segment;
-import records.DataPoint;
+import compression.BlobDecompressor;
+import config.ConfigProperties;
+import records.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class SegmentGenerator {
-
     private final CompressionModelManager compressionModelManager;
     private final int timeSeriesId;
-    private List<DataPoint> notYetEmitted;
+    private final List<DataPoint> notYetEmitted;
+    private static final boolean usesSegmentSummary = ConfigProperties.getInstance().populateSegmentSummary();
+
 
     public SegmentGenerator(CompressionModelManager compressionModelManager, int timeSeriesId) {
         this.compressionModelManager = compressionModelManager;
@@ -21,14 +22,12 @@ public class SegmentGenerator {
 
     /**
      *
-     * @param dataPoint
+     * @param dataPoint to be appended to models
      * @return on false as the return value, generateSegment must be the next method invoked by the caller
      */
     public boolean acceptDataPoint(DataPoint dataPoint) {
         notYetEmitted.add(dataPoint);
-        boolean appendSuccess = compressionModelManager.tryAppendDataPointToAllModels(dataPoint);
-
-        return appendSuccess;
+        return compressionModelManager.tryAppendDataPointToAllModels(dataPoint);
     }
 
     public List<Segment> constructSegmentsFromBuffer() {
@@ -52,7 +51,7 @@ public class SegmentGenerator {
                     notYetEmitted.get(bestCompressionModel.length()- 1).timestamp()
             );
             segments.add(segment);
-            amtDataPointsUsed = segment.dataPointsUsed().size();
+            amtDataPointsUsed = bestCompressionModel.length();
         } while (!prepareForNextSegment(amtDataPointsUsed));
 
         return segments;
@@ -71,16 +70,23 @@ public class SegmentGenerator {
     }
 
     private Segment generateSegment(CompressionModel compressionModel, long startTime, long endTime) {
+        SegmentKey segmentKey = new SegmentKey(this.timeSeriesId, startTime);
+        SegmentSummary segmentSummary = null;
+        if (usesSegmentSummary) {
+            List<DataPoint> decompressedDataPoints = BlobDecompressor.decompressBlobs(compressionModel.timestampType(),
+                    compressionModel.timestampCompressionModel(), compressionModel.valueType(),
+                    compressionModel.valueCompressionModel(), startTime, endTime);
+            segmentSummary = new SegmentSummary(decompressedDataPoints, segmentKey);
+        }
+
         return new Segment(
-                this.timeSeriesId,
-                startTime,
+                segmentKey,
                 endTime,
                 (byte) compressionModel.valueType().ordinal(),
                 compressionModel.valueCompressionModel(),
                 (byte) compressionModel.timestampType().ordinal(),
                 compressionModel.timestampCompressionModel(),
-                new ArrayList<>(this.notYetEmitted.subList(0, compressionModel.length())) // TODO: Should be decompressed values
-        );
+                segmentSummary);
     }
 
 }

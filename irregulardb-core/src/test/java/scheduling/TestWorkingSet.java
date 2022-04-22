@@ -13,7 +13,8 @@ public class TestWorkingSet extends WorkingSet{
     }
 
     @Override
-    public void accept(TimeSeriesReading timeSeriesReading) {
+    public boolean accept(TimeSeriesReading timeSeriesReading) {
+        return true;
     }
 
     @Override

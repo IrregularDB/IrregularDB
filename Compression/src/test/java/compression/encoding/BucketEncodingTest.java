@@ -2,33 +2,33 @@ package compression.encoding;
 
 import compression.utility.BitBuffer.BitBuffer;
 import compression.utility.BitStream.BitStream;
+import compression.utility.BitStream.BitStreamNew;
 import org.junit.jupiter.api.Assertions;
 import utility.BitPattern;
 import utility.BitUtil;
 import org.junit.jupiter.api.Test;
 
+import java.nio.ByteBuffer;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class BucketEncodingTest {
 
-    BucketEncoding bucketEncoding = new BucketEncoding(false);
-
     String removeSpace(String string) {
         return string.replace(" ", "");
     }
 
     BitStream getBitStreamForReadings(List<Integer> readings) {
-        BitBuffer encoding = bucketEncoding.encode(readings);
-        return encoding.getBitStream();
+        ByteBuffer byteBuffer = BucketEncoding.encode(readings, false);
+        return new BitStreamNew(byteBuffer);
     }
 
     @Test
     void getMaxValues() {
         List<Integer> expectedValues = List.of(0, 511, 65535);
 
-        assertEquals(expectedValues, bucketEncoding.getMaxAbsoluteValuesOfResizeableBuckets());
+        assertEquals(expectedValues, BucketEncoding.getMaxAbsoluteValuesOfResizeableBuckets());
     }
 
     @Test
@@ -157,7 +157,7 @@ class BucketEncodingTest {
 
         List<Integer> readings = List.of(i1);
 
-        Assertions.assertThrows(IllegalArgumentException.class, () -> bucketEncoding.encode(readings));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> BucketEncoding.encode(readings, false));
     }
 
     @Test

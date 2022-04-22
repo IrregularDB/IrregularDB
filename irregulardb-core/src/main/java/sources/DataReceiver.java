@@ -18,7 +18,10 @@ public abstract class DataReceiver {
         this.timeSeriesTagsEmitted = new HashSet<>();
     }
 
-    protected void sendTimeSeriesReadingToBuffer(TimeSeriesReading timeSeriesReading){
+    /**
+     * Similar documentation to that of WorkingSet.accept()
+     */
+    protected boolean sendTimeSeriesReadingToBuffer(TimeSeriesReading timeSeriesReading){
         int sizeBefore = timeSeriesTagsEmitted.size();
         timeSeriesTagsEmitted.add(timeSeriesReading.getTag());
         if (sizeBefore != timeSeriesTagsEmitted.size()) {
@@ -26,7 +29,7 @@ public abstract class DataReceiver {
             Stopwatch.putStartTime(timeSeriesReading.getTag());
         }
 
-        this.workingSet.accept(timeSeriesReading);
+        return this.workingSet.accept(timeSeriesReading);
     }
 
     public abstract void receiveData();

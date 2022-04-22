@@ -1,5 +1,6 @@
 package scheduling;
 
+import config.ConfigProperties;
 import records.FinalizeTimeSeriesReading;
 import records.TimeSeriesReading;
 import segmentgenerator.TimeSeries;
@@ -11,23 +12,34 @@ import utility.Stopwatch;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Queue;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class WorkingSet {
+
+    public static final int MAX_SIZE_OF_BUFFER_BEFORE_RECEIVER_THROTTLING = ConfigProperties.getInstance().getMaxBufferSizeBeforeThrottle();
 
     private final Queue<TimeSeriesReading> buffer;
     private final Map<String, TimeSeries> timeSeriesTagToTimeSeries;
     private final TimeSeriesFactory timeSeriesFactory;
     private final DatabaseConnection databaseConnection;
+    private final AtomicInteger bufferSize;
 
     public WorkingSet(Queue<TimeSeriesReading> buffer, TimeSeriesFactory timeSeriesFactory, DatabaseConnectionFactory databaseConnectionFactory) {
         this.buffer = buffer;
+        this.bufferSize = new AtomicInteger(0);
         this.timeSeriesTagToTimeSeries = new HashMap<>();
         this.timeSeriesFactory = timeSeriesFactory;
         this.databaseConnection = databaseConnectionFactory.createDataBaseConnection();
     }
 
-    public void accept(TimeSeriesReading timeSeriesReading){
+    /**
+     * @param timeSeriesReading, is stored in the buffer no matter the return value
+     * @return when true continue sending in data points, when false throttle data sending
+     */
+    public boolean accept(TimeSeriesReading timeSeriesReading){
         this.buffer.add(timeSeriesReading);
+        int currSize = this.bufferSize.incrementAndGet();
+        return currSize < MAX_SIZE_OF_BUFFER_BEFORE_RECEIVER_THROTTLING;
     }
 
     public void run(){
@@ -48,7 +60,7 @@ public class WorkingSet {
         if (timeSeriesReading == null) {
             return false;
         }
-
+        this.bufferSize.decrementAndGet();
         String tag = timeSeriesReading.getTag();
 
         if (!(timeSeriesReading instanceof FinalizeTimeSeriesReading)){

@@ -32,6 +32,7 @@ CREATE TABLE SegmentSummary(
     start_time bigint not null,
     minValue real,
     maxValue real,
+    amtDataPoints int,
     CONSTRAINT fk_segmentSummary_ts_key_to_segment
         FOREIGN KEY(time_series_id, start_time) REFERENCES Segment(time_series_id, start_time),
     CONSTRAINT pk_segmentSummary_timeId_startTime

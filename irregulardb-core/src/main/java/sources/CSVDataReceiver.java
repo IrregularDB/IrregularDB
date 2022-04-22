@@ -1,5 +1,6 @@
 package sources;
 
+import config.ConfigProperties;
 import records.DataPoint;
 import records.TimeSeriesReading;
 import scheduling.WorkingSet;
@@ -7,9 +8,9 @@ import scheduling.WorkingSet;
 import java.io.*;
 
 public class CSVDataReceiver extends DataReceiver {
-
     private final String elementDelimiter;
     private final File csvFile;
+    private static final int AMT_TIME_TO_SLEEP = ConfigProperties.getInstance().getReceiverCSVThrottleSleepTime();
 
     public CSVDataReceiver(File csvFile, WorkingSet workingSet, String elementDelimiter) {
         super(workingSet);
@@ -25,7 +26,7 @@ public class CSVDataReceiver extends DataReceiver {
 
             readFile(bufferedReader);
 
-            close();
+            super.close();
             System.out.println("CSVReceiver for " + csvFile.getAbsolutePath() + " has completed delivering its data");
         } catch (IOException e) {
             e.printStackTrace();
@@ -36,7 +37,15 @@ public class CSVDataReceiver extends DataReceiver {
         String line;
         while ((line = bufferedReader.readLine()) != null) {
             TimeSeriesReading timeSeriesReading = parseLine(line);
-            sendTimeSeriesReadingToBuffer(timeSeriesReading);
+
+            if (!sendTimeSeriesReadingToBuffer(timeSeriesReading)) {
+                try {
+                    Thread.sleep(AMT_TIME_TO_SLEEP);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+
         }
     }
 

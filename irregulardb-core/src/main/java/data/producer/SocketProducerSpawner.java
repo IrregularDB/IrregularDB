@@ -1,12 +1,9 @@
 package data.producer;
 
 import config.ConfigProperties;
-import scheduling.WorkingSet;
-import sources.CSVDataReceiver;
 import sources.CSVTimeSeriesReader;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Set;
 

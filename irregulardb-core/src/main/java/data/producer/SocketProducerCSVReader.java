@@ -5,7 +5,7 @@ import sources.CSVTimeSeriesReader;
 import java.io.IOException;
 
 public class SocketProducerCSVReader extends SocketProducerBase {
-    private CSVTimeSeriesReader csvTimeSeriesReader;
+    private final CSVTimeSeriesReader csvTimeSeriesReader;
 
     public SocketProducerCSVReader(CSVTimeSeriesReader csvTimeSeriesReader, String serverIp, int serverPort) throws IOException {
         super(serverIp, serverPort);

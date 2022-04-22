@@ -9,12 +9,13 @@ import java.util.Set;
 
 public class SocketProducerSpawner {
 
-    private static final String CSV_DELIMITER = " ";
+    private final String csvDelimiter;
     private final Set<File> csvFiles;
 
 
-    public SocketProducerSpawner(Set<File> csvFiles) {
+    public SocketProducerSpawner(Set<File> csvFiles, String csvDelimiter) {
         this.csvFiles = csvFiles;
+        this.csvDelimiter = csvDelimiter;
     }
 
     public void spawn() {
@@ -32,7 +33,7 @@ public class SocketProducerSpawner {
             }
 
             try {
-                CSVTimeSeriesReader csvTimeSeriesReader = new CSVTimeSeriesReader(csvFile, CSV_DELIMITER);
+                CSVTimeSeriesReader csvTimeSeriesReader = new CSVTimeSeriesReader(csvFile, csvDelimiter);
                 SocketProducerCSVReader socketProducerCSVReader = new SocketProducerCSVReader(csvTimeSeriesReader, serverIp, serverPort);
                 socketProducerCSVReader.run();
             } catch (IOException e) {

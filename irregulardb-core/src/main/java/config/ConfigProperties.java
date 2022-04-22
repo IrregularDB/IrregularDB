@@ -46,12 +46,7 @@ public class ConfigProperties extends Properties {
     }
 
     public int getConfiguredNumberOfWorkingSets() {
-        String workingsets = getProperty("workingsets");
-        if (workingsets == null) {
-            // Defaults to 1
-            return 1;
-        }
-
+        String workingsets = getProperty("workingsets", "1");
         return Integer.parseInt(workingsets);
     }
 
@@ -86,6 +81,12 @@ public class ConfigProperties extends Properties {
         }
 
         return output;
+    }
+
+    public String getCsvDelimiter() {
+        // Defaults to ","
+        String csvDelimiter = getProperty("source.csv.delimiter", ",").replace("\"", "");
+        return csvDelimiter;
     }
 
     public List<ValueCompressionModelType> getValueModels() {

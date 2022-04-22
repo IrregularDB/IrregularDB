@@ -28,7 +28,8 @@ public class Main {
         Set<File> csvSources = ConfigProperties.getInstance().getCsvSources();
 
         if (!csvSources.isEmpty()){
-            DataReceiverSpawner dataReceiverSpawner = new CSVDataReceiverSpawner(partitioner, csvSources);
+            String csvDelimiter = ConfigProperties.getInstance().getCsvDelimiter();
+            DataReceiverSpawner dataReceiverSpawner = new CSVDataReceiverSpawner(partitioner, csvSources, csvDelimiter);
             dataReceiverSpawner.spawn();
         }
     }

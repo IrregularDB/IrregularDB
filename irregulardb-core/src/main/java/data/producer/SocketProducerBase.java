@@ -44,7 +44,7 @@ public abstract class SocketProducerBase {
     }
 
     private void writeFullTimeSeriesReadingToSocket(TimeSeriesReading reading) throws IOException {
-        dataOutputStream.write(SocketDataReceiver.INDICATES_NEW_TAG);
+        dataOutputStream.writeByte(SocketDataReceiver.INDICATES_NEW_TAG);
         byte[] timeSeriesTagAsBytes = reading.getTag().getBytes(StandardCharsets.UTF_8);
         dataOutputStream.writeInt(timeSeriesTagAsBytes.length);
         dataOutputStream.write(timeSeriesTagAsBytes);
@@ -54,7 +54,7 @@ public abstract class SocketProducerBase {
     }
 
     private void writeOnlyDataPointToSocket(DataPoint dataPoint) throws IOException {
-        dataOutputStream.write(SocketDataReceiver.INDICATES_NO_NEW_TAG);
+        dataOutputStream.writeByte(SocketDataReceiver.INDICATES_NO_NEW_TAG);
         dataOutputStream.writeLong(dataPoint.timestamp());
         dataOutputStream.writeFloat(dataPoint.value());
     }

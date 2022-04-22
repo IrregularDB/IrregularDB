@@ -20,10 +20,11 @@ public class SocketDataReceiver extends DataReceiver {
     private DataInputStream clientInputStream;
     private String currentInUseTag;
 
-    public SocketDataReceiver(WorkingSet workingSet, Socket clientConnection) {
+    public SocketDataReceiver(WorkingSet workingSet, Socket socket) {
         super(workingSet);
         try {
-            this.clientInputStream = new DataInputStream(clientConnection.getInputStream());
+            // TODO: make this maybe into a buffered reader.
+            this.clientInputStream = new DataInputStream(socket.getInputStream());
         } catch (IOException e) {
             e.printStackTrace();
         }

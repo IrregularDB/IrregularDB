@@ -47,24 +47,20 @@ select * from datapointview dp
 
 select count(*) from segment;
 
+-- Gets amount of segments of each type of model
 select count(*), t.valuemodel, t.timestampmodel from segment s
     join timestampvaluemodeltypes t on s.value_timestamp_model_type = t.timestampvaluemodelshort
     group by t.valuemodel, t.timestampmodel;
 
+-- Gets sum of amount of data points for each time series tag
 select t.tag, summary.* from (select s.time_series_id, sum(s.amtdatapoints)
     from segmentsummary s
     group by s.time_series_id) summary join timeseries t on t.id = summary.time_series_id;
 
-
+-- Gets average segment length for each time series tag
 select t.tag, summary.* from (select s.time_series_id, avg(s.amtdatapoints) as avgAmtDataPoints
                               from segmentsummary s
                               group by s.time_series_id) summary join timeseries t on t.id = summary.time_series_id;
-
-
-
-select count(*), t.valuemodel, t.timestampmodel from segment s
-      join timestampvaluemodeltypes t on s.value_timestamp_model_type = t.timestampvaluemodelshort
-      group by t.valuemodel, t.timestampmodel;
 
 -- Query used to check the segments with length 49
 select count(*), t.valuemodel, t.timestampmodel from (select * from

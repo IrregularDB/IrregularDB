@@ -33,8 +33,7 @@ public class SocketProducerSpawner {
             }
 
             try {
-                CSVTimeSeriesReader csvTimeSeriesReader = new CSVTimeSeriesReader(csvFile, csvDelimiter);
-                SocketProducerCSVReader socketProducerCSVReader = new SocketProducerCSVReader(csvTimeSeriesReader, serverIp, serverPort);
+                SocketProducerCSVReader socketProducerCSVReader = new SocketProducerCSVReader(csvFile, csvDelimiter, serverIp, serverPort);
                 socketProducerCSVReader.run();
             } catch (IOException e) {
                 e.printStackTrace();

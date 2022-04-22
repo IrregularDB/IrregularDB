@@ -38,12 +38,11 @@ class SocketProducerCSVReaderTest {
         SocketDataReceiverSpawner socketDataReceiverSpawner = new SocketDataReceiverSpawner(testPartitioner, serverPort);
         socketDataReceiverSpawner.spawn();
 
-        CSVTimeSeriesReader csvTimeSeriesReader = new CSVTimeSeriesReader(new File(csvFilePath), ",");
-        SocketProducerCSVReader socketProducerCSVReader = new SocketProducerCSVReader(csvTimeSeriesReader, serverIp, serverPort);
+        SocketProducerCSVReader socketProducerCSVReader = new SocketProducerCSVReader(new File(csvFilePath), ",", serverIp, serverPort);
         Thread csvProducerThread = socketProducerCSVReader.run();
         csvProducerThread.join();
 
-        csvTimeSeriesReader = new CSVTimeSeriesReader(new File(csvFilePath), ","); // create a new instance as the other is already consumed
+        CSVTimeSeriesReader csvTimeSeriesReader = new CSVTimeSeriesReader(new File(csvFilePath), ","); // create a new instance as the other is already consumed
         TimeSeriesReading next = csvTimeSeriesReader.next();
         List<TimeSeriesReading> expectedReadings = new ArrayList<>();
         while (next != null) {

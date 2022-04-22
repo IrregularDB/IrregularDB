@@ -31,7 +31,6 @@ public class CSVDataReceiver extends DataReceiver {
             }
 
             super.close();
-            System.out.println("CSVReceiver for " + csvFile.getAbsolutePath() + " has completed delivering its data");
         } catch (IOException | InterruptedException e){
             e.printStackTrace();
             throw new RuntimeException(e);

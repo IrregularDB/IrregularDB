@@ -18,12 +18,6 @@ public class Main {
 
     public static void main(String[] args) throws SQLException, InterruptedException {
         PostgresConnection.resetTables();
-        for (String arg : args) { //Example: java -jar out.jar c:/my/path/tp/application.properties
-            if (arg.startsWith("-propFile=")) {
-                String filePath = arg.replace("-propFile=", "");
-                ConfigProperties.useFileAsConfigProperties(new File(filePath));
-            }
-        }
 
         // TODO: Should be configurable which partitioner should be used
         Partitioner partitioner = new IncrementPartitioner(new WorkingSetFactory(), ConfigProperties.getInstance().getConfiguredNumberOfWorkingSets());

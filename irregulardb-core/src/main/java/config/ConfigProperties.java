@@ -19,6 +19,9 @@ public class ConfigProperties extends Properties {
     private final Map<String, Integer> timestampThresholds = new HashMap<>();
     private final Map<String, Float> valueErrorBounds = new HashMap<>();
 
+    /**
+     * This method should never be called from a static context
+     */
     public static ConfigProperties getInstance() {
         if (INSTANCE != null) {
             return INSTANCE;
@@ -27,16 +30,14 @@ public class ConfigProperties extends Properties {
         if (!isTest) {
             INSTANCE = new ConfigProperties("irregulardb-core/src/main/resources/config.properties");
         } else {
-            INSTANCE = new ConfigProperties("src/test/resources/config.properties");
+            File configProperties = new File("./config.properties");
+            if (configProperties.exists()) {
+                INSTANCE = new ConfigProperties(configProperties.getAbsolutePath());
+            } else {
+                INSTANCE = new ConfigProperties("src/test/resources/config.properties");
+            }
         }
         return INSTANCE;
-    }
-
-    public static void useFileAsConfigProperties(File propertyFile) {
-        if (!propertyFile.exists()) {
-            throw new RuntimeException("Can't find property file: " + propertyFile.getAbsolutePath());
-        }
-        INSTANCE = new ConfigProperties(propertyFile.getAbsolutePath());
     }
 
     private ConfigProperties(String path) {

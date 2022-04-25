@@ -34,8 +34,9 @@ public class SocketDataReceiver extends DataReceiver {
 
     @Override
     public void receiveData() {
+        TimeSeriesReading timeSeriesReadingFromSocket = new TimeSeriesReading("UNITIALIZED", new DataPoint(0, 0));
         try {
-            TimeSeriesReading timeSeriesReadingFromSocket = getTimeSeriesReadingFromSocket();
+            timeSeriesReadingFromSocket = getTimeSeriesReadingFromSocket();
             while (timeSeriesReadingFromSocket != null) {
                 if (!sendTimeSeriesReadingToBuffer(timeSeriesReadingFromSocket)) {
                     Thread.sleep(AMT_TIME_TO_SLEEP);
@@ -44,7 +45,8 @@ public class SocketDataReceiver extends DataReceiver {
             }
         } catch (IOException | InterruptedException e) {
             // We don't rethrow the exception as we want to close the socket if this happens and not the crash the system.
-            System.out.println("Socket was terminated unexpectedly.");
+            System.out.println("Socket was terminated unexpectedly. For tag: " + timeSeriesReadingFromSocket.getTag());
+            e.printStackTrace();
         }
         close();
     }

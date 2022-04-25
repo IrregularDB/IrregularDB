@@ -32,6 +32,13 @@ public class ConfigProperties extends Properties {
         return INSTANCE;
     }
 
+    public static void useFileAsConfigProperties(File propertyFile) {
+        if (!propertyFile.exists()) {
+            throw new RuntimeException("Can't find property file: " + propertyFile.getAbsolutePath());
+        }
+        INSTANCE = new ConfigProperties(propertyFile.getAbsolutePath());
+    }
+
     private ConfigProperties(String path) {
         String property = System.getProperty("user.dir");
         File file = new File(path);

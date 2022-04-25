@@ -18,6 +18,12 @@ public class Main {
 
     public static void main(String[] args) throws SQLException, InterruptedException {
         PostgresConnection.resetTables();
+        for (String arg : args) { //Example: java -jar out.jar c:/my/path/tp/application.properties
+            if (arg.startsWith("-propFile=")) {
+                String filePath = arg.replace("-propFile=", "");
+                ConfigProperties.useFileAsConfigProperties(new File(filePath));
+            }
+        }
 
         // TODO: Should be configurable which partitioner should be used
         Partitioner partitioner = new IncrementPartitioner(new WorkingSetFactory(), ConfigProperties.getInstance().getConfiguredNumberOfWorkingSets());
@@ -30,7 +36,7 @@ public class Main {
     private static void initializeCSVDataReceiverSpawner(Partitioner partitioner) {
         Set<File> csvSources = ConfigProperties.getInstance().getCsvSources();
 
-        if (!csvSources.isEmpty()){
+        if (!csvSources.isEmpty()) {
             String csvDelimiter = ConfigProperties.getInstance().getCsvDelimiter();
             DataReceiverSpawner dataReceiverSpawner = new CSVDataReceiverSpawner(partitioner, csvSources, csvDelimiter);
             dataReceiverSpawner.spawn();
@@ -53,7 +59,7 @@ public class Main {
     private static void initializeSocketProducerSpawner() {
         Set<File> csvSources = ConfigProperties.getInstance().getCsvSources();
 
-        if (!csvSources.isEmpty()){
+        if (!csvSources.isEmpty()) {
             String csvDelimiter = ConfigProperties.getInstance().getCsvDelimiter();
             SocketProducerSpawner spawner = new SocketProducerSpawner(csvSources, csvDelimiter);
             spawner.spawn();

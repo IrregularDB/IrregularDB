@@ -35,7 +35,8 @@ public class SocketProducerSpawner {
             try {
                 SocketProducerCSVReader socketProducerCSVReader = new SocketProducerCSVReader(csvFile, csvDelimiter, serverIp, serverPort);
                 socketProducerCSVReader.run();
-            } catch (IOException e) {
+                Thread.sleep(5);
+            } catch (IOException | InterruptedException e) {
                 e.printStackTrace();
             }
         }

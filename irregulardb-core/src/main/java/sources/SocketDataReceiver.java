@@ -1,6 +1,7 @@
 package sources;
 
 
+import config.ConfigProperties;
 import records.DataPoint;
 import records.TimeSeriesReading;
 import scheduling.WorkingSet;
@@ -16,6 +17,7 @@ public class SocketDataReceiver extends DataReceiver {
     public static final byte INDICATES_NEW_TAG = 0b00000001;
     public static final byte INDICATES_NO_NEW_TAG = 0b00000000;
     public static final byte INDICATE_END_OF_STREAM = 0b01010101;
+    private static final int AMT_TIME_TO_SLEEP = ConfigProperties.getInstance().getReceiverCSVThrottleSleepTime();
 
 
     private BufferedInputStream clientInputStream;
@@ -33,15 +35,14 @@ public class SocketDataReceiver extends DataReceiver {
     @Override
     public void receiveData() {
         try {
-            while (true) {
-                TimeSeriesReading timeSeriesReadingFromSocket = getTimeSeriesReadingFromSocket();
-                if (timeSeriesReadingFromSocket != null) {
-                    sendTimeSeriesReadingToBuffer(timeSeriesReadingFromSocket);
-                } else {
-                    break;
+            TimeSeriesReading timeSeriesReadingFromSocket = getTimeSeriesReadingFromSocket();
+            while (timeSeriesReadingFromSocket != null) {
+                if (!sendTimeSeriesReadingToBuffer(timeSeriesReadingFromSocket)) {
+                    Thread.sleep(AMT_TIME_TO_SLEEP);
                 }
+                timeSeriesReadingFromSocket = getTimeSeriesReadingFromSocket();
             }
-        } catch (IOException e) {
+        } catch (IOException | InterruptedException e) {
             // We don't rethrow the exception as we want to close the socket if this happens and not the crash the system.
             System.out.println("Socket was terminated unexpectedly.");
         }

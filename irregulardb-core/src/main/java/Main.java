@@ -22,9 +22,9 @@ public class Main {
         // TODO: Should be configurable which partitioner should be used
         Partitioner partitioner = new IncrementPartitioner(new WorkingSetFactory(), ConfigProperties.getInstance().getConfiguredNumberOfWorkingSets());
 
+        Stopwatch.setInitialStartTime();
         //initializeCSVDataReceiverSpawner(partitioner);
         initializeSocketData(partitioner);
-        Stopwatch.setInitialStartTime();
     }
 
     private static void initializeCSVDataReceiverSpawner(Partitioner partitioner) {

@@ -76,7 +76,7 @@ public class WorkingSet {
             // After closing a time series we ensure all its segments are written to the DB
             databaseConnection.flushBatchToDB();
             this.timeSeriesTagToTimeSeries.remove(tag);
-            Stopwatch.getDurationForTag(tag);
+            Stopwatch.printDurationForTag(tag);
         }
         return true;
     }

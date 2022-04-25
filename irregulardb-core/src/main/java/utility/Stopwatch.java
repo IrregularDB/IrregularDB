@@ -10,7 +10,7 @@ public class Stopwatch {
     private Stopwatch() {
     }
 
-    static{ // Static constructor
+    static { // Static constructor
         startTimesByTag = new HashMap<>();
         initialStartTime = null;
     }
@@ -23,7 +23,7 @@ public class Stopwatch {
         startTimesByTag.put(tag, System.currentTimeMillis());
     }
 
-    public synchronized static void getDurationForTag(String tag) {
+    public synchronized static void printDurationForTag(String tag) {
         long startTime = startTimesByTag.remove(tag);
 
         long endTime = System.currentTimeMillis();

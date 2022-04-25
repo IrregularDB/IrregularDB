@@ -59,7 +59,6 @@ public class PostgresConnection implements DatabaseConnection {
         preparedStatement.setBytes(6, segment.timestampBlob().array());
     }
 
-
     @Override
     public int getTimeSeriesId(String timeSeriesTag) {
         final String GET_TIME_SERIES_BY_TAG = "SELECT * FROM TimeSeries where tag = ?";

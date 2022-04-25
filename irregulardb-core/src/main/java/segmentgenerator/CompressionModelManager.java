@@ -1,5 +1,6 @@
 package segmentgenerator;
 
+import compression.BaseModel;
 import records.CompressionModel;
 import compression.timestamp.TimestampCompressionModel;
 import compression.value.ValueCompressionModel;
@@ -16,11 +17,11 @@ public class CompressionModelManager {
 
     private final ModelPicker modelPicker;
 
-    private List<ValueCompressionModel> activeValueModels;
-    private List<TimestampCompressionModel> activeTimestampModels;
+    private final List<ValueCompressionModel> activeValueModels;
+    private final List<TimestampCompressionModel> activeTimestampModels;
 
-    private List<ValueCompressionModel> inactiveValueModels;
-    private List<TimestampCompressionModel> inactiveTimestampModels;
+    private final List<ValueCompressionModel> inactiveValueModels;
+    private final List<TimestampCompressionModel> inactiveTimestampModels;
 
     public CompressionModelManager(List<ValueCompressionModel> valueCompressionModels, List<TimestampCompressionModel> timestampCompressionModels) {
         this.activeValueModels = new ArrayList<>(valueCompressionModels);
@@ -33,23 +34,27 @@ public class CompressionModelManager {
 
     public boolean tryAppendDataPointToAllModels(DataPoint dataPoint) {
         // Partition models by append success
-        List<ValueCompressionModel> valueModelsNowInactive = activeValueModels.stream()
-                .filter(model -> !model.append(dataPoint))
-                .toList();
 
-        for (ValueCompressionModel inactiveValueModel : valueModelsNowInactive) {
-            this.activeValueModels.remove(inactiveValueModel);
-            this.inactiveValueModels.add(inactiveValueModel);
+        List<BaseModel> valueModelsNowInactive = new ArrayList<>();
+
+        for (ValueCompressionModel valueModel : activeValueModels){
+            if (!valueModel.append(dataPoint)){
+                valueModelsNowInactive.add(valueModel);
+            }
         }
 
-        List<TimestampCompressionModel> timeModelsNowInactive = this.activeTimestampModels.stream()
-                .filter(model -> !model.append(dataPoint))
-                .toList();
+        makeModelsInactive(valueModelsNowInactive);
 
-        for (TimestampCompressionModel inactiveTimestampModel : timeModelsNowInactive) {
-            this.activeTimestampModels.remove(inactiveTimestampModel);
-            this.inactiveTimestampModels.add(inactiveTimestampModel);
+        List<BaseModel> timeModelsNowInactive = new ArrayList<>();
+
+        for (TimestampCompressionModel timeModel : activeTimestampModels){
+            if (!timeModel.append(dataPoint)){
+                timeModelsNowInactive.add(timeModel);
+            }
         }
+
+        makeModelsInactive(timeModelsNowInactive);
+
         return (!this.activeValueModels.isEmpty()) && (!this.activeTimestampModels.isEmpty());
     }
 
@@ -60,27 +65,23 @@ public class CompressionModelManager {
         activeTimestampModels.addAll(inactiveTimestampModels);
         inactiveTimestampModels.clear();
 
-        List<ValueCompressionModel> valueModelsToMakeInactive = new ArrayList<>();
+        List<BaseModel> valueModelsToMakeInactive = new ArrayList<>();
         for (ValueCompressionModel model : activeValueModels) {
             if (!model.resetAndAppendAll(notYetEmitted)) {
                 valueModelsToMakeInactive.add(model);
             }
         }
-        for (ValueCompressionModel valueCompressionModel : valueModelsToMakeInactive) {
-            activeValueModels.remove(valueCompressionModel);
-            inactiveValueModels.add(valueCompressionModel);
-        }
 
-        List<TimestampCompressionModel> timeModelToMakeInactive = new ArrayList<>();
+        makeModelsInactive(valueModelsToMakeInactive);
+
+        List<BaseModel> timeModelToMakeInactive = new ArrayList<>();
         for (TimestampCompressionModel model : activeTimestampModels) {
             if (!model.resetAndAppendAll(notYetEmitted)) {
                 timeModelToMakeInactive.add(model);
             }
         }
-        for (TimestampCompressionModel timestampCompressionModel : timeModelToMakeInactive) {
-            activeTimestampModels.remove(timestampCompressionModel);
-            inactiveTimestampModels.add(timestampCompressionModel);
-        }
+
+        makeModelsInactive(timeModelToMakeInactive);
 
         return !activeValueModels.isEmpty() && !activeTimestampModels.isEmpty();
     }
@@ -90,5 +91,17 @@ public class CompressionModelManager {
         List<ValueCompressionModel> valueModels = Stream.concat(activeValueModels.stream(), inactiveValueModels.stream()).toList();
         List<TimestampCompressionModel> timeStampModels = Stream.concat(activeTimestampModels.stream(), inactiveTimestampModels.stream()).toList();
         return modelPicker.findBestCompressionModel(valueModels, timeStampModels);
+    }
+
+    private void makeModelsInactive(List<BaseModel> inactiveModels){
+        for (BaseModel inactiveModel : inactiveModels){
+            if (inactiveModel instanceof ValueCompressionModel) {
+                activeValueModels.remove(inactiveModel);
+                inactiveValueModels.add((ValueCompressionModel) inactiveModel);
+            } else if (inactiveModel instanceof TimestampCompressionModel) {
+                activeTimestampModels.remove(inactiveModel);
+                inactiveTimestampModels.add((TimestampCompressionModel) inactiveModel);
+            }
+        }
     }
 }

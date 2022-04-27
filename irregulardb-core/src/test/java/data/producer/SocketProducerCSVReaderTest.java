@@ -52,6 +52,8 @@ class SocketProducerCSVReaderTest {
         expectedReadings.add(new FinalizeTimeSeriesReading("tag1"));
         expectedReadings.add(new FinalizeTimeSeriesReading("tag2"));
 
+        Thread.sleep(100);
+
         Assertions.assertEquals(expectedReadings.size(), workingSetBuffer.size());
         for (int i = 0; i < expectedReadings.size(); i++) {
             Assertions.assertEquals(expectedReadings.get(i), workingSetBuffer.poll());

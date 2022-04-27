@@ -124,9 +124,7 @@ public class PostgresConnection implements DatabaseConnection {
 
     public static void resetTables() throws SQLException {
         final String SQL = """
-                truncate table TimeSeries;
-                truncate table Segment;
-                truncate table SegmentSummary;
+                truncate table TimeSeries cascade;
                 """;
 
 

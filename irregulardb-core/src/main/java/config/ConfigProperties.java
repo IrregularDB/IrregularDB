@@ -91,6 +91,9 @@ public class ConfigProperties extends Properties {
         return output;
     }
 
+    /**
+     * You should wrap the delimiter in " on both sides.
+     */
     public String getCsvDelimiter() {
         // Defaults to ","
         String csvDelimiter = getProperty("source.csv.delimiter", ",").replace("\"", "");

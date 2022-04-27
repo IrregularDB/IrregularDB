@@ -37,6 +37,7 @@ public abstract class DataReceiver {
     public void close(){
         for (String tag : timeSeriesTagsEmitted) {
             this.workingSet.accept(new FinalizeTimeSeriesReading(tag));
+            System.out.println("DataReceiver for the tag: " + tag + ", has completed delivering its data");
         }
     }
 }

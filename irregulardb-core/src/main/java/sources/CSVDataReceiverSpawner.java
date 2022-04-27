@@ -8,12 +8,13 @@ import java.util.Set;
 
 public class CSVDataReceiverSpawner extends DataReceiverSpawner{
 
-    private static final String CSV_DELIMITER = " ";
+    private final String csvDelimiter;
     private final Set<File> csvFiles;
     
-    public CSVDataReceiverSpawner(Partitioner partitioner, Set<File> csvFiles) {
+    public CSVDataReceiverSpawner(Partitioner partitioner, Set<File> csvFiles, String csvDelimiter) {
         super(partitioner);
         this.csvFiles = csvFiles;
+        this.csvDelimiter = csvDelimiter;
     }
     
     @Override
@@ -29,7 +30,7 @@ public class CSVDataReceiverSpawner extends DataReceiverSpawner{
             }
 
             WorkingSet workingSet = super.partitioner.workingSetToSpawnReceiverFor();
-            CSVDataReceiver csvDataReceiver = new CSVDataReceiver(csvFile, workingSet, CSV_DELIMITER);
+            CSVDataReceiver csvDataReceiver = new CSVDataReceiver(csvFile, workingSet, csvDelimiter);
             runReceiverInThread(csvDataReceiver);
         }
     }

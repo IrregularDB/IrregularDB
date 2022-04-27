@@ -62,6 +62,9 @@ select t.tag, summary.* from (select s.time_series_id, avg(s.amtdatapoints) as a
                               from segmentsummary s
                               group by s.time_series_id) summary join timeseries t on t.id = summary.time_series_id;
 
+-- Total amount data points:
+select sum(s.amtdatapoints) from segmentsummary s;
+
 -- Query used to check the segments with length 49
 select count(*), t.valuemodel, t.timestampmodel from (select * from
 (select s.time_series_id, s.start_time, s.amtdatapoints

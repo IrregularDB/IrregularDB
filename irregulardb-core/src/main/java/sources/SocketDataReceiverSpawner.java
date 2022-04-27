@@ -17,11 +17,6 @@ public class SocketDataReceiverSpawner extends DataReceiverSpawner {
         this.serverSocketPort = serverSocketPort;
     }
 
-    public SocketDataReceiverSpawner(Partitioner partitioner) {
-        super(partitioner);
-        this.serverSocketPort = ConfigProperties.getInstance().getSocketDataReceiverSpawnerPort();
-    }
-
     @Override
     public void spawn() {
         new Thread(this::runServerSocket).start();

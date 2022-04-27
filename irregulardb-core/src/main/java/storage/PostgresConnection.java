@@ -100,12 +100,12 @@ public class PostgresConnection implements DatabaseConnection {
 
             boolean anySegmentSummaryUsed = false;
             for (Pair<Segment, SegmentSummary> segmentSegmentSummaryPair : insertBuffer) {
-                prepareStatementForInsertSegment(segmentSegmentSummaryPair.f0(), insertSegmentStatement);
+                prepareStatementForInsertSegment(segmentSegmentSummaryPair.getF0(), insertSegmentStatement);
                 insertSegmentStatement.addBatch();
                 insertSegmentStatement.clearParameters();
 
-                if (segmentSegmentSummaryPair.f1() != null) { // Handling of summary
-                    prepareStatementForInsertSegmentSummary(segmentSegmentSummaryPair.f1(), insertSegmentSummaryStatement);
+                if (segmentSegmentSummaryPair.getF1() != null) { // Handling of summary
+                    prepareStatementForInsertSegmentSummary(segmentSegmentSummaryPair.getF1(), insertSegmentSummaryStatement);
                     insertSegmentSummaryStatement.addBatch();
                     insertSegmentSummaryStatement.clearParameters();
                     anySegmentSummaryUsed = true;

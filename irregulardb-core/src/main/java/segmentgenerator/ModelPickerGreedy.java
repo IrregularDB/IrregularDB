@@ -68,11 +68,11 @@ public class ModelPickerGreedy extends ModelPicker {
         Pair<Double, ValueCompressionModel> bestModel = new Pair<>(Double.MAX_VALUE, null);
         for (ValueCompressionModel valueCompressionModel : valueCompressionModelsList) {
             double bytesPerPoint = calculateAmountBytesPerDataPoint(valueCompressionModel);
-            if (bytesPerPoint < bestModel.f0()) {
+            if (bytesPerPoint < bestModel.getF0()) {
                 bestModel = new Pair<>(bytesPerPoint, valueCompressionModel);
             }
         }
-        return bestModel.f1();
+        return bestModel.getF1();
     }
 
     private void performShortCircuitingValueModels(List<ValueCompressionModel> valueCompressionModelsList) {
@@ -106,11 +106,11 @@ public class ModelPickerGreedy extends ModelPicker {
         Pair<Double, TimestampCompressionModel> bestModel = new Pair<>(Double.MAX_VALUE, null);
         for (TimestampCompressionModel timestampCompressionModel : timestampCompressionModelsList) {
             double bytesPerPoint = calculateAmountBytesPerDataPoint(timestampCompressionModel);
-            if (bytesPerPoint < bestModel.f0()) {
+            if (bytesPerPoint < bestModel.getF0()) {
                 bestModel = new Pair<>(bytesPerPoint, timestampCompressionModel);
             }
         }
-        return bestModel.f1();
+        return bestModel.getF1();
     }
 
     private void performShortCircuitingTimestampModels(List<TimestampCompressionModel> timestampCompressionModelsList) {

@@ -34,13 +34,13 @@ public class ModelPickerBruteForce extends ModelPicker{
         List<Pair<TimestampCompressionModelType, ValueCompressionModelType>> allPairs = getAllPairs(valueModels,timestampModels);
         Pair<TimestampCompressionModelType, ValueCompressionModelType> bestPair = findBestFromAllPairs(allPairs);
 
-        int minLength = Math.min(timestampModelsLengths.get(bestPair.f0()), valueModelsLengths.get(bestPair.f1()));
+        int minLength = Math.min(timestampModelsLengths.get(bestPair.getF0()), valueModelsLengths.get(bestPair.getF1()));
 
         return new CompressionModel(
-                bestPair.f1(),
-                modelPickerBlobBuffer.getBlobForValueModelWithLength(bestPair.f1(), minLength).orElseThrow(),
-                bestPair.f0(),
-                modelPickerBlobBuffer.getBlobForTimestampModelWithLength(bestPair.f0(), minLength).orElseThrow(),
+                bestPair.getF1(),
+                modelPickerBlobBuffer.getBlobForValueModelWithLength(bestPair.getF1(), minLength).orElseThrow(),
+                bestPair.getF0(),
+                modelPickerBlobBuffer.getBlobForTimestampModelWithLength(bestPair.getF0(), minLength).orElseThrow(),
                 minLength
         );
 
@@ -51,9 +51,9 @@ public class ModelPickerBruteForce extends ModelPicker{
         double currentBestBytesPerDataPoint = Double.MAX_VALUE;
 
         for (var pair : allPairs) {
-            int minLength = Math.min(timestampModelsLengths.get(pair.f0()), valueModelsLengths.get(pair.f1()));
-            Optional<ByteBuffer> timestampBlob = modelPickerBlobBuffer.getBlobForTimestampModelWithLength(pair.f0(), minLength);
-            Optional<ByteBuffer> valueBlob = modelPickerBlobBuffer.getBlobForValueModelWithLength(pair.f1(), minLength);
+            int minLength = Math.min(timestampModelsLengths.get(pair.getF0()), valueModelsLengths.get(pair.getF1()));
+            Optional<ByteBuffer> timestampBlob = modelPickerBlobBuffer.getBlobForTimestampModelWithLength(pair.getF0(), minLength);
+            Optional<ByteBuffer> valueBlob = modelPickerBlobBuffer.getBlobForValueModelWithLength(pair.getF1(), minLength);
 
             if (timestampBlob.isPresent() && valueBlob.isPresent()) {
                 double bytesPerDataPoint = calculateAmountBytesPerDataPoint(timestampBlob.get().capacity(), minLength)

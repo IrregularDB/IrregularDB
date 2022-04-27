@@ -23,8 +23,8 @@ public class Main {
         Partitioner partitioner = new IncrementPartitioner(new WorkingSetFactory(), ConfigProperties.getInstance().getConfiguredNumberOfWorkingSets());
 
         Stopwatch.setInitialStartTime();
-        //initializeCSVDataReceiverSpawner(partitioner);
-        initializeSocketData(partitioner);
+        initializeCSVDataReceiverSpawner(partitioner);
+        //initializeSocketData(partitioner);
     }
 
     private static void initializeCSVDataReceiverSpawner(Partitioner partitioner) {

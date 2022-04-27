@@ -44,17 +44,17 @@ class ModelPickerBruteForceBlobBufferTest {
         List<Pair<TimestampCompressionModel, ValueCompressionModel>> allPairs = getAllPairs(timestampModels, valueModels);
 
         for (Pair<TimestampCompressionModel, ValueCompressionModel> pair : allPairs) {
-            Integer timestampLength = timestampModelsLengths.get(pair.f0());
-            Integer valueLength = valueModelsLengths.get(pair.f1());
+            Integer timestampLength = timestampModelsLengths.get(pair.getF0());
+            Integer valueLength = valueModelsLengths.get(pair.getF1());
             int minLength = Math.min(timestampLength,valueLength);
-            Optional<ByteBuffer> timestampBlob = modelPickerBruteForceBlobBuffer.getBlobForTimestampModelWithLength(pair.f0().getTimestampCompressionModelType(), minLength);
-            Optional<ByteBuffer> valueBlob = modelPickerBruteForceBlobBuffer.getBlobForValueModelWithLength(pair.f1().getValueCompressionModelType(), minLength);
+            Optional<ByteBuffer> timestampBlob = modelPickerBruteForceBlobBuffer.getBlobForTimestampModelWithLength(pair.getF0().getTimestampCompressionModelType(), minLength);
+            Optional<ByteBuffer> valueBlob = modelPickerBruteForceBlobBuffer.getBlobForValueModelWithLength(pair.getF1().getValueCompressionModelType(), minLength);
 
             if (timestampBlob.isPresent() && valueBlob.isPresent()) {
-                System.out.println("valid pair: <" + pair.f0().getTimestampCompressionModelType().name() + "[" + timestampModelsLengths.get(pair.f0()) + "] " + pair.f1().getValueCompressionModelType().name() + "[" + valueModelsLengths.get(pair.f1()) + "]" + ">" + "; size=" + minLength);
+                System.out.println("valid pair: <" + pair.getF0().getTimestampCompressionModelType().name() + "[" + timestampModelsLengths.get(pair.getF0()) + "] " + pair.getF1().getValueCompressionModelType().name() + "[" + valueModelsLengths.get(pair.getF1()) + "]" + ">" + "; size=" + minLength);
                 Assertions.assertTrue(correctValidPair(pair));
             } else {
-                System.out.println("Invalid pair: <" + pair.f0().getTimestampCompressionModelType().name() + "[" + timestampModelsLengths.get(pair.f0()) + "] " + pair.f1().getValueCompressionModelType().name() + "[" + valueModelsLengths.get(pair.f1()) + "]" + ">");
+                System.out.println("Invalid pair: <" + pair.getF0().getTimestampCompressionModelType().name() + "[" + timestampModelsLengths.get(pair.getF0()) + "] " + pair.getF1().getValueCompressionModelType().name() + "[" + valueModelsLengths.get(pair.getF1()) + "]" + ">");
                 Assertions.assertTrue(correctInvalidPair(pair));
             }
         }
@@ -62,11 +62,11 @@ class ModelPickerBruteForceBlobBufferTest {
     }
 
     private boolean correctInvalidPair(Pair<TimestampCompressionModel, ValueCompressionModel> pair){
-        return (pair.f0().getTimestampCompressionModelType() == TimestampCompressionModelType.REGULAR &&
-                pair.f1().getValueCompressionModelType() == ValueCompressionModelType.PMC_MEAN)
+        return (pair.getF0().getTimestampCompressionModelType() == TimestampCompressionModelType.REGULAR &&
+                pair.getF1().getValueCompressionModelType() == ValueCompressionModelType.PMC_MEAN)
                 ||
-                (pair.f0().getTimestampCompressionModelType() == TimestampCompressionModelType.SIDIFF &&
-                pair.f1().getValueCompressionModelType() == ValueCompressionModelType.PMC_MEAN);
+                (pair.getF0().getTimestampCompressionModelType() == TimestampCompressionModelType.SIDIFF &&
+                pair.getF1().getValueCompressionModelType() == ValueCompressionModelType.PMC_MEAN);
     }
 
     private boolean correctValidPair(Pair<TimestampCompressionModel,ValueCompressionModel> pair){

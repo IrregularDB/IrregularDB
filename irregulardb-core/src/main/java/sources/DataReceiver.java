@@ -5,28 +5,32 @@ import scheduling.WorkingSet;
 import utility.Stopwatch;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 public abstract class DataReceiver {
 
     private final WorkingSet workingSet;
     private final Set<String> timeSeriesTagsEmitted;
+    private String lastTagReceived;
 
     public DataReceiver(WorkingSet workingSet) {
         this.workingSet = workingSet;
         this.timeSeriesTagsEmitted = new HashSet<>();
+        this.lastTagReceived ="";
     }
 
     /**
      * Similar documentation to that of WorkingSet.accept()
      */
     protected boolean sendTimeSeriesReadingToBuffer(TimeSeriesReading timeSeriesReading){
-        int sizeBefore = timeSeriesTagsEmitted.size();
-        timeSeriesTagsEmitted.add(timeSeriesReading.getTag());
-        if (sizeBefore != timeSeriesTagsEmitted.size()) {
-            // New tag is added
-            Stopwatch.putStartTime(timeSeriesReading.getTag());
+        String tag = timeSeriesReading.getTag();
+        // Speedup trying to reduce the amount of calls to contains()
+        if (!tag.equals(this.lastTagReceived)) {
+            if (!this.timeSeriesTagsEmitted.contains(tag)) {
+                timeSeriesTagsEmitted.add(tag);
+                Stopwatch.putStartTime(timeSeriesReading.getTag());
+            }
+            this.lastTagReceived = tag;
         }
 
         return this.workingSet.accept(timeSeriesReading);

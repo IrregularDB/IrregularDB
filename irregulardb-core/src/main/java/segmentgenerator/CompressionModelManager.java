@@ -1,16 +1,12 @@
 package segmentgenerator;
 
-import compression.BaseModel;
 import records.CompressionModel;
 import compression.timestamp.TimestampCompressionModel;
 import compression.value.ValueCompressionModel;
 import records.DataPoint;
 
-import java.sql.Time;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class CompressionModelManager {
@@ -23,13 +19,14 @@ public class CompressionModelManager {
     private final List<ValueCompressionModel> inactiveValueModels;
     private final List<TimestampCompressionModel> inactiveTimestampModels;
 
-    public CompressionModelManager(List<ValueCompressionModel> valueCompressionModels, List<TimestampCompressionModel> timestampCompressionModels) {
+    public CompressionModelManager(List<ValueCompressionModel> valueCompressionModels, List<TimestampCompressionModel> timestampCompressionModels,
+                                   ModelPickerFactory.ModelPickerType modelPickerType) {
         this.activeValueModels = new ArrayList<>(valueCompressionModels);
         this.activeTimestampModels = new ArrayList<>(timestampCompressionModels);
 
         this.inactiveValueModels = new ArrayList<>();
         this.inactiveTimestampModels = new ArrayList<>();
-        this.modelPicker = ModelPickerFactory.getModelPicker();//can be taken as a method parameter if we want
+        this.modelPicker = ModelPickerFactory.createModelPicker(modelPickerType);//can be taken as a method parameter if we want
     }
 
     public boolean tryAppendDataPointToAllModels(DataPoint dataPoint) {

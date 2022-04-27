@@ -22,7 +22,7 @@ public class TestCompressionModelManagerRegularPMCMean extends CompressionModelM
     private Float expectedValue = null;
 
     public TestCompressionModelManagerRegularPMCMean(List<ValueCompressionModel> valueCompressionModels, List<TimestampCompressionModel> timestampCompressionModels) {
-        super(valueCompressionModels, timestampCompressionModels);
+        super(valueCompressionModels, timestampCompressionModels, ModelPickerFactory.ModelPickerType.GREEDY);
         this.valueCompressionModels = valueCompressionModels;
         this.timestampCompressionModels = timestampCompressionModels;
         this.acceptedDataPoints = new ArrayList<>();

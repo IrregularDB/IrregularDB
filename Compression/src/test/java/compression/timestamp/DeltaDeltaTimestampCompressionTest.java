@@ -27,8 +27,8 @@ class DeltaDeltaTimestampCompressionTest {
 
     @Test
     public void testModelAppendsTwice() {
-        boolean append1 = deltaDeltaTimestampCompressionModel.append(createDataPoint());
-        boolean append2 = deltaDeltaTimestampCompressionModel.append(createDataPoint());
+        boolean append1 = deltaDeltaTimestampCompressionModel.append(createDataPoint(1000));
+        boolean append2 = deltaDeltaTimestampCompressionModel.append(createDataPoint(2000));
 
         Assertions.assertTrue(append1);
         Assertions.assertTrue(append2);
@@ -36,9 +36,9 @@ class DeltaDeltaTimestampCompressionTest {
 
     @Test
     public void testModelResets() {
-        deltaDeltaTimestampCompressionModel.append(createDataPoint());
-        deltaDeltaTimestampCompressionModel.append(createDataPoint());
-        deltaDeltaTimestampCompressionModel.append(createDataPoint());
+        deltaDeltaTimestampCompressionModel.append(createDataPoint(1000));
+        deltaDeltaTimestampCompressionModel.append(createDataPoint(2000));
+        deltaDeltaTimestampCompressionModel.append(createDataPoint(3000));
 
         List<DataPoint> dataPointList = createTenDataPoints();
         boolean success = deltaDeltaTimestampCompressionModel.resetAndAppendAll(dataPointList);
@@ -212,16 +212,15 @@ class DeltaDeltaTimestampCompressionTest {
     }
 
     // Helper that creates random data points in increasing order
-    private DataPoint createDataPoint() {
-        previousLong += random.nextLong(100L);
-        previousFloat += random.nextFloat(100.00f);
+    private DataPoint createDataPoint(long previousLong) {
+        previousFloat += random.nextFloat() * 100;
         return new DataPoint(previousLong, previousFloat);
     }
 
     private List<DataPoint> createTenDataPoints() {
         List<DataPoint> dataPointList = new ArrayList<>();
         for (int i = 0; i < 10; i++) {
-            dataPointList.add(createDataPoint());
+            dataPointList.add(createDataPoint(i * 1000));
         }
         return dataPointList;
     }

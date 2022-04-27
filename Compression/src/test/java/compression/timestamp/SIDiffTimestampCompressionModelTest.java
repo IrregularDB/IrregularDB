@@ -18,19 +18,16 @@ class SIDiffTimestampCompressionModelTest {
 
 
     // Helper that creates random data points in increasing order
-    private DataPoint createDataPoint(){
-        long previousLong = 0;
+    private DataPoint createDataPoint(long previousLong){
         float previousFloat = 0;
-
-        previousLong += random.nextLong(100L);
-        previousFloat += random.nextFloat(100.00f);
+        previousFloat += random.nextFloat();
         return new DataPoint(previousLong, previousFloat);
     }
 
     private List<DataPoint> createTenDataPoints(){
         List<DataPoint> dataPointList = new ArrayList<>();
         for(int i = 0; i < 10; i++){
-            dataPointList.add(createDataPoint());
+            dataPointList.add(createDataPoint(i * 1000));
         }
         return dataPointList;
     }
@@ -44,8 +41,8 @@ class SIDiffTimestampCompressionModelTest {
 
     @Test
     public void testModelAppendsTwice(){
-        boolean append1 = siDiffTimestampModelType.append(createDataPoint());
-        boolean append2 = siDiffTimestampModelType.append(createDataPoint());
+        boolean append1 = siDiffTimestampModelType.append(createDataPoint(1000));
+        boolean append2 = siDiffTimestampModelType.append(createDataPoint(2000));
 
         Assertions.assertTrue(append1);
         Assertions.assertTrue(append2);
@@ -53,9 +50,9 @@ class SIDiffTimestampCompressionModelTest {
 
     @Test
     public void testModelResets(){
-        siDiffTimestampModelType.append(createDataPoint());
-        siDiffTimestampModelType.append(createDataPoint());
-        siDiffTimestampModelType.append(createDataPoint());
+        siDiffTimestampModelType.append(createDataPoint(1000));
+        siDiffTimestampModelType.append(createDataPoint(2000));
+        siDiffTimestampModelType.append(createDataPoint(3000));
 
         List<DataPoint> dataPointList = createTenDataPoints();
         boolean success = siDiffTimestampModelType.resetAndAppendAll(dataPointList);

@@ -79,7 +79,4 @@ public class ModelPickerBruteForce extends ModelPicker{
         }
         return result;
     }
-
-
-
 }

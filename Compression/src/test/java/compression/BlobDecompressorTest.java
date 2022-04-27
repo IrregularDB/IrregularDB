@@ -23,12 +23,10 @@ class BlobDecompressorTest {
     ByteBuffer valueBlob;
 
     // Helper that creates random data points in increasing order
-    private DataPoint createRandomDataPoint(Random random){
-        long previousLong = 0;
+    private DataPoint createRandomDataPoint(Random random, long previousLong){
         float previousFloat = 0;
 
-        previousLong += random.nextLong(100L);
-        previousFloat += random.nextFloat(100.00f);
+        previousFloat += random.nextFloat();
         return new DataPoint(previousLong, previousFloat);
     }
 
@@ -37,7 +35,7 @@ class BlobDecompressorTest {
 
         List<DataPoint> dataPointList = new ArrayList<>();
         for(int i = 0; i < x; i++){
-            dataPointList.add(createRandomDataPoint(random));
+            dataPointList.add(createRandomDataPoint(random, i * 1000L));
         }
         return dataPointList;
     }

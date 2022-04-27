@@ -1,10 +1,17 @@
 package segmentgenerator;
 
+import config.ConfigProperties;
+
 public class ModelPickerFactory {
 
     public enum ModelPickerType {
         GREEDY,
         BRUTE_FORCE;
+    }
+
+    public static ModelPicker createModelPickerFromConfig() {
+        ModelPickerType modelPickerType = ConfigProperties.getInstance().getModelPickerType();
+        return createModelPicker(modelPickerType);
     }
 
     public static ModelPicker createModelPicker(ModelPickerType modelPickerType) {

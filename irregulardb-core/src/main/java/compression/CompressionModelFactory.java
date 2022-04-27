@@ -17,11 +17,6 @@ public class CompressionModelFactory {
     private static final int lengthBound = config.getModelLengthBound();
     private static final List<TimestampCompressionModelType> timestampModelTypes =  config.getTimestampModels();
     private static final List<ValueCompressionModelType> valueModelTypes =  config.getValueModels();
-    private static final ModelPickerFactory.ModelPickerType modelPickerType = config.getModelPickerType();
-
-    public static ModelPicker getModelPicker() {
-        return ModelPickerFactory.createModelPicker(modelPickerType);
-    }
 
     public static List<TimestampCompressionModel> getTimestampCompressionModels(String tag){
         final Integer timestampModelThreshold = config.getTimeStampThresholdForTimeSeriesTag(tag);

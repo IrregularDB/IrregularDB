@@ -1,18 +1,13 @@
 package segmentgenerator;
 
-import compression.timestamp.DeltaDeltaTimestampCompressionModel;
-import compression.timestamp.RegularTimestampCompressionModel;
-import compression.timestamp.SIDiffTimestampCompressionModel;
-import compression.timestamp.TimestampCompressionModel;
-import compression.value.GorillaValueCompressionModel;
-import compression.value.PMCMeanValueCompressionModel;
-import compression.value.SwingValueCompressionModel;
-import compression.value.ValueCompressionModel;
+import compression.timestamp.*;
+import compression.value.*;
 import config.ConfigProperties;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import records.CompressionModel;
 import records.DataPoint;
 
 import java.util.ArrayList;
@@ -20,7 +15,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class CompressionModelManagerTest {
+class SmallIntegrationTestOfCompressionModelManager {
     CompressionModelManager compressionModelManager;
     private static final int LENGTH_BOUND = 3;
 
@@ -72,9 +67,50 @@ class CompressionModelManagerTest {
 
     @Test
     void resetAndTryAppendBuffer() {
+        List<DataPoint> initialDataPoints = new ArrayList<>();
+        initialDataPoints.add(new DataPoint(0, 1));
+        initialDataPoints.add(new DataPoint(100, 1));
+        initialDataPoints.add(new DataPoint(200, 1));
+        for (DataPoint dataPoint : initialDataPoints) {
+            Assertions.assertTrue(compressionModelManager.tryAppendDataPointToAllModels(dataPoint));
+        }
+
+        // Even though these new data points are very different from the old one we expect the
+        // the method to return true as the models should have been reseted.
+
+        List<DataPoint> buffer = new ArrayList<>();
+        buffer.add(new DataPoint(1000, 999));
+        buffer.add(new DataPoint(1100, 999));
+        buffer.add(new DataPoint(1200, 999));
+        buffer.add(new DataPoint(1300, 999));
+        Assertions.assertTrue(compressionModelManager.resetAndTryAppendBuffer(buffer));
     }
 
+
+    // TODO: consider adding more tests using other models
+    // We here expect a regular model and a pmc mean model with length 10
     @Test
-    void getBestCompressionModel() {
+    void getBestCompressionModelPmcMeanAndRegular() {
+        List<DataPoint> dataPoints = new ArrayList<>();
+        dataPoints.add(new DataPoint(0, 1));
+        dataPoints.add(new DataPoint(100, 1));
+        dataPoints.add(new DataPoint(200, 1));
+        dataPoints.add(new DataPoint(300, 1));
+        dataPoints.add(new DataPoint(400, 1));
+        dataPoints.add(new DataPoint(500, 1));
+        dataPoints.add(new DataPoint(600, 1));
+        dataPoints.add(new DataPoint(700, 1));
+        dataPoints.add(new DataPoint(800, 1));
+        dataPoints.add(new DataPoint(900, 1));
+
+        for (DataPoint dataPoint : dataPoints) {
+            Assertions.assertTrue(compressionModelManager.tryAppendDataPointToAllModels(dataPoint));
+        }
+
+        CompressionModel bestCompressionModel = compressionModelManager.getBestCompressionModel();
+
+        assertEquals(dataPoints.size(), bestCompressionModel.length());
+        assertEquals(TimestampCompressionModelType.REGULAR, bestCompressionModel.timestampType());
+        assertEquals(ValueCompressionModelType.PMC_MEAN, bestCompressionModel.valueType());
     }
 }

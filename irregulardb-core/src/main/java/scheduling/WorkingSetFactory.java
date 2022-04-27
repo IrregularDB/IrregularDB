@@ -10,5 +10,4 @@ public class WorkingSetFactory {
     public WorkingSet generateWorkingSet(){
         return new WorkingSet(new ConcurrentLinkedQueue<>(), new TimeSeriesFactory(), new DatabaseConnectionFactory());
     }
-
 }

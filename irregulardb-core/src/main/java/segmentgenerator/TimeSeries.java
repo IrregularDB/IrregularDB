@@ -4,7 +4,6 @@ import compression.CompressionModelFactory;
 import config.ConfigProperties;
 import records.DataPoint;
 import records.Segment;
-import records.SegmentSummary;
 import storage.DatabaseConnection;
 
 import java.util.List;
@@ -13,18 +12,14 @@ public class TimeSeries {
     private final String timeSeriesTag;
     private final DatabaseConnection databaseConnection;
     private final SegmentGenerator segmentGenerator;
-    private final boolean computeSegmentSummary;
 
     public TimeSeries(String timeSeriesTag, DatabaseConnection dbConnection) {
         this.timeSeriesTag = timeSeriesTag;
         this.databaseConnection = dbConnection;
-        int timeSeriesId = getTimeSeriesIdFromDb();
-        this.segmentGenerator = new SegmentGenerator(new CompressionModelManager(CompressionModelFactory.getValueCompressionModels(timeSeriesTag), CompressionModelFactory.getTimestampCompressionModels(timeSeriesTag)), timeSeriesId);
-        this.computeSegmentSummary = ConfigProperties.getInstance().populateSegmentSummary();
-    }
-
-    private int getTimeSeriesIdFromDb() {
-        return databaseConnection.getTimeSeriesId(this.timeSeriesTag);
+        int timeSeriesId = databaseConnection.getTimeSeriesId(timeSeriesTag);
+        ModelPicker modelPicker = ModelPickerFactory.createModelPickerFromConfig();
+        CompressionModelManager compressionModelManager = new CompressionModelManager(CompressionModelFactory.getValueCompressionModels(timeSeriesTag), CompressionModelFactory.getTimestampCompressionModels(timeSeriesTag), modelPicker);
+        this.segmentGenerator = new SegmentGenerator(compressionModelManager, timeSeriesId);
     }
 
     public void processDataPoint(DataPoint dataPoint) {

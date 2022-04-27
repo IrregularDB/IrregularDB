@@ -50,7 +50,8 @@ class SegmentGeneratorTest {
                 new SegmentSummary(dataPoints, segmentKey)
         );
 
-        TestCompressionModelManagerRegularPMCMean testCompressionModelManagerRegularPMCMean = new TestCompressionModelManagerRegularPMCMean(List.of(new PMCMeanValueCompressionModel(0)), List.of(new RegularTimestampCompressionModel(0)));
+        ModelPicker modelPicker = ModelPickerFactory.createModelPickerFromConfig();
+        TestCompressionModelManagerRegularPMCMean testCompressionModelManagerRegularPMCMean = new TestCompressionModelManagerRegularPMCMean(List.of(new PMCMeanValueCompressionModel(0)), List.of(new RegularTimestampCompressionModel(0)), modelPicker);
 
         SegmentGenerator segmentGenerator = new SegmentGenerator(testCompressionModelManagerRegularPMCMean, 1);
 
@@ -75,7 +76,8 @@ class SegmentGeneratorTest {
         int EXPECTED_LENGTH_BOUND = 50; //this is defined in the test config.properties
         List<DataPoint> nPmcMeanDataPoints = getNPmcMeanDataPoints(1, 1, 1, EXPECTED_LENGTH_BOUND);
 
-        TestCompressionModelManagerRegularPMCMean testCompressionModelManagerRegularPMCMean = new TestCompressionModelManagerRegularPMCMean(List.of(new PMCMeanValueCompressionModel(0)), List.of(new RegularTimestampCompressionModel(0)));
+        ModelPicker modelPicker = ModelPickerFactory.createModelPickerFromConfig();
+        TestCompressionModelManagerRegularPMCMean testCompressionModelManagerRegularPMCMean = new TestCompressionModelManagerRegularPMCMean(List.of(new PMCMeanValueCompressionModel(0)), List.of(new RegularTimestampCompressionModel(0)), modelPicker);
 
         SegmentGenerator segmentGenerator = new SegmentGenerator(testCompressionModelManagerRegularPMCMean, 1);
 

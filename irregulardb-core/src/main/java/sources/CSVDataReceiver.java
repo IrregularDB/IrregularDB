@@ -30,6 +30,7 @@ public class CSVDataReceiver extends DataReceiver {
                 timeSeriesReading = csvTimeSeriesReader.next();
             }
 
+            csvTimeSeriesReader.close();
             super.close();
         } catch (IOException | InterruptedException e){
             e.printStackTrace();

@@ -30,6 +30,7 @@ public class SocketProducerCSVReader extends SocketProducerBase {
                 timeSeriesReading = csvTimeSeriesReader.next();
             }
             System.out.println("Socket producer done with: " + this.csvFile.getAbsolutePath());
+            csvTimeSeriesReader.close();
             super.close();
         } catch (IOException e) {
             throw new RuntimeException(e);

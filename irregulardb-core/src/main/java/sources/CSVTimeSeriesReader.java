@@ -12,8 +12,11 @@ public class CSVTimeSeriesReader {
     public CSVTimeSeriesReader(File csvFile, String csvDelimiter) throws FileNotFoundException {
         FileReader fileReader = new FileReader(csvFile);
         this.bufferedReader = new BufferedReader(fileReader);
-
         this.csvDelimiter = csvDelimiter;
+    }
+
+    public void close() throws IOException {
+        this.bufferedReader.close();
     }
 
     /**
@@ -26,7 +29,6 @@ public class CSVTimeSeriesReader {
         }
         return parseLine(line);
     }
-
 
     private TimeSeriesReading parseLine(String line) {
         String[] split = line.split(this.csvDelimiter);

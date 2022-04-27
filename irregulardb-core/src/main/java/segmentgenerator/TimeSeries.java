@@ -1,6 +1,7 @@
 package segmentgenerator;
 
 import compression.CompressionModelFactory;
+import config.ConfigProperties;
 import records.DataPoint;
 import records.Segment;
 import storage.DatabaseConnection;
@@ -16,7 +17,9 @@ public class TimeSeries {
         this.timeSeriesTag = timeSeriesTag;
         this.databaseConnection = dbConnection;
         int timeSeriesId = databaseConnection.getTimeSeriesId(timeSeriesTag);
-        this.segmentGenerator = new SegmentGenerator(new CompressionModelManager(CompressionModelFactory.getValueCompressionModels(timeSeriesTag), CompressionModelFactory.getTimestampCompressionModels(timeSeriesTag)), timeSeriesId);
+        ModelPicker modelPicker = ModelPickerFactory.createModelPickerFromConfig();
+        CompressionModelManager compressionModelManager = new CompressionModelManager(CompressionModelFactory.getValueCompressionModels(timeSeriesTag), CompressionModelFactory.getTimestampCompressionModels(timeSeriesTag), modelPicker);
+        this.segmentGenerator = new SegmentGenerator(compressionModelManager, timeSeriesId);
     }
 
     public void processDataPoint(DataPoint dataPoint) {

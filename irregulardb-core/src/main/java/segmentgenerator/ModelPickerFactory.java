@@ -9,10 +9,12 @@ public class ModelPickerFactory {
         BRUTE_FORCE;
     }
 
-    private static final ModelPickerType modelPickerType = ConfigProperties.getInstance().getModelPickerType();
+    public static ModelPicker createModelPickerFromConfig() {
+        ModelPickerType modelPickerType = ConfigProperties.getInstance().getModelPickerType();
+        return createModelPicker(modelPickerType);
+    }
 
-
-    public static ModelPicker getModelPicker() {
+    public static ModelPicker createModelPicker(ModelPickerType modelPickerType) {
         return initializeModelPickerByType(modelPickerType);
     }
 

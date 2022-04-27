@@ -20,13 +20,13 @@ public class CompressionModelManager {
     private final List<TimestampCompressionModel> inactiveTimestampModels;
 
     public CompressionModelManager(List<ValueCompressionModel> valueCompressionModels, List<TimestampCompressionModel> timestampCompressionModels,
-                                   ModelPickerFactory.ModelPickerType modelPickerType) {
+                                  ModelPicker modelPicker) {
         this.activeValueModels = new ArrayList<>(valueCompressionModels);
         this.activeTimestampModels = new ArrayList<>(timestampCompressionModels);
 
         this.inactiveValueModels = new ArrayList<>();
         this.inactiveTimestampModels = new ArrayList<>();
-        this.modelPicker = ModelPickerFactory.createModelPicker(modelPickerType);//can be taken as a method parameter if we want
+        this.modelPicker = modelPicker;
     }
 
     public boolean tryAppendDataPointToAllModels(DataPoint dataPoint) {

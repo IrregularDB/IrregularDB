@@ -1,7 +1,5 @@
 package segmentgenerator;
 
-import config.ConfigProperties;
-
 public class ModelPickerFactory {
 
     public enum ModelPickerType {

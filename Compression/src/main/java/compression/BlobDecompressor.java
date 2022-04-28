@@ -93,7 +93,7 @@ public class BlobDecompressor {
     }
 
 
-    static List<DataPoint> createDataPointsByDecompressingValues(ValueCompressionModelType valueModelType, ByteBuffer valueBlob, List<Long> timestamps) {
+    public static List<DataPoint> createDataPointsByDecompressingValues(ValueCompressionModelType valueModelType, ByteBuffer valueBlob, List<Long> timestamps) {
         return switch (valueModelType) {
             case PMC_MEAN -> decompressPMCMean(valueBlob, timestamps);
             case SWING -> decompressSwing(valueBlob, timestamps);
@@ -109,13 +109,14 @@ public class BlobDecompressor {
     }
 
     private static List<DataPoint> decompressSwing(ByteBuffer valueBlob, List<Long> timestamps) {
+        Long startTime = timestamps.get(0);
         final float slope = valueBlob.getFloat(0);
         final float intercept = valueBlob.getFloat(4);
 
         // TODO: consider just using a linear function object
         Function<Long, Float> linearFunction = (Long time) -> time * slope + intercept;
 
-        return timestamps.stream().map(timeStamp -> new DataPoint(timeStamp, linearFunction.apply(timeStamp))).toList();
+        return timestamps.stream().map(timeStamp -> new DataPoint(timeStamp, linearFunction.apply(timeStamp - startTime))).toList();
     }
 
     private static List<DataPoint> decompressGorilla(ByteBuffer valueBlob, List<Long> timeStamps) {

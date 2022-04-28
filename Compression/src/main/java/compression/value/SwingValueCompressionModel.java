@@ -17,6 +17,7 @@ public class SwingValueCompressionModel extends ValueCompressionModel {
     private boolean earlierAppendFailed;
     private LinearFunction upperBound;
     private LinearFunction lowerBound;
+    private Long startTime;
 
     public SwingValueCompressionModel(float errorBound) {
         super(errorBound,
@@ -35,6 +36,7 @@ public class SwingValueCompressionModel extends ValueCompressionModel {
         this.initialDataPoint = null;
         this.currentSize = 0;
         this.earlierAppendFailed = false;
+        this.startTime = null;
     }
 
     @Override
@@ -44,19 +46,25 @@ public class SwingValueCompressionModel extends ValueCompressionModel {
 
     @Override
     protected boolean appendDataPoint(DataPoint dataPoint) {
-        if (earlierAppendFailed) { // Security added so that if you try to append after an earlier append failed
+        if (earlierAppendFailed){ // Security added so that if you try to append after an earlier append failed
             throw new IllegalArgumentException("You tried to append to the SWING-model after it failed an earlier append");
         }
+        if (this.startTime == null) {
+            this.startTime = dataPoint.timestamp();
+        }
+
+        DataPoint offsetDataPoint = new DataPoint(dataPoint.timestamp() - this.startTime, dataPoint.value());
+
         boolean withinErrorBound;
-        float allowedDerivation = Math.abs(dataPoint.value() * getErrorBound());
+        float allowedDerivation = Math.abs(offsetDataPoint.value() * getErrorBound());
 
         if (this.getLength() < 2) {
-            handleFirstTwoDataPoints(dataPoint, allowedDerivation);  // LINE 2-4: makes a recording and upper+lower bound
+            handleFirstTwoDataPoints(offsetDataPoint, allowedDerivation);  // LINE 2-4: makes a recording and upper+lower bound
             withinErrorBound = true;
         } else {
-            withinErrorBound = checkIfDataPointIsWithinErrorBound(dataPoint, allowedDerivation); // Line 12
+            withinErrorBound = checkIfDataPointIsWithinErrorBound(offsetDataPoint, allowedDerivation); // Line 12
             if (withinErrorBound) { // Line 23-27
-                swingBounds(dataPoint, allowedDerivation);
+                swingBounds(offsetDataPoint, allowedDerivation);
             } else { // Line 13-22 (we ignore most of it as we only track one recording at a time)
                 earlierAppendFailed = true;
             }

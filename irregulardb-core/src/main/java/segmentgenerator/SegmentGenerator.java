@@ -1,11 +1,6 @@
 package segmentgenerator;
 
 import compression.BlobDecompressor;
-import compression.timestamp.FallbackTimeStampCompressionModel;
-import compression.timestamp.TimestampCompressionModel;
-import compression.value.FallbackValueCompressionModel;
-import compression.value.ValueCompressionModel;
-import compression.value.ValueCompressionModelType;
 import config.ConfigProperties;
 import records.*;
 

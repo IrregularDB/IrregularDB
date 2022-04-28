@@ -452,7 +452,7 @@ class BlobDecompressorTest {
         float value = 99F;
         DataPoint dataPoint = new DataPoint(timestamp, value);
 
-        TimestampCompressionModel timeModel = new FallbackTimeStampCompressionModel(timestamp);
+        TimestampCompressionModel timeModel = new FallbackTimestampCompressionModel(timestamp);
         ValueCompressionModel valueModel =  new FallbackValueCompressionModel(value);
 
         List<Long> decompressedTimestamps = BlobDecompressor.decompressTimestamps(timeModel.getTimestampCompressionModelType(),

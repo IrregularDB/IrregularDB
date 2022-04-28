@@ -57,7 +57,7 @@ public abstract class ModelPicker {
 
     public static CompressionModel createFallBackCompressionModel(DataPoint dataPoint) {
         CompressionModel bestCompressionModel;
-        TimestampCompressionModel timestampCompressionModel = new FallbackTimeStampCompressionModel(dataPoint.timestamp());
+        TimestampCompressionModel timestampCompressionModel = new FallbackTimestampCompressionModel(dataPoint.timestamp());
         ValueCompressionModel valueCompressionModel = new FallbackValueCompressionModel(dataPoint.value());
         bestCompressionModel = new CompressionModel(
                 valueCompressionModel.getValueCompressionModelType(),

@@ -89,7 +89,7 @@ public class DeltaDeltaTimestampCompressionModel extends TimestampCompressionMod
 
     @Override
     public boolean canCreateByteBuffer() {
-        return previousTimestamp != null;
+        return deltaDeltaTimestamps.size() != 0;
     }
 
     @Override

@@ -1,6 +1,7 @@
 package compression;
 
 import compression.timestamp.*;
+import compression.value.FallbackValueCompressionModel;
 import compression.value.GorillaValueCompressionModel;
 import compression.value.ValueCompressionModel;
 import compression.value.ValueCompressionModelType;
@@ -443,6 +444,30 @@ class BlobDecompressorTest {
         assertEquals(5000 + 251, decodedTimestamps.get(2)); // 5000 + 251 -> 5251, because it is above the threshold for bucket 0 and should stay in bucket 1.
         assertEquals(7500 + 511, decodedTimestamps.get(3)); // 7500 + (511 + 250) -> 7500 + 511, bucket 1 size is 511 so we want to be 511+250 away to get reduced to it its max value
         assertEquals(10000, decodedTimestamps.get(4)); // 10000 -> 10000 because it is precisely reconstructed using the calculated SI.
+    }
+
+    @Test
+    public void testDecompressingFallbackModels(){
+        long timestamp = 1000L;
+        float value = 99F;
+        DataPoint dataPoint = new DataPoint(timestamp, value);
+
+        TimestampCompressionModel timeModel = new FallbackTimeStampCompressionModel(timestamp);
+        ValueCompressionModel valueModel =  new FallbackValueCompressionModel(value);
+
+        List<Long> decompressedTimestamps = BlobDecompressor.decompressTimestamps(timeModel.getTimestampCompressionModelType(),
+                timeModel.getBlobRepresentation(),
+                timestamp,
+                timestamp);
+        assertEquals(1, decompressedTimestamps.size());
+        assertEquals(timestamp, decompressedTimestamps.get(0));
+
+        List<DataPoint> decompressedDataPoints = BlobDecompressor.createDataPointsByDecompressingValues(valueModel.getValueCompressionModelType(),
+                valueModel.getBlobRepresentation(),
+                decompressedTimestamps);
+
+        assertEquals(1, decompressedDataPoints.size());
+        assertEquals(dataPoint, decompressedDataPoints.get(0));
     }
 
 }

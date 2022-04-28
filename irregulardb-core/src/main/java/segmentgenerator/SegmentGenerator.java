@@ -1,6 +1,11 @@
 package segmentgenerator;
 
 import compression.BlobDecompressor;
+import compression.timestamp.FallbackTimeStampCompressionModel;
+import compression.timestamp.TimestampCompressionModel;
+import compression.value.FallbackValueCompressionModel;
+import compression.value.ValueCompressionModel;
+import compression.value.ValueCompressionModelType;
 import config.ConfigProperties;
 import records.*;
 
@@ -38,7 +43,13 @@ public class SegmentGenerator {
         int amtDataPointsUsed;
 
         do {
-            CompressionModel bestCompressionModel = this.compressionModelManager.getBestCompressionModel();
+            CompressionModel bestCompressionModel;
+            if (notYetEmitted.size() == 1) {
+                DataPoint dataPoint = notYetEmitted.get(0);
+                bestCompressionModel = getFallBackCompressionModel(dataPoint);
+            } else {
+                bestCompressionModel = this.compressionModelManager.getBestCompressionModel();
+            }
 
             //find size of each model and reduce the largest down to the size of the smallest
             if (bestCompressionModel.length() == 0) {
@@ -55,6 +66,19 @@ public class SegmentGenerator {
         } while (!prepareForNextSegment(amtDataPointsUsed));
 
         return segments;
+    }
+
+    private CompressionModel getFallBackCompressionModel(DataPoint dataPoint) {
+        CompressionModel bestCompressionModel;
+        TimestampCompressionModel timestampCompressionModel = new FallbackTimeStampCompressionModel(dataPoint.timestamp());
+        ValueCompressionModel valueCompressionModel = new FallbackValueCompressionModel(dataPoint.value());
+        bestCompressionModel = new CompressionModel(
+                valueCompressionModel.getValueCompressionModelType(),
+                valueCompressionModel.getBlobRepresentation(),
+                timestampCompressionModel.getTimestampCompressionModelType(),
+                timestampCompressionModel.getBlobRepresentation(),
+                1);
+        return bestCompressionModel;
     }
 
     /**

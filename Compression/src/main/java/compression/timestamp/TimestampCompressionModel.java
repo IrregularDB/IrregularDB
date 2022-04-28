@@ -16,7 +16,7 @@ public abstract class TimestampCompressionModel extends BaseModel {
      */
     public abstract TimestampCompressionModelType getTimestampCompressionModelType();
 
-    public Integer getThreshold() {
+    public final Integer getThreshold() {
         if (threshold == null) {
             throw new UnsupportedOperationException("You tried to get error bound for a model, which has no error bound defined");
         }

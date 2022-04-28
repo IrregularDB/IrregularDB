@@ -24,6 +24,7 @@ class ModelPickerBruteForceBlobBufferTest {
         ConfigProperties.isTest = true;
     }
 
+    /*
     @Test
     void getBlobForModelWithLength() {
         List<DataPoint> testDataPoints = createTestDataPoints();
@@ -58,8 +59,7 @@ class ModelPickerBruteForceBlobBufferTest {
                 Assertions.assertTrue(correctInvalidPair(pair));
             }
         }
-
-    }
+    }*/
 
     private boolean correctInvalidPair(Pair<TimestampCompressionModel, ValueCompressionModel> pair){
         return (pair.f0().getTimestampCompressionModelType() == TimestampCompressionModelType.REGULAR &&

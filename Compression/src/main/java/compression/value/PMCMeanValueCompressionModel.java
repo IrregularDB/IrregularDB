@@ -97,6 +97,9 @@ public class PMCMeanValueCompressionModel extends ValueCompressionModel {
     @Override
     protected void reduceToSize(int n) {
         // Do nothing except update length (if the constant model could fit the longer list of values it can also fit the shorter list)
+        float average = this.sum / this.length;
+        float reduceSumAmount = average * (this.getLength() - n);
+        this.sum-=reduceSumAmount;
         length = n;
     }
 }

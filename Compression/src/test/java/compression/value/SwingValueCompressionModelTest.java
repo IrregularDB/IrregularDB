@@ -9,6 +9,7 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Stream;
 
 class SwingValueCompressionModelTest {
     SwingValueCompressionModel swingModel;
@@ -208,5 +209,42 @@ class SwingValueCompressionModelTest {
         var values = Arrays.asList(1.0F, 1.0F, 1.0F, 1.0F);
         swingModel.resetAndAppendAll(createDataPointsFromValues(values));
         Assertions.assertThrows(IllegalArgumentException.class, () ->  swingModel.reduceToSizeN(5));
+    }
+
+    @Test
+    void specificTest(){
+        List<String> stringReadings = List.of(
+                "1304136460000 2.00",
+                "1304136463000 2.00",
+                "1304136472000 0.00",
+                "1304136476000 0.00",
+                "1304136479000 0.00",
+                "1304136482000 0.00",
+                "1304136486000 0.00",
+                "1304136489000 0.00",
+                "1304136493000 0.00",
+                "1304136496000 0.00",
+                "1304136500000 0.00",
+                "1304136503000 0.00",
+                "1304136507000 0.00",
+                "1304136510000 0.00",
+                "1304136514000 0.00",
+                "1304136517000 0.00",
+                "1304136521000 0.00",
+                "1304136524000 0.00",
+                "1304136533000 0.00"
+        );
+
+        List<DataPoint> dataPoints = stringReadings.stream().map(this::stringToDataPoint).toList();
+
+        boolean success = swingModel.resetAndAppendAll(dataPoints);
+
+        Assertions.assertFalse(success);
+        Assertions.assertEquals(2, swingModel.getLength());
+    }
+
+    private DataPoint stringToDataPoint(String str) {
+        String[] s = str.split(" ");
+        return new DataPoint(Long.parseLong(s[0]), Float.parseFloat(s[1]));
     }
 }

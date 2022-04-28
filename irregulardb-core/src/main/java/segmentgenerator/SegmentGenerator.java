@@ -46,7 +46,7 @@ public class SegmentGenerator {
             CompressionModel bestCompressionModel;
             if (notYetEmitted.size() == 1) {
                 DataPoint dataPoint = notYetEmitted.get(0);
-                bestCompressionModel = getFallBackCompressionModel(dataPoint);
+                bestCompressionModel = ModelPicker.createFallBackCompressionModel(dataPoint);
             } else {
                 bestCompressionModel = this.compressionModelManager.getBestCompressionModel();
             }
@@ -68,18 +68,6 @@ public class SegmentGenerator {
         return segments;
     }
 
-    private CompressionModel getFallBackCompressionModel(DataPoint dataPoint) {
-        CompressionModel bestCompressionModel;
-        TimestampCompressionModel timestampCompressionModel = new FallbackTimeStampCompressionModel(dataPoint.timestamp());
-        ValueCompressionModel valueCompressionModel = new FallbackValueCompressionModel(dataPoint.value());
-        bestCompressionModel = new CompressionModel(
-                valueCompressionModel.getValueCompressionModelType(),
-                valueCompressionModel.getBlobRepresentation(),
-                timestampCompressionModel.getTimestampCompressionModelType(),
-                timestampCompressionModel.getBlobRepresentation(),
-                1);
-        return bestCompressionModel;
-    }
 
     /**
      * @return if this method returns false then another segment must be generated.

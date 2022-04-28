@@ -1,10 +1,13 @@
 package segmentgenerator;
 
 import compression.BaseModel;
+import compression.timestamp.FallbackTimeStampCompressionModel;
+import compression.value.FallbackValueCompressionModel;
 import config.ConfigProperties;
 import records.CompressionModel;
 import compression.timestamp.TimestampCompressionModel;
 import compression.value.ValueCompressionModel;
+import records.DataPoint;
 
 import java.util.Comparator;
 import java.util.List;
@@ -49,5 +52,19 @@ public abstract class ModelPicker {
             overhead += 4 + 8 + 4 + 4;
         }
         return overhead / 2; // there are two models to share the overhead
+    }
+
+
+    public static CompressionModel createFallBackCompressionModel(DataPoint dataPoint) {
+        CompressionModel bestCompressionModel;
+        TimestampCompressionModel timestampCompressionModel = new FallbackTimeStampCompressionModel(dataPoint.timestamp());
+        ValueCompressionModel valueCompressionModel = new FallbackValueCompressionModel(dataPoint.value());
+        bestCompressionModel = new CompressionModel(
+                valueCompressionModel.getValueCompressionModelType(),
+                valueCompressionModel.getBlobRepresentation(),
+                timestampCompressionModel.getTimestampCompressionModelType(),
+                timestampCompressionModel.getBlobRepresentation(),
+                1);
+        return bestCompressionModel;
     }
 }

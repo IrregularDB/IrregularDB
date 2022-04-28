@@ -59,3 +59,7 @@ INSERT INTO TimestampValueModelTypes(timestampValueModelShort, valuemodel, times
     (512, 'Gorilla', 'Regular'),
     (513, 'Gorilla', 'Delta Delta'),
     (514, 'Gorilla', 'SI-Difference');
+
+
+INSERT INTO TimestampValueModelTypes(timestampValueModelShort, valuemodel, timestampmodel) VALUES
+    (771, 'Fallback', 'Fallback');

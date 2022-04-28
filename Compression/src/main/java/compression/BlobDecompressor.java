@@ -29,6 +29,7 @@ public class BlobDecompressor {
             case REGULAR -> decompressRegular(timestampBlob, startTime, endTime);
             case DELTADELTA -> decompressDeltaDelta(timestampBlob, startTime);
             case SIDIFF -> decompressSIDiff(timestampBlob, startTime);
+            case FALLBACK -> List.of(startTime);
             default -> throw new IllegalArgumentException("No decompression method has been implemented for the given Time Stamp Model Type");
         };
     }
@@ -46,9 +47,6 @@ public class BlobDecompressor {
     }
 
     private static List<Long> decompressDeltaDelta(ByteBuffer timestampBlob, long startTime){
-        if (timestampBlob.limit() == 0) {
-            return List.of(startTime);
-        }
         BitStream bitStream = new BitStreamNew(timestampBlob);
 
         List<Integer> deltaDeltaTimes = BucketEncoding.decode(bitStream, true);
@@ -99,6 +97,7 @@ public class BlobDecompressor {
             case PMC_MEAN -> decompressPMCMean(valueBlob, timestamps);
             case SWING -> decompressSwing(valueBlob, timestamps);
             case GORILLA -> decompressGorilla(valueBlob, timestamps);
+            case FALLBACK -> decompressFallbackValue(valueBlob, timestamps);
             default -> throw new IllegalArgumentException("No decompression method has been implemented for the given Value Model Type");
         };
     }
@@ -132,5 +131,13 @@ public class BlobDecompressor {
             dataPoints.add(new DataPoint(timeStamps.get(i), decodedValues.get(i)));
         }
         return dataPoints;
+    }
+
+    private static List<DataPoint> decompressFallbackValue(ByteBuffer valueBlob, List<Long> timestamps) {
+        if (timestamps.size() != 1) {
+            throw new RuntimeException("The amount of values and time stamps did not match up");
+        }
+        float value = valueBlob.getFloat(0);
+        return List.of(new DataPoint(timestamps.get(0), value));
     }
 }

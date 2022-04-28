@@ -4,10 +4,10 @@ import records.DataPoint;
 
 import java.nio.ByteBuffer;
 
-public class FallbackTimeStampCompressionModel extends TimestampCompressionModel {
+public class FallbackTimestampCompressionModel extends TimestampCompressionModel {
     private final Long timestamp;
 
-    public FallbackTimeStampCompressionModel(Long timestamp) {
+    public FallbackTimestampCompressionModel(Long timestamp) {
         super(-1, null, false, -1);
         this.timestamp = timestamp;
     }

@@ -1,7 +1,7 @@
 package segmentgenerator;
 
 import compression.BaseModel;
-import compression.timestamp.FallbackTimeStampCompressionModel;
+import compression.timestamp.FallbackTimestampCompressionModel;
 import compression.value.FallbackValueCompressionModel;
 import config.ConfigProperties;
 import records.CompressionModel;
@@ -9,7 +9,6 @@ import compression.timestamp.TimestampCompressionModel;
 import compression.value.ValueCompressionModel;
 import records.DataPoint;
 
-import java.util.Comparator;
 import java.util.List;
 
 public abstract class ModelPicker {

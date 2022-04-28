@@ -23,3 +23,18 @@ CREATE FUNCTION decompressSegment(segment)
     RETURNS Setof sqlDataPoint
 AS 'SegmentDecompressor.decompressSegment'
     IMMUTABLE LANGUAGE java;
+
+select * from timeseries;
+
+
+561
+
+select * from (
+                  select (decompressSegment(s)).*
+                  from segment s
+                  where s.time_series_id = 561
+                    and s.start_time <= 1304136472000
+                    and (s.start_time + s.end_time) >= 1304136472000
+              ) t where t.timestamp = 1304136472000
+;
+select count(*) from datapointview;

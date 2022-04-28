@@ -94,7 +94,7 @@ public class BlobDecompressor {
         return timestamps;
     }
 
-    static List<DataPoint> createDataPointsByDecompressingValues(ValueCompressionModelType valueModelType, ByteBuffer valueBlob, List<Long> timestamps) {
+    public static List<DataPoint> createDataPointsByDecompressingValues(ValueCompressionModelType valueModelType, ByteBuffer valueBlob, List<Long> timestamps) {
         return switch (valueModelType) {
             case PMC_MEAN -> decompressPMCMean(valueBlob, timestamps);
             case SWING -> decompressSwing(valueBlob, timestamps);

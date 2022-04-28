@@ -88,6 +88,28 @@ class SegmentGeneratorTest {
         Assertions.assertEquals(nPmcMeanDataPoints.size(), amountAcceptedDataPoints);
     }
 
+
+    @Test
+    void testSingleDatapoint() {
+        DataPoint dataPoint = new DataPoint(1000L, 99F);
+        ModelPicker modelPicker = ModelPickerFactory.createModelPickerFromConfig();
+        TestCompressionModelManagerRegularPMCMean testCompressionModelManagerRegularPMCMean = new TestCompressionModelManagerRegularPMCMean(List.of(new PMCMeanValueCompressionModel(0)), List.of(new RegularTimestampCompressionModel(0)), modelPicker);
+
+        SegmentGenerator segmentGenerator = new SegmentGenerator(testCompressionModelManagerRegularPMCMean, 1);
+        segmentGenerator.acceptDataPoint(dataPoint);
+
+        List<Segment> segments = segmentGenerator.constructSegmentsFromBuffer();
+        Assertions.assertEquals(1, segments.size());
+        Segment segment = segments.get(0);
+        // We expect it to use the fall back model type
+        byte expectedTimestampModelType = (byte) TimestampCompressionModelType.FALLBACK.ordinal();
+        Assertions.assertEquals(expectedTimestampModelType, segment.timestampModelType());
+
+        byte expectedValueModelType = (byte) ValueCompressionModelType.FALLBACK.ordinal();
+        Assertions.assertEquals(expectedValueModelType, segment.valueModelType());
+    }
+
+
     private List<DataPoint> getNPmcMeanDataPoints(int startTime, int timeIncrement, float value, int amount) {
         List<DataPoint> dataPoints = new ArrayList<>();
         int time = startTime;

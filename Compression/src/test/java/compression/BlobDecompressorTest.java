@@ -171,15 +171,15 @@ class BlobDecompressorTest {
     void decompressSwing() {
         setupSwingValueModel(0.05F, 0.00F);
 
-        List<Long> timestamps = List.of(0L, 1L, 2L, 3L, 4L, 5L);
+        List<Long> timestamps = List.of(1000000000L, 1000000001L, 1000000002L, 1000000003L, 1000000004L, 1000000005L);
         List<DataPoint> dataPoints = callValueDecompressor(timestamps);
         List<DataPoint> expectedDataPoints = new ArrayList<>();
-        expectedDataPoints.add(new DataPoint(0, 0));
-        expectedDataPoints.add(new DataPoint(1, 0.05F));
-        expectedDataPoints.add(new DataPoint(2, 0.1F));
-        expectedDataPoints.add(new DataPoint(3, 0.15F));
-        expectedDataPoints.add(new DataPoint(4, 0.20F));
-        expectedDataPoints.add(new DataPoint(5, 0.25F));
+        expectedDataPoints.add(new DataPoint(1000000000, 1000000000 * 0.05F));
+        expectedDataPoints.add(new DataPoint(1000000001, 1000000001 * 0.05F));
+        expectedDataPoints.add(new DataPoint(1000000002, 1000000002 * 0.05F));
+        expectedDataPoints.add(new DataPoint(1000000003, 1000000003 * 0.05F));
+        expectedDataPoints.add(new DataPoint(1000000004, 1000000004 * 0.05F));
+        expectedDataPoints.add(new DataPoint(1000000005, 1000000005 * 0.05F));
 
         var allowedDifference = 0.000001;
         for (int i = 0; i < dataPoints.size(); i++) {

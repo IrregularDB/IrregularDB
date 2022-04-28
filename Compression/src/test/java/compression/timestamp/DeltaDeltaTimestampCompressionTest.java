@@ -165,27 +165,6 @@ class DeltaDeltaTimestampCompressionTest {
     }
 
     @Test
-    public void test1DataPoint() {
-        //expected max bucket size 0, 511, 65535, max int
-        final int threshold = 10;
-        List<DataPoint> dataPoints = List.of(
-                new DataPoint(50, -1)
-        );
-
-        deltaDeltaTimestampCompressionModel = new DeltaDeltaTimestampCompressionModel(threshold, Integer.MAX_VALUE);
-        deltaDeltaTimestampCompressionModel.resetAndAppendAll(dataPoints);
-
-        List<Long> decompressedTimestamps = BlobDecompressor.decompressTimestamps(TimestampCompressionModelType.DELTADELTA,
-                deltaDeltaTimestampCompressionModel.getBlobRepresentation(),
-                dataPoints.get(0).timestamp(),
-                dataPoints.get(dataPoints.size() - 1).timestamp()
-        );
-
-        Assertions.assertEquals(50, decompressedTimestamps.get(0));
-    }
-
-
-    @Test
     void testingToLargeDifferenceInTimeStamps() {
         List<Long> timestamps = Arrays.asList(1303382821000L, 1303382822000L, 1303382823000L, 1306097664000L, 1306097665000L);
 
@@ -200,15 +179,17 @@ class DeltaDeltaTimestampCompressionTest {
 
     @Test
     void testingToLargeDifferenceForInitialDelta() {
-        List<Long> timestamps = Arrays.asList(1303382823000L, 1306097664000L);
+        long t1 = 1303382823000L;
+        long t2 = t1 + 2L * Integer.MAX_VALUE;
+        List<Long> timestamps = Arrays.asList(t1, t2);
 
         boolean success = deltaDeltaTimestampCompressionModel.resetAndAppendAll(createDataPointsFromTimestamps(timestamps));
         Assertions.assertFalse(success);
         // We expect to be able to handle only the first data point as the DELTA value between these two timestamps is
         // larger than INT_MAX
         Assertions.assertEquals(1, deltaDeltaTimestampCompressionModel.getLength());
-        // DeltaDelta supports having a model of size 1
-        Assertions.assertTrue(deltaDeltaTimestampCompressionModel.canCreateByteBuffer());
+        // DeltaDelta no longer supports models of size 1
+        Assertions.assertFalse(deltaDeltaTimestampCompressionModel.canCreateByteBuffer());
     }
 
     // Helper that creates random data points in increasing order

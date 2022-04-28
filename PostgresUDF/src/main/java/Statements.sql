@@ -52,6 +52,15 @@ select count(*), t.valuemodel, t.timestampmodel from segment s
     join timestampvaluemodeltypes t on s.value_timestamp_model_type = t.timestampvaluemodelshort
     group by t.valuemodel, t.timestampmodel;
 
+-- Get amount of each type of value models
+select count(*), t.valuemodel from segment s
+    join timestampvaluemodeltypes t on s.value_timestamp_model_type = t.timestampvaluemodelshort
+    group by t.valuemodel;
+
+select count(*), t.timestampmodel from segment s
+    join timestampvaluemodeltypes t on s.value_timestamp_model_type = t.timestampvaluemodelshort
+group by t.timestampmodel;
+
 -- Gets sum of amount of data points for each time series tag
 select t.tag, summary.* from (select s.time_series_id, sum(s.amtdatapoints)
     from segmentsummary s

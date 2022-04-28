@@ -3,6 +3,7 @@ package data.producer;
 import records.TimeSeriesReading;
 import scheduling.WorkingSet;
 import sources.CSVTimeSeriesReader;
+import sources.CSVTimeSeriesReaderNoTags;
 
 import java.io.File;
 import java.io.IOException;
@@ -23,7 +24,7 @@ public class SocketProducerCSVReader extends SocketProducerBase {
     @Override
     protected void connectAndSendData() {
         try {
-            CSVTimeSeriesReader csvTimeSeriesReader = new CSVTimeSeriesReader(this.csvFile, this.csvDelimiter);
+            CSVTimeSeriesReader csvTimeSeriesReader = new CSVTimeSeriesReaderNoTags(this.csvFile, this.csvDelimiter);
             TimeSeriesReading timeSeriesReading = csvTimeSeriesReader.next();
             while (timeSeriesReading != null) {
                 super.sendReadingToStream(timeSeriesReading);

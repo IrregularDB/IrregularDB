@@ -6,8 +6,8 @@ import records.TimeSeriesReading;
 import java.io.*;
 
 public class CSVTimeSeriesReader {
-    private final BufferedReader bufferedReader;
-    private final String csvDelimiter;
+    protected final BufferedReader bufferedReader;
+    protected final String csvDelimiter;
 
     public CSVTimeSeriesReader(File csvFile, String csvDelimiter) throws FileNotFoundException {
         FileReader fileReader = new FileReader(csvFile);

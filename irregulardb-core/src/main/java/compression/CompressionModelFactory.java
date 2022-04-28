@@ -3,6 +3,9 @@ package compression;
 import compression.timestamp.*;
 import compression.value.*;
 import config.ConfigProperties;
+import segmentgenerator.CompressionModelManager;
+import segmentgenerator.ModelPicker;
+import segmentgenerator.ModelPickerFactory;
 
 import java.util.List;
 import java.util.function.Function;
@@ -10,23 +13,18 @@ import java.util.stream.Collectors;
 
 
 public class CompressionModelFactory {
-
-    private static ConfigProperties config = ConfigProperties.getInstance();
-    private static int lengthBound = config.getModelLengthBound();
-
+    private static final ConfigProperties config = ConfigProperties.getInstance();
+    private static final int lengthBound = config.getModelLengthBound();
+    private static final List<TimestampCompressionModelType> timestampModelTypes =  config.getTimestampModels();
+    private static final List<ValueCompressionModelType> valueModelTypes =  config.getValueModels();
 
     public static List<TimestampCompressionModel> getTimestampCompressionModels(String tag){
-        List<TimestampCompressionModelType> timestampModelTypes =  config.getTimestampModels();
         final Integer timestampModelThreshold = config.getTimeStampThresholdForTimeSeriesTag(tag);
-
         return getCompressionModels(timestampModelTypes, (modelType) -> getTimestampCompressionModelByType(modelType, timestampModelThreshold));
     }
 
-
     public static List<ValueCompressionModel> getValueCompressionModels(String tag) {
-        List<ValueCompressionModelType> valueModelTypes =  config.getValueModels();
         final Float valueModelErrorBound = config.getValueErrorBoundForTimeSeriesTag(tag);
-
         return getCompressionModels(valueModelTypes, (modelType) -> CompressionModelFactory.getValueCompressionModelByType(modelType, valueModelErrorBound));
     }
 
@@ -36,7 +34,6 @@ public class CompressionModelFactory {
                 .map(getModelInstance)
                 .collect(Collectors.toList());
     }
-
 
     private static ValueCompressionModel getValueCompressionModelByType(ValueCompressionModelType valueCompressionModelType, float errorBound) {
         switch (valueCompressionModelType) {

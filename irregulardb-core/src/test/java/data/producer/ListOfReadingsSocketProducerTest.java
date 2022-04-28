@@ -12,6 +12,7 @@ import scheduling.WorkingSet;
 import sources.SocketDataReceiverSpawner;
 import storage.TestDatabaseConnectionFactory;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
@@ -19,7 +20,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-class SocketProducerTest {
+class ListOfReadingsSocketProducerTest {
 
     @BeforeAll
     public static void setupConfig(){
@@ -45,7 +46,7 @@ class SocketProducerTest {
     }
 
     @Test
-    void connectAndSendData() {
+    void connectAndSendData() throws IOException {
         int serverSocketPort = ConfigProperties.getInstance().getSocketDataReceiverSpawnerPort();
 
         Queue<TimeSeriesReading> workingSetBuffer = new ConcurrentLinkedQueue<>();
@@ -56,7 +57,7 @@ class SocketProducerTest {
 
         List<TimeSeriesReading> testData = getNTestDataForTag("key1", 10);
 
-        SocketProducer socketProducer = new SocketProducer(testData, "localhost", serverSocketPort);
+        ListOfReadingsSocketProducer socketProducer = new ListOfReadingsSocketProducer(testData, "localhost", serverSocketPort);
         socketProducer.connectAndSendData();
 
         try {
@@ -79,7 +80,7 @@ class SocketProducerTest {
     }
 
     @Test
-    void connectAndSendDataSeveralTagsInOneStream() {
+    void connectAndSendDataSeveralTagsInOneStream() throws IOException {
         int serverSocketPort = ConfigProperties.getInstance().getSocketDataReceiverSpawnerPort() + 1;
         Queue<TimeSeriesReading> workingSetBuffer = new ConcurrentLinkedQueue<>();
         TestPartitioner testPartitioner = new TestPartitioner(workingSetBuffer);
@@ -90,7 +91,7 @@ class SocketProducerTest {
         List<TimeSeriesReading> testData2 = getNTestDataForTag("key2", 5);
         List<TimeSeriesReading> testData3 = getNTestDataForTag("key1", 5);
         List<TimeSeriesReading> allTestData = Stream.concat(Stream.concat(testData1.stream(), testData2.stream()), testData3.stream()).toList();
-        SocketProducer socketProducer = new SocketProducer(allTestData, "localhost", serverSocketPort);
+        ListOfReadingsSocketProducer socketProducer = new ListOfReadingsSocketProducer(allTestData, "localhost", serverSocketPort);
         socketProducer.connectAndSendData();
 
         try {
@@ -114,20 +115,5 @@ class SocketProducerTest {
         Assertions.assertEquals(testData2.get(0).getTag(), finalize2.getTag());
 
         Assertions.assertNull(workingSetBuffer.poll());
-    }
-
-    private static class TestPartitioner extends Partitioner {
-
-        private Queue<TimeSeriesReading> buffer;
-
-        public TestPartitioner(Queue<TimeSeriesReading> buffer) {
-            super(null, -1);
-            this.buffer = buffer;
-        }
-
-        @Override
-        public WorkingSet workingSetToSpawnReceiverFor() {
-            return new WorkingSet(this.buffer, null, new TestDatabaseConnectionFactory());
-        }
     }
 }

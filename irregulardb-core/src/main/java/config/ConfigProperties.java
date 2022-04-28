@@ -19,6 +19,9 @@ public class ConfigProperties extends Properties {
     private final Map<String, Integer> timestampThresholds = new HashMap<>();
     private final Map<String, Float> valueErrorBounds = new HashMap<>();
 
+    /**
+     * This method should never be called from a static context
+     */
     public static ConfigProperties getInstance() {
         if (INSTANCE != null) {
             return INSTANCE;
@@ -27,7 +30,12 @@ public class ConfigProperties extends Properties {
         if (!isTest) {
             INSTANCE = new ConfigProperties("irregulardb-core/src/main/resources/config.properties");
         } else {
-            INSTANCE = new ConfigProperties("src/test/resources/config.properties");
+            File configProperties = new File("./config.properties");
+            if (configProperties.exists()) {
+                INSTANCE = new ConfigProperties(configProperties.getAbsolutePath());
+            } else {
+                INSTANCE = new ConfigProperties("src/test/resources/config.properties");
+            }
         }
         return INSTANCE;
     }
@@ -46,12 +54,7 @@ public class ConfigProperties extends Properties {
     }
 
     public int getConfiguredNumberOfWorkingSets() {
-        String workingsets = getProperty("workingsets");
-        if (workingsets == null) {
-            // Defaults to 1
-            return 1;
-        }
-
+        String workingsets = getProperty("workingsets", "1");
         return Integer.parseInt(workingsets);
     }
 
@@ -86,6 +89,15 @@ public class ConfigProperties extends Properties {
         }
 
         return output;
+    }
+
+    /**
+     * You should wrap the delimiter in " on both sides.
+     */
+    public String getCsvDelimiter() {
+        // Defaults to ","
+        String csvDelimiter = getProperty("source.csv.delimiter", ",").replace("\"", "");
+        return csvDelimiter;
     }
 
     public List<ValueCompressionModelType> getValueModels() {

@@ -20,7 +20,7 @@ public class CSVDataReceiver extends DataReceiver {
     @Override
     public void receiveData() {
         try {
-            CSVTimeSeriesReader csvTimeSeriesReader = new CSVTimeSeriesReaderNoTags(this.csvFile, this.csvDelimiter);
+            CSVTimeSeriesReader csvTimeSeriesReader = new CSVTimeSeriesReader(this.csvFile, this.csvDelimiter);
 
             TimeSeriesReading timeSeriesReading = csvTimeSeriesReader.next();
             while (timeSeriesReading != null) {

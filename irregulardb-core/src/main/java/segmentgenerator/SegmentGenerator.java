@@ -39,11 +39,11 @@ public class SegmentGenerator {
 
         do {
             CompressionModel bestCompressionModel;
-            if (notYetEmitted.size() == 1) {
+            if (compressionModelManager.canCreateCompressionModel()) {
+                bestCompressionModel = this.compressionModelManager.getBestCompressionModel();
+            } else {
                 DataPoint dataPoint = notYetEmitted.get(0);
                 bestCompressionModel = ModelPicker.createFallBackCompressionModel(dataPoint);
-            } else {
-                bestCompressionModel = this.compressionModelManager.getBestCompressionModel();
             }
 
             //find size of each model and reduce the largest down to the size of the smallest

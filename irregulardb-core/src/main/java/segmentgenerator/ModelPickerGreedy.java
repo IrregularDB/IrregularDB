@@ -47,10 +47,6 @@ public class ModelPickerGreedy extends ModelPicker {
         ValueCompressionModel bestValueCompressionModel = getBestValueModel(valueModels);
         TimestampCompressionModel bestTimestampCompressionModel = getBestTimeStampModel(timeStampModels);
 
-        // TODO: remove this after having created fallback model
-        if (bestTimestampCompressionModel == null) {
-            throw new IllegalStateException("This should not happen");
-        }
         if (bestValueCompressionModel.getLength() < bestTimestampCompressionModel.getLength()) {
             bestTimestampCompressionModel.reduceToSizeN(bestValueCompressionModel.getLength());
         } else {

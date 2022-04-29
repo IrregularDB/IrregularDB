@@ -29,6 +29,11 @@ public class TestCompressionModelManagerRegularPMCMean extends CompressionModelM
     }
 
     @Override
+    public boolean canCreateCompressionModel() {
+        return acceptedDataPoints.size() > 1;
+    }
+
+    @Override
     public boolean tryAppendDataPointToAllModels(DataPoint dataPoint) {
         if (expectedValue == null) {
             expectedValue = dataPoint.value();

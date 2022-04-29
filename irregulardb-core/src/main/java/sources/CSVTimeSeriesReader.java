@@ -31,7 +31,7 @@ public class CSVTimeSeriesReader {
         } else {
             index = indexes.get(indexes.size() - 2);
         }
-        return path.substring(index, path.lastIndexOf("."));
+        return path.substring(index + 1, path.lastIndexOf("."));
     }
 
     private List<Integer> allIndexesOf(String str, String searchString) {

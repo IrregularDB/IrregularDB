@@ -34,6 +34,8 @@ public class Main {
             String csvDelimiter = ConfigProperties.getInstance().getCsvDelimiter();
             DataReceiverSpawner dataReceiverSpawner = new CSVDataReceiverSpawner(partitioner, csvSources, csvDelimiter);
             dataReceiverSpawner.spawn();
+        } else {
+            System.out.println("None of the provided CSV files could be found");
         }
     }
 

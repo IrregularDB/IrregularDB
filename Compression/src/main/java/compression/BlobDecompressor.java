@@ -125,7 +125,7 @@ public class BlobDecompressor {
         List<Float> decodedValues = GorillaValueEncoding.decode(bitStream);
         int amtValues = decodedValues.size();
         if (amtValues != timeStamps.size()) {
-            throw new RuntimeException("The amount of values and time stamps did not match up");
+            throw new RuntimeException("The amount of values and time stamps did not match up for decompress gorilla");
         }
         List<DataPoint> dataPoints = new ArrayList<>();
         for (int i = 0; i < amtValues; i++) {
@@ -136,7 +136,7 @@ public class BlobDecompressor {
 
     private static List<DataPoint> decompressFallbackValue(ByteBuffer valueBlob, List<Long> timestamps) {
         if (timestamps.size() != 1) {
-            throw new RuntimeException("The amount of values and time stamps did not match up");
+            throw new RuntimeException("Not exactly 1 timestamp for fallback value model");
         }
         float value = valueBlob.getFloat(0);
         return List.of(new DataPoint(timestamps.get(0), value));

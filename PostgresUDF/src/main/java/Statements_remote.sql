@@ -24,10 +24,16 @@ CREATE FUNCTION decompressSegment(segment)
 AS 'SegmentDecompressor.decompressSegment'
     IMMUTABLE LANGUAGE java;
 
-select * from timeseries;
-
-
-561
+drop materialized view datapointsview;
+create materialized view datapointsview as
+select tag, timestamp, value
+from (
+         select (decompressSegment(segment)).*
+         from segment
+     ) dp join timeseries t
+               on dp.timeseriesid = t.id
+order by tag, timestamp
+;
 
 select * from (
                   select (decompressSegment(s)).*

@@ -7,6 +7,7 @@ import segmentgenerator.CompressionModelManager;
 import segmentgenerator.ModelPicker;
 import segmentgenerator.ModelPickerFactory;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -25,6 +26,14 @@ public class CompressionModelFactory {
 
     public static List<ValueCompressionModel> getValueCompressionModels(String tag) {
         final Float valueModelErrorBound = config.getValueErrorBoundForTimeSeriesTag(tag);
+        final Integer threshold = config.getTimeStampThresholdForTimeSeriesTag(tag);
+        List<ValueCompressionModelType> modelTypes = new ArrayList<>(valueModelTypes);
+        if (threshold > 0) {
+            boolean wasSwingRemoved = modelTypes.remove(ValueCompressionModelType.SWING);
+            if (wasSwingRemoved) {
+                System.out.println("Disabled SWING value model for the tag: " + tag + ", because its threshold is greater than zero.");
+            }
+        }
         return getCompressionModels(valueModelTypes, (modelType) -> CompressionModelFactory.getValueCompressionModelByType(modelType, valueModelErrorBound));
     }
 

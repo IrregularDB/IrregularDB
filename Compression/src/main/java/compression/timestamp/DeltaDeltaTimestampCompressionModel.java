@@ -50,17 +50,16 @@ public class DeltaDeltaTimestampCompressionModel extends TimestampCompressionMod
             if (intRepresentationOfDelta == null) { // Delta was too large.
                 return false;
             }
-            int approximatedDelta = tryApplyThreshold(intRepresentationOfDelta);
-            previousDelta = approximatedDelta;
+            previousDelta = intRepresentationOfDelta;
             previousTimestamp = previousTimestamp + previousDelta;
-            deltaDeltaTimestamps.add(approximatedDelta);
+            deltaDeltaTimestamps.add(intRepresentationOfDelta);
         } else {
             long delta = calculateDelta(dataPoint.timestamp(), previousTimestamp);
             Integer deltaOfDelta = LongToInt.calculateDifference(delta, previousDelta);
             if (deltaOfDelta == null) { // Delta-of-delta was too large.
                 return false;
             }
-            int approximatedDeltaOfDelta = tryApplyThreshold(deltaOfDelta);
+            int approximatedDeltaOfDelta = deltaOfDelta < 0 ? deltaOfDelta : tryApplyThreshold(deltaOfDelta); // Fix for record timestamp overtaking
             previousDelta = previousDelta + approximatedDeltaOfDelta;
             previousTimestamp = previousTimestamp + previousDelta;
             deltaDeltaTimestamps.add(approximatedDeltaOfDelta);

@@ -64,6 +64,7 @@ public class BlobDecompressor {
         while (amtGenerated < amtDataPoints) {
             timestamps.add(currTime);
             currTime += si;
+            amtGenerated++;
         }
         return timestamps;
     }

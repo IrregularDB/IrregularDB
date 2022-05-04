@@ -73,6 +73,9 @@ public class ConfigProperties extends Properties {
 
         for (String source : listOfSources) {
             File f = new File(source);
+            if (!f.exists()) {
+                System.out.println("Source not found: " + f.getAbsolutePath());
+            }
             if (f.isFile()) {
                 output.add(f);
             }
@@ -191,6 +194,10 @@ public class ConfigProperties extends Properties {
         return Integer.parseInt(getProperty("receiver.csv.throttle_sleep_time", "50"));
     }
 
+    public boolean getModelValueErrorBoundStrict(){
+        return Boolean.parseBoolean(getProperty("model.value.error_bound.strict", "true"));
+    }
+
     /* Private methods */
     private void parseAllTimestampThresholds() {
         for (Enumeration<?> e = propertyNames(); e.hasMoreElements(); ) {
@@ -212,6 +219,7 @@ public class ConfigProperties extends Properties {
             }
         }
     }
+
 
 
 }

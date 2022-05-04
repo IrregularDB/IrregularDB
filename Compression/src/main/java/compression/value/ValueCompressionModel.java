@@ -8,14 +8,13 @@ public abstract class ValueCompressionModel extends BaseModel {
 
     public ValueCompressionModel(Float errorBound, String cantConstructBlobErrorMessage, boolean adhereToLengthBound, int lengthBound) {
         super(cantConstructBlobErrorMessage, adhereToLengthBound, lengthBound);
-
-        // HACK: Floating point imprecision can lead to error-bound of zero not really working.
         if (errorBound != null) {
-            if (errorBound == 0) {
-                this.errorBound = 0.00001F;
-            } else {
-                this.errorBound = errorBound / 100;
+            float temp = errorBound;
+            if (temp == 0) {
+                // HACK: Floating point imprecision can lead to error-bound of zero not really working.
+                temp = 0.001F;
             }
+            this.errorBound = temp / 100;
         } else {
             this.errorBound = null;
         }

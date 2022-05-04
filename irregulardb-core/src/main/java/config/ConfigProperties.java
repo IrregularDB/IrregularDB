@@ -176,7 +176,7 @@ public class ConfigProperties extends Properties {
     public ModelPickerFactory.ModelPickerType getModelPickerType(){
         String modelPickerType = getProperty("model.picker");
         if (modelPickerType == null) {
-            return ModelPickerFactory.ModelPickerType.GREEDY;
+            return ModelPickerFactory.ModelPickerType.BRUTE_FORCE;
         }
         return ModelPickerFactory.ModelPickerType.valueOf(modelPickerType);
     }

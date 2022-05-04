@@ -79,16 +79,26 @@ public class SegmentGenerator {
     private Segment generateSegment(CompressionModel compressionModel, long startTime, long endTime) {
         SegmentKey segmentKey = new SegmentKey(this.timeSeriesId, startTime);
         SegmentSummary segmentSummary = null;
+
+        List<Long> decompressedTimestamp = BlobDecompressor.decompressTimestampsUsingAmtDataPoints(
+                compressionModel.timestampType(),
+                compressionModel.timestampCompressionModel(),
+                startTime,
+                compressionModel.length()
+        );
+
         if (usesSegmentSummary) {
-            List<DataPoint> decompressedDataPoints = BlobDecompressor.decompressBlobs(compressionModel.timestampType(),
-                    compressionModel.timestampCompressionModel(), compressionModel.valueType(),
-                    compressionModel.valueCompressionModel(), startTime, endTime);
+            List<DataPoint> decompressedDataPoints = BlobDecompressor.createDataPointsByDecompressingValues(
+                    compressionModel.valueType(),
+                    compressionModel.valueCompressionModel(),
+                    decompressedTimestamp
+            );
             segmentSummary = new SegmentSummary(decompressedDataPoints, segmentKey);
         }
 
         return new Segment(
                 segmentKey,
-                endTime,
+                decompressedTimestamp.get(decompressedTimestamp.size() -1),
                 (byte) compressionModel.valueType().ordinal(),
                 compressionModel.valueCompressionModel(),
                 (byte) compressionModel.timestampType().ordinal(),

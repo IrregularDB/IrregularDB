@@ -33,6 +33,16 @@ public class BlobDecompressor {
             default -> throw new IllegalArgumentException("No decompression method has been implemented for the given Time Stamp Model Type");
         };
     }
+    public static List<Long> decompressTimestampsUsingAmtDataPoints(TimestampCompressionModelType timestampModelType, ByteBuffer timestampBlob,
+                                                  Long startTime, int amtDataPoints) {
+        return switch (timestampModelType) {
+            case REGULAR -> decompressRegularUsingAmtDataPoints(timestampBlob, startTime, amtDataPoints);
+            case DELTADELTA -> decompressDeltaDelta(timestampBlob, startTime);
+            case SIDIFF -> decompressSIDiff(timestampBlob, startTime);
+            case FALLBACK -> List.of(startTime);
+            default -> throw new IllegalArgumentException("No decompression method has been implemented for the given Time Stamp Model Type");
+        };
+    }
 
     private static List<Long> decompressRegular(ByteBuffer timestampBlob, Long startTime, Long endTime) {
         int si = SingleIntEncoding.decode(timestampBlob);
@@ -40,6 +50,18 @@ public class BlobDecompressor {
 
         List<Long> timestamps = new ArrayList<>();
         while (currTime <= endTime) {
+            timestamps.add(currTime);
+            currTime += si;
+        }
+        return timestamps;
+    }
+
+    private static List<Long> decompressRegularUsingAmtDataPoints(ByteBuffer timestampBlob, Long startTime, int amtDataPoints) {
+        int si = SingleIntEncoding.decode(timestampBlob);
+        int amtGenerated = 0;
+        Long currTime = startTime;
+        List<Long> timestamps = new ArrayList<>();
+        while (amtGenerated < amtDataPoints) {
             timestamps.add(currTime);
             currTime += si;
         }

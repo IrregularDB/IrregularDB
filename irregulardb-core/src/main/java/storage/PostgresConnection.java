@@ -42,11 +42,15 @@ public class PostgresConnection implements DatabaseConnection {
     }
 
     private void prepareStatementForInsertSegmentSummary(SegmentSummary segmentSummary, PreparedStatement preparedStatement) throws SQLException {
-        preparedStatement.setInt(1, segmentSummary.getSegmentKey().timeSeriesId());
-        preparedStatement.setLong(2, segmentSummary.getSegmentKey().startTime());
-        preparedStatement.setFloat(3, segmentSummary.getMinValue());
-        preparedStatement.setFloat(4, segmentSummary.getMaxValue());
-        preparedStatement.setInt(5, segmentSummary.getAmtDataPoints());
+        if (segmentSummary != null) {
+            preparedStatement.setFloat(7, segmentSummary.getMinValue());
+            preparedStatement.setFloat(8, segmentSummary.getMaxValue());
+            preparedStatement.setInt(9, segmentSummary.getAmtDataPoints());
+        } else {
+            preparedStatement.setNull(7, Types.FLOAT);
+            preparedStatement.setNull(8, Types.FLOAT);
+            preparedStatement.setNull(9, Types.INTEGER);
+        }
     }
 
     private void prepareStatementForInsertSegment(Segment segment, PreparedStatement preparedStatement) throws SQLException {
@@ -92,30 +96,18 @@ public class PostgresConnection implements DatabaseConnection {
     @Override
     public void flushBatchToDB() {
         try {
-            final String INSERT_SEGMENT_STATEMENT = "INSERT INTO Segment(time_series_id, start_time, end_time, value_timestamp_model_type, value_model_blob, timestamp_model_blob) VALUES (?,?,?,?,?,?)";
+            final String INSERT_SEGMENT_STATEMENT = "INSERT INTO Segment(time_series_id, start_time, end_time, value_timestamp_model_type, value_model_blob, timestamp_model_blob, minValue, maxvalue, amtDataPoints) VALUES (?,?,?,?,?,?,?,?,?)";
             PreparedStatement insertSegmentStatement = connection.prepareStatement(INSERT_SEGMENT_STATEMENT, Statement.RETURN_GENERATED_KEYS);
 
-            final String INSERT_SEGMENT_SUMMARY_STATEMENT = "INSERT INTO SegmentSummary(time_series_id, start_time, minValue, maxvalue, amtDataPoints) VALUES (?,?,?,?,?)";
-            PreparedStatement insertSegmentSummaryStatement = connection.prepareStatement(INSERT_SEGMENT_SUMMARY_STATEMENT);
-
-            boolean anySegmentSummaryUsed = false;
             for (Pair<Segment, SegmentSummary> segmentSegmentSummaryPair : insertBuffer) {
                 prepareStatementForInsertSegment(segmentSegmentSummaryPair.f0(), insertSegmentStatement);
+                prepareStatementForInsertSegmentSummary(segmentSegmentSummaryPair.f1(), insertSegmentStatement);
+
                 insertSegmentStatement.addBatch();
                 insertSegmentStatement.clearParameters();
-
-                if (segmentSegmentSummaryPair.f1() != null) { // Handling of summary
-                    prepareStatementForInsertSegmentSummary(segmentSegmentSummaryPair.f1(), insertSegmentSummaryStatement);
-                    insertSegmentSummaryStatement.addBatch();
-                    insertSegmentSummaryStatement.clearParameters();
-                    anySegmentSummaryUsed = true;
-                }
             }
 
             insertSegmentStatement.executeBatch();
-            if (anySegmentSummaryUsed) {
-                insertSegmentSummaryStatement.executeBatch();
-            }
             insertBuffer.clear();
         } catch (SQLException e) {
             throw new RuntimeException(e);

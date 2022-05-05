@@ -1,3 +1,7 @@
+DROP materialized view IF EXISTS datapointsview;
+DROP FUNCTION IF EXISTS decompressSegment(Segment);
+DROP TYPE IF EXISTS sqlDataPoint;
+
 DROP TABLE IF EXISTS TimestampValueModelTypes;
 DROP TABLE IF EXISTS SegmentSummary;
 DROP TABLE IF EXISTS Segment;
@@ -20,23 +24,14 @@ CREATE TABLE Segment(
     value_timestamp_model_type int2 not null,
     value_model_blob bytea not null,
     timestamp_model_blob bytea not null,
+    minValue real,
+    maxValue real,
+    amtDataPoints int,
     CONSTRAINT fk_time_series
                     FOREIGN KEY(time_series_id)
                     REFERENCES TimeSeries(id)
                     ON DELETE CASCADE,
     CONSTRAINT pk_segment_timeId_startTime primary key(time_series_id, start_time)
-);
-
-CREATE TABLE SegmentSummary(
-    time_series_id int not null,
-    start_time bigint not null,
-    minValue real,
-    maxValue real,
-    amtDataPoints int,
-    CONSTRAINT fk_segmentSummary_ts_key_to_segment
-        FOREIGN KEY(time_series_id, start_time) REFERENCES Segment(time_series_id, start_time),
-    CONSTRAINT pk_segmentSummary_timeId_startTime
-        PRIMARY KEY (time_series_id, start_time)
 );
 
 CREATE TABLE TimestampValueModelTypes(
@@ -63,3 +58,10 @@ INSERT INTO TimestampValueModelTypes(timestampValueModelShort, valuemodel, times
 
 INSERT INTO TimestampValueModelTypes(timestampValueModelShort, valuemodel, timestampmodel) VALUES
     (771, 'Fallback', 'Fallback');
+
+CREATE TYPE sqlDataPoint AS(timeSeriesId integer, timestamp BigInt, value float);
+
+CREATE FUNCTION decompressSegment(segment)
+    RETURNS Setof sqlDataPoint AS 'SegmentDecompressor.decompressSegment'
+    IMMUTABLE LANGUAGE java
+;

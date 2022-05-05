@@ -14,16 +14,6 @@ select sqlj.set_classpath(
 select sqlj.get_classpath('public');
 
 
-DROP TYPE sqlDataPoint;
-CREATE TYPE sqlDataPoint AS(timeSeriesId integer, timestamp BigInt, value float);
-
-
-DROP FUNCTION decompressSegment(segment);
-CREATE FUNCTION decompressSegment(segment)
-    RETURNS Setof sqlDataPoint
-AS 'SegmentDecompressor.decompressSegment'
-    IMMUTABLE LANGUAGE java;
-
 part 1 done, part 2 done, part 3 ongoing
 select min(id) from timeseries; 197 -> 225 -> 255 -> 285 -> 312
 select max(id) from timeseries; 312
@@ -57,3 +47,6 @@ select * from (
               ) t where t.timestamp = 1304136472000
 ;
 select count(*) from datapointview;
+
+select minvalue, maxvalue, amtdatapoints, start_time + end_time, * from segment where start_time = 1303132933000 and time_series_id = 39;
+select (decompresssegment(segment)).* from segment where start_time = 1303132933000 and time_series_id = 39;

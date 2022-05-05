@@ -95,3 +95,5 @@ SELECT pg_total_relation_size('timeseries');
 SELECT pg_total_relation_size('segment');
 SELECT pg_total_relation_size('timestampvaluemodeltypes');
 SELECT pg_total_relation_size('segmentsummary');
+
+SELECT pg_size_pretty( pg_total_relation_size('timeseries'));

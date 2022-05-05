@@ -83,6 +83,7 @@ public class RegularTimestampCompressionModel extends TimestampCompressionModel 
             withinThreshold = testNewCandidateSI(timestamp);
             if (withinThreshold) {
                 timestamps.add(timestamp);
+
             }
         }
         return withinThreshold;
@@ -110,16 +111,21 @@ public class RegularTimestampCompressionModel extends TimestampCompressionModel 
     private boolean doesCandidateSIFit(ArrayList<Long> allTimestamps, int candidateSI) {
         long startTime = allTimestamps.get(0);
         long localNextExpectedTimestamp = startTime + candidateSI;
+        Integer threshold = getThreshold();
 
         for (int i = 1; i < allTimestamps.size(); i++) {
-            boolean timestampWithinThreshold = isTimestampWithinThreshold(allTimestamps.get(i), localNextExpectedTimestamp, getThreshold());
+            boolean timestampWithinThreshold = isTimestampWithinThreshold(allTimestamps.get(i), localNextExpectedTimestamp,threshold);
             if (!timestampWithinThreshold) {
                 return false;
             }
             localNextExpectedTimestamp += candidateSI;
         }
+        this.nextExpectedTimestamp = localNextExpectedTimestamp - candidateSI;//substract candidate si as it is added in the appendDataPoint
         return true;
     }
+
+
+
 
     private boolean isTimestampWithinThreshold(long timestamp, long nextExpectedTimestamp, Integer threshold) {
         Integer difference = LongToInt.calculateDifference(nextExpectedTimestamp, timestamp);
@@ -129,6 +135,8 @@ public class RegularTimestampCompressionModel extends TimestampCompressionModel 
             return Math.abs(difference) <= threshold;
         }
     }
+
+
 
     @Override
     protected ByteBuffer createByteBuffer() {

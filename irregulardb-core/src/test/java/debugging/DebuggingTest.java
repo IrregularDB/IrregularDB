@@ -35,10 +35,11 @@ public class DebuggingTest {
         DeltaDeltaTimestampCompressionModel deltaDeltaTimestampCompressionModel = new DeltaDeltaTimestampCompressionModel(threshold, 200);
         boolean b = deltaDeltaTimestampCompressionModel.resetAndAppendAll(dataPoints);
 
-        List<Long> longs = decompressTimestampsForTimestampModel(dataPoints, deltaDeltaTimestampCompressionModel);
+        List<Long> decompressedTimestamps = decompressTimestampsForTimestampModel(dataPoints, deltaDeltaTimestampCompressionModel);
 
-        for (int i = 0; i < dataPoints.size(); i++) {
-            Assertions.assertTrue(Math.abs(dataPoints.get(i).timestamp() - longs.get(i)) < threshold);
+        for (int i = 0; i < decompressedTimestamps.size(); i++) {
+            long diff = Math.abs(dataPoints.get(i).timestamp() - decompressedTimestamps.get(i));
+            Assertions.assertTrue(diff <= threshold);
         }
     }
 

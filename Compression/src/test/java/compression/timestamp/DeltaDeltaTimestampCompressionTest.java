@@ -13,11 +13,9 @@ import java.util.List;
 import java.util.Random;
 
 class DeltaDeltaTimestampCompressionTest {
-
     Random random = new Random();
     long previousLong;
     float previousFloat;
-    List<DataPoint> dataPoints = createTenDataPoints();
     private DeltaDeltaTimestampCompressionModel deltaDeltaTimestampCompressionModel;
 
     @BeforeEach
@@ -50,6 +48,7 @@ class DeltaDeltaTimestampCompressionTest {
 
     @Test
     public void testReduceSizeToN() {
+        List<DataPoint> dataPoints = createTenDataPoints();
         dataPoints.forEach(dp -> deltaDeltaTimestampCompressionModel.append(dp));
         deltaDeltaTimestampCompressionModel.reduceToSizeN(5);
         int actualAmountOfTimestamps = deltaDeltaTimestampCompressionModel.getLength();
@@ -60,6 +59,7 @@ class DeltaDeltaTimestampCompressionTest {
 
     @Test
     public void testReduceSizeWithNumberOfTimestamps() {
+        List<DataPoint> dataPoints = createTenDataPoints();
         dataPoints.forEach(dp -> deltaDeltaTimestampCompressionModel.append(dp));
         int expectedAmountTimestamps = dataPoints.size();
         deltaDeltaTimestampCompressionModel.reduceToSizeN(expectedAmountTimestamps);
@@ -69,12 +69,14 @@ class DeltaDeltaTimestampCompressionTest {
 
     @Test
     public void testReduceSizeWithZeroThrowsException() {
+        List<DataPoint> dataPoints = createTenDataPoints();
         dataPoints.forEach(dp -> deltaDeltaTimestampCompressionModel.append(dp));
         Assertions.assertThrows(IllegalArgumentException.class, () -> deltaDeltaTimestampCompressionModel.reduceToSizeN(0));
     }
 
     @Test
     public void testReduceSizeWithMoreThanListSizeThrowsException() {
+        List<DataPoint> dataPoints = createTenDataPoints();
         dataPoints.forEach(dp -> deltaDeltaTimestampCompressionModel.append(dp));
         Assertions.assertThrows(IllegalArgumentException.class, () -> deltaDeltaTimestampCompressionModel.reduceToSizeN(20));
     }
@@ -114,7 +116,7 @@ class DeltaDeltaTimestampCompressionTest {
                 new DataPoint(50, -1),
                 new DataPoint(100, -1),
                 new DataPoint(146, -1),
-                new DataPoint(208, -1),
+                new DataPoint(202, -1),
                 new DataPoint(242, -1),
                 new DataPoint(330, -1)
         );
@@ -130,9 +132,9 @@ class DeltaDeltaTimestampCompressionTest {
 
         Assertions.assertEquals(50, decompressedTimestamps.get(0));
         Assertions.assertEquals(100, decompressedTimestamps.get(1));
-        Assertions.assertEquals(150, decompressedTimestamps.get(2));
-        Assertions.assertEquals(200, decompressedTimestamps.get(3));
-        Assertions.assertEquals(250, decompressedTimestamps.get(4));
+        Assertions.assertEquals(146, decompressedTimestamps.get(2)); // We are not allowed to approxmiate negative Delta-of-Delta values
+        Assertions.assertEquals(192, decompressedTimestamps.get(3)); // We can keep 46 as DELTA so we get 100 + 46 + 46 = 192
+        Assertions.assertEquals(238, decompressedTimestamps.get(4)); // 100 + 46 * 3 = 238 which is within the orignal value of 242
         Assertions.assertEquals(330, decompressedTimestamps.get(5));
     }
 
@@ -143,8 +145,8 @@ class DeltaDeltaTimestampCompressionTest {
         List<DataPoint> dataPoints = List.of(
                 new DataPoint(50, -1),
                 new DataPoint(100, -1),
-                new DataPoint(146, -1), //will be pushed to 150
-                new DataPoint(720, -1), //= pre value(150) + prev delta(50) + bucketMaxAndThres(520), will be pushed to 150 + 50 + 511
+                new DataPoint(155, -1), //will be pushed to 150 as DELTA = 50 works
+                new DataPoint(720, -1), // curr delta = 720-150 = 570, = prev delta = 50. Delta-of-delta = 520, which will be pushed down to 511 giving 150 + (50 + 511) = 711
                 new DataPoint(66812, -1)// deltadelta = 65535 + 5// prevValue(711) + prevDelta(711 - 150) + bucketMax(65535) + 5
         );
 
@@ -190,6 +192,31 @@ class DeltaDeltaTimestampCompressionTest {
         Assertions.assertEquals(1, deltaDeltaTimestampCompressionModel.getLength());
         // DeltaDelta no longer supports models of size 1
         Assertions.assertFalse(deltaDeltaTimestampCompressionModel.canCreateByteBuffer());
+    }
+
+    @Test
+    void testNegativeDeltaDeltaNotPushed() {
+        int threshold = 100;
+        deltaDeltaTimestampCompressionModel = new DeltaDeltaTimestampCompressionModel(threshold, Integer.MAX_VALUE);
+        List<Long> timestamps = List.of(0L, 200L, 300L, 350L);
+        List<DataPoint> dataPoints = createDataPointsFromTimestamps(timestamps);
+        boolean success = deltaDeltaTimestampCompressionModel.resetAndAppendAll(dataPoints);
+        Assertions.assertTrue(success);
+
+        List<Long> decompressedTimestamps = BlobDecompressor.decompressTimestamps(TimestampCompressionModelType.DELTADELTA,
+                deltaDeltaTimestampCompressionModel.getBlobRepresentation(),
+                dataPoints.get(0).timestamp(),
+                dataPoints.get(dataPoints.size() - 1).timestamp()
+        );
+
+
+        for (int i = 0; i < decompressedTimestamps.size(); i++) {
+            if (i != 0) {
+                // Current timestamp should be larger than previous
+                Assertions.assertTrue(decompressedTimestamps.get(i) > decompressedTimestamps.get(i -1));
+            }
+            Assertions.assertTrue(dataPoints.get(i).timestamp() - decompressedTimestamps.get(i) < threshold);
+        }
     }
 
     // Helper that creates random data points in increasing order

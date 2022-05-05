@@ -1,6 +1,6 @@
 drop FUNCTION IF EXISTS valueRangeQuery(timeSeriesId INTEGER, theMinValue real, theMaxValue real, errorBound real, useSegmentSummary boolean);
 CREATE OR REPLACE FUNCTION valueRangeQuery(timeSeriesId INTEGER, theMinValue real, theMaxValue real, errorBound real, useSegmentSummary boolean)
-    RETURNS TABLE(id INTEGER, timestamo BIGINT, value float) AS $$
+    RETURNS TABLE(id INTEGER, timestamp BIGINT, value float) AS $$
 DECLARE
     allowableErrorMinValue constant real := ABS(theMinValue * errorBound);
     allowableErrorMaxValue constant real := ABS(theMaxValue * errorBound);
@@ -29,7 +29,7 @@ $$ LANGUAGE plpgsql;
 
 drop FUNCTION IF EXISTS valuePointQuery(timeSeriesId INTEGER, theValue real, errorBound real, useSegmentSummary boolean);
 CREATE OR REPLACE FUNCTION valuePointQuery(timeSeriesId INTEGER, theValue real, errorBound real, useSegmentSummary boolean)
-    RETURNS TABLE(id INTEGER, timestamo BIGINT, value float) AS $$
+    RETURNS TABLE(id INTEGER, timestamp BIGINT, value float) AS $$
     BEGIN
         return query
             select * from valueRangeQuery(timeSeriesId, theValue, theValue, errorBound, useSegmentSummary);
@@ -41,7 +41,7 @@ $$ LANGUAGE plpgsql;
 
 drop FUNCTION IF EXISTS timestampRangeQuery(timeSeriesId INTEGER, theLowerBound BIGINT, theUpperBound BIGINT, threshold INTEGER);
 CREATE OR REPLACE FUNCTION timestampRangeQuery(timeSeriesId INTEGER, theLowerBound BIGINT, theUpperBound BIGINT, threshold INTEGER)
-    RETURNS TABLE(id INTEGER, timestamo BIGINT, value float) AS $$
+    RETURNS TABLE(id INTEGER, timestamp BIGINT, value float) AS $$
 DECLARE
     lowerBound constant BIGINT := theLowerBound - threshold;
     upperBound constant BIGINT := theUpperBound + threshold;
@@ -59,7 +59,7 @@ $$ LANGUAGE plpgsql;
 
 drop FUNCTION IF EXISTS timestampPointQuery(timeSeriesId INTEGER, theTimestamp BIGINT, threshold INTEGER);
 CREATE OR REPLACE FUNCTION timestampPointQuery(timeSeriesId INTEGER, theTimestamp BIGINT, threshold INTEGER)
-    RETURNS TABLE(id INTEGER, timestamo BIGINT, value float) AS $$
+    RETURNS TABLE(id INTEGER, timestamp BIGINT, value float) AS $$
 BEGIN
     return query
         select * from timestampRangeQuery(timeSeriesId, theTimestamp, theTimestamp, threshold);

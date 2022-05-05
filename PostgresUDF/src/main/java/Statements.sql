@@ -88,6 +88,8 @@ from segmentsummary s
 where s.amtdatapoints = 49) summary join segment s on s.time_series_id = summary.time_series_id and s.start_time = summary.start_time) s join timestampvaluemodeltypes t on s.value_timestamp_model_type = t.timestampvaluemodelshort
 group by t.valuemodel, t.timestampmodel;
 
+vacuum full analyse ;
 SELECT pg_database.datname as "database_name", pg_size_pretty(pg_database_size(pg_database.datname))FROM pg_database;
 SELECT pg_size_pretty( pg_total_relation_size('timeseries'));
+
 SELECT pg_size_pretty( pg_total_relation_size('segment'));

@@ -37,7 +37,7 @@ public class CompressionModelFactory {
             }
         }
 
-        return getCompressionModels(valueModelTypes, (modelType) -> CompressionModelFactory.getValueCompressionModelByType(modelType, valueModelErrorBound));
+        return getCompressionModels(modelTypes, (modelType) -> CompressionModelFactory.getValueCompressionModelByType(modelType, valueModelErrorBound));
     }
 
 

@@ -35,13 +35,35 @@ public class DebuggingTest {
         DeltaDeltaTimestampCompressionModel deltaDeltaTimestampCompressionModel = new DeltaDeltaTimestampCompressionModel(threshold, 200);
         boolean b = deltaDeltaTimestampCompressionModel.resetAndAppendAll(dataPoints);
 
-        List<Long> longs = decompressTimestampsForTimestampModel(dataPoints, deltaDeltaTimestampCompressionModel);
+        List<Long> decompressedTimestamps = decompressTimestampsForTimestampModel(dataPoints, deltaDeltaTimestampCompressionModel);
 
-
-
-        for (int i = 0; i < dataPoints.size(); i++) {
-            Assertions.assertTrue(Math.abs(dataPoints.get(i).timestamp() - longs.get(i)) < threshold);
+        for (int i = 0; i < decompressedTimestamps.size(); i++) {
+            long diff = Math.abs(dataPoints.get(i).timestamp() - decompressedTimestamps.get(i));
+            Assertions.assertTrue(diff <= threshold);
         }
+    }
+
+    @Test
+    void esbenDebug() {
+        int threshold = 100;
+        //List<Long> timeStamps = List.of(0L, 2000L, 3000L, 4999L, 5000L);
+        List<Long> timeStamps = List.of(0L, 200L, 300L, 350L);
+        //List<Long> timeStamps = List.of(23000L, 24000L, 26000L, 28001L, 31000L); // NOT a problem apperently
+        //List<Long> timeStamps = List.of(23000L, 25000L, 26000L, 28000L, 29000L);
+
+        List<DataPoint> dataPoints = createDataPointsFromTimestamps(timeStamps);
+
+        TimestampCompressionModel deltaDelta = new DeltaDeltaTimestampCompressionModel(threshold, 200);
+        boolean b = deltaDelta.resetAndAppendAll(dataPoints);
+
+        List<Long> decompressedTimestamps = decompressTimestampsForTimestampModel(dataPoints, deltaDelta);
+        for (int i = 0; i < dataPoints.size(); i++) {
+            Assertions.assertTrue(Math.abs(dataPoints.get(i).timestamp() - decompressedTimestamps.get(i)) < threshold);
+        }
+    }
+
+    private List<DataPoint> createDataPointsFromTimestamps(List<Long> timestamps) {
+        return timestamps.stream().map(t -> new DataPoint(t, -1)).toList();
     }
 
     private List<Long> decompressTimestampsForTimestampModel(List<DataPoint> dataPoints, TimestampCompressionModel timestampCompressionModel) {

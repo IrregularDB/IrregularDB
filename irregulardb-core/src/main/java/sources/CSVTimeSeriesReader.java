@@ -12,26 +12,11 @@ public class CSVTimeSeriesReader {
     private final String csvDelimiter;
     private final String tagFromFileName;
 
-    public CSVTimeSeriesReader(File csvFile, String csvDelimiter) throws FileNotFoundException {
+    public CSVTimeSeriesReader(File csvFile, String fallBackTag, String csvDelimiter) throws FileNotFoundException {
         FileReader fileReader = new FileReader(csvFile);
         this.bufferedReader = new BufferedReader(fileReader);
         this.csvDelimiter = csvDelimiter;
-        this.tagFromFileName = extractTagFromFileName(csvFile);
-    }
-
-    private String extractTagFromFileName(File csvFile) {
-        String path = csvFile.getAbsolutePath();
-        List<Integer> indexes = allIndexesOf(path, "/");
-        if (indexes.isEmpty()) {
-            indexes = allIndexesOf(path, "\\");
-        }
-        int index;
-        if (indexes.size() == 1) {
-            index = indexes.get(0);
-        } else {
-            index = indexes.get(indexes.size() - 2);
-        }
-        return path.substring(index + 1, path.lastIndexOf("."));
+        this.tagFromFileName = fallBackTag;
     }
 
     private List<Integer> allIndexesOf(String str, String searchString) {

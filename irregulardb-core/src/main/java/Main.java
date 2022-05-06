@@ -1,5 +1,6 @@
 import config.ConfigProperties;
 import data.producer.SocketProducerSpawner;
+import records.Pair;
 import scheduling.IncrementPartitioner;
 import scheduling.Partitioner;
 import scheduling.WorkingSetFactory;
@@ -28,7 +29,7 @@ public class Main {
     }
 
     private static void initializeCSVDataReceiverSpawner(Partitioner partitioner) {
-        Set<File> csvSources = ConfigProperties.getInstance().getCsvSources();
+        List<Pair<File,String>> csvSources = ConfigProperties.getInstance().getCsvSourceFilesWithFileNameTag();
 
         if (!csvSources.isEmpty()) {
             String csvDelimiter = ConfigProperties.getInstance().getCsvDelimiter();
@@ -53,11 +54,11 @@ public class Main {
     }
 
     private static void initializeSocketProducerSpawner() {
-        Set<File> csvSources = ConfigProperties.getInstance().getCsvSources();
+        List<Pair<File,String>> csvSourcesWithFileTags = ConfigProperties.getInstance().getCsvSourceFilesWithFileNameTag();
 
-        if (!csvSources.isEmpty()) {
+        if (!csvSourcesWithFileTags.isEmpty()) {
             String csvDelimiter = ConfigProperties.getInstance().getCsvDelimiter();
-            SocketProducerSpawner spawner = new SocketProducerSpawner(csvSources, csvDelimiter);
+            SocketProducerSpawner spawner = new SocketProducerSpawner(csvSourcesWithFileTags, csvDelimiter);
             spawner.spawn();
         }
     }

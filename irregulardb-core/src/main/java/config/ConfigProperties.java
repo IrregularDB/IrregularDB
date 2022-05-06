@@ -2,7 +2,9 @@ package config;
 
 import compression.timestamp.TimestampCompressionModelType;
 import compression.value.ValueCompressionModelType;
+import records.Pair;
 import segmentgenerator.ModelPickerFactory;
+import utility.CSVFileGetter;
 
 import java.io.File;
 import java.io.FileReader;
@@ -58,40 +60,20 @@ public class ConfigProperties extends Properties {
         return Integer.parseInt(workingsets);
     }
 
-    public Set<File> getCsvSources() {
+    public List<Pair<File, String>> getCsvSourceFilesWithFileNameTag() {
         String csvSource = getProperty("source.csv");
         if (csvSource == null) {
             // no sources -> return empty list
-            return Collections.emptySet();
+            return Collections.emptyList();
         }
 
-        List<String> listOfSources = Arrays.stream(csvSource.trim().split(","))
+         return Arrays.stream(csvSource.trim().split(","))
                 .map(String::trim)
+                .map(File::new)
+                .map(CSVFileGetter::getCsvFilesWithTag)
+                .flatMap(map -> map.entrySet().stream())
+                .map(entry -> new Pair<>(entry.getKey(), entry.getValue()))
                 .toList();
-
-        Set<File> output = new HashSet<>();
-
-        for (String source : listOfSources) {
-            File f = new File(source);
-            if (!f.exists()) {
-                System.out.println("Source not found: " + f.getAbsolutePath());
-            }
-            if (f.isFile()) {
-                output.add(f);
-            }
-            else if (f.isDirectory()) {
-                File[] files = f.listFiles();
-                if (files != null) {
-                    for (File file : files){
-                        if (file.isFile()){
-                            output.add(file);
-                        }
-                    }
-                }
-            }
-        }
-
-        return output;
     }
 
     /**

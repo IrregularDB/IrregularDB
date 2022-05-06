@@ -13,17 +13,19 @@ import java.util.Queue;
 public class SocketProducerCSVReader extends SocketProducerBase {
     private final File csvFile;
     private final String csvDelimiter;
+    private final String fallbackTag;
 
-    public SocketProducerCSVReader(File csvFile, String csvDelimiter, String serverIp, int serverPort) throws IOException {
+    public SocketProducerCSVReader(File csvFile,String fallbackTag, String csvDelimiter, String serverIp, int serverPort) throws IOException {
         super(serverIp, serverPort);
         this.csvFile = csvFile;
         this.csvDelimiter = csvDelimiter;
+        this.fallbackTag = fallbackTag;
     }
 
     @Override
     protected void connectAndSendData() {
         try {
-            CSVTimeSeriesReader csvTimeSeriesReader = new CSVTimeSeriesReader(this.csvFile, this.csvDelimiter);
+            CSVTimeSeriesReader csvTimeSeriesReader = new CSVTimeSeriesReader(this.csvFile, this.fallbackTag, this.csvDelimiter);
             TimeSeriesReading timeSeriesReading = csvTimeSeriesReader.next();
             while (timeSeriesReading != null) {
                 super.sendReadingToStream(timeSeriesReading);

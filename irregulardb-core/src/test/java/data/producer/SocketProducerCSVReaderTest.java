@@ -29,6 +29,7 @@ class SocketProducerCSVReaderTest {
     @Test
     void connectAndSendData() throws IOException, InterruptedException {
         String csvFilePath = "src\\test\\resources\\testFolder\\csvDocketProducer.csv";
+        String fallbackTag = "";
         String serverIp = "localhost";
         int serverPort = ConfigProperties.getInstance().getSocketDataReceiverSpawnerPort();
 
@@ -38,11 +39,11 @@ class SocketProducerCSVReaderTest {
         SocketDataReceiverSpawner socketDataReceiverSpawner = new SocketDataReceiverSpawner(testPartitioner, serverPort);
         socketDataReceiverSpawner.spawn();
 
-        SocketProducerCSVReader socketProducerCSVReader = new SocketProducerCSVReader(new File(csvFilePath), ",", serverIp, serverPort);
+        SocketProducerCSVReader socketProducerCSVReader = new SocketProducerCSVReader(new File(csvFilePath),"", ",", serverIp, serverPort);
         Thread csvProducerThread = socketProducerCSVReader.run();
         csvProducerThread.join();
 
-        CSVTimeSeriesReader csvTimeSeriesReader = new CSVTimeSeriesReader(new File(csvFilePath), ","); // create a new instance as the other is already consumed
+        CSVTimeSeriesReader csvTimeSeriesReader = new CSVTimeSeriesReader(new File(csvFilePath),fallbackTag, ","); // create a new instance as the other is already consumed
         TimeSeriesReading next = csvTimeSeriesReader.next();
         List<TimeSeriesReading> expectedReadings = new ArrayList<>();
         while (next != null) {

@@ -82,7 +82,7 @@ public class DebuggingTest {
 
     private List<TimeSeriesReading> extractAllReadings(String pathname) throws IOException {
         File testData = new File(pathname);
-        CSVTimeSeriesReader csvTimeSeriesReader = new CSVTimeSeriesReader(testData, " ");
+        CSVTimeSeriesReader csvTimeSeriesReader = new CSVTimeSeriesReader(testData,"", " ");
 
         ArrayList<TimeSeriesReading> result = new ArrayList<>();
         TimeSeriesReading reading = csvTimeSeriesReader.next();

@@ -9,18 +9,20 @@ import java.io.*;
 public class CSVDataReceiver extends DataReceiver {
     private final String csvDelimiter;
     private final File csvFile;
+    private final String fileBasedTag;
     private static final int AMT_TIME_TO_SLEEP = ConfigProperties.getInstance().getReceiverCSVThrottleSleepTime();
 
-    public CSVDataReceiver(File csvFile, WorkingSet workingSet, String csvDelimiter) {
+    public CSVDataReceiver(File csvFile, String fileTag, WorkingSet workingSet, String csvDelimiter) {
         super(workingSet);
         this.csvDelimiter = csvDelimiter;
         this.csvFile = csvFile;
+        this.fileBasedTag = fileTag;
     }
 
     @Override
     public void receiveData() {
         try {
-            CSVTimeSeriesReader csvTimeSeriesReader = new CSVTimeSeriesReader(this.csvFile, this.csvDelimiter);
+            CSVTimeSeriesReader csvTimeSeriesReader = new CSVTimeSeriesReader(this.csvFile, fileBasedTag, this.csvDelimiter);
 
             TimeSeriesReading timeSeriesReading = csvTimeSeriesReader.next();
             while (timeSeriesReading != null) {

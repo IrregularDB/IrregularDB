@@ -73,8 +73,9 @@ public class DeltaDeltaTimestampCompressionModel extends TimestampCompressionMod
             int approximatedDeltaOfDelta = tryApplyThreshold(deltaOfDelta, previousDelta, previousTimestamp, nextTimestamp);
 
             // Update state and store delta-delta value
-            previousDelta = previousDelta + approximatedDeltaOfDelta;
-            previousTimestamp = previousTimestamp + previousDelta;
+            int currDelta = previousDelta + approximatedDeltaOfDelta;
+            previousDelta = currDelta;
+            previousTimestamp += currDelta;
             deltaDeltaTimestamps.add(approximatedDeltaOfDelta);
         }
 

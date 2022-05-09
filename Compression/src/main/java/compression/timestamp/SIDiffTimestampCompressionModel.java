@@ -57,15 +57,15 @@ public class SIDiffTimestampCompressionModel extends TimestampCompressionModel {
         int allowedDerivation = getThreshold();
         List<Integer> maxValuesOfBuckets = BucketEncoding.getMaxAbsoluteValuesOfResizeableBuckets();
 
-        long approximation = firstTimestamp + (long) si;
+        long approximationOfCurrentTimestamp = firstTimestamp + (long) si;
         long previousTimestamp = firstTimestamp;
         // We skip the first timestamp as it is stored on the segment
         for (int i = 1; i < timestamps.size(); i++) {
             Long nextTimestamp = getNextTimestamp(i);
-            int difference = calculateDifference(timestamps.get(i), nextTimestamp, previousTimestamp, approximation, maxValuesOfBuckets, allowedDerivation);
+            int difference = calculateDifference(timestamps.get(i), nextTimestamp, previousTimestamp, approximationOfCurrentTimestamp, maxValuesOfBuckets, allowedDerivation);
             readings.add(difference);
-            approximation += si;
-            previousTimestamp = approximation;
+            previousTimestamp = approximationOfCurrentTimestamp + difference;
+            approximationOfCurrentTimestamp += si;
         }
 
         return BucketEncoding.encode(readings, true);
@@ -95,8 +95,8 @@ public class SIDiffTimestampCompressionModel extends TimestampCompressionModel {
         return Math.round((float) duration / (timestamps.size() - 1));
     }
 
-    private int calculateDifference(long currentTimestamp, long nextTimestamp, long previousTimestamp, long approximation, List<Integer> maxValuesOfBuckets, int allowedDerivation) {
-        int difference = Math.toIntExact(currentTimestamp - approximation);
+    private int calculateDifference(long currentTimestamp, long nextTimestamp, long previousTimestamp, long approximationOfCurrentTime, List<Integer> maxValuesOfBuckets, int allowedDerivation) {
+        int difference = Math.toIntExact(currentTimestamp - approximationOfCurrentTime);
         int absoluteDifference = Math.abs(difference);
 
         // We look for values that are between max value and max value + allowed derivation
@@ -104,8 +104,8 @@ public class SIDiffTimestampCompressionModel extends TimestampCompressionModel {
             if (maxValue <= absoluteDifference && absoluteDifference <= (maxValue + allowedDerivation)) {
                 boolean isNegativeNumber = difference < 0;
                 int pushedDifference = isNegativeNumber ? -1 * maxValue : maxValue;
-                long pushedApproximation = approximation + pushedDifference;
-                if (previousTimestamp < pushedApproximation && pushedApproximation < nextTimestamp) {
+                long pushedApproximationOfCurrentTime = approximationOfCurrentTime + pushedDifference;
+                if (previousTimestamp < pushedApproximationOfCurrentTime && pushedApproximationOfCurrentTime < nextTimestamp) {
                     return pushedDifference; // We only use the pushed difference if it is between the previous and next time stamp
                 }
             }

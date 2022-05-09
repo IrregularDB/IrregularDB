@@ -6,7 +6,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import records.DataPoint;
 
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -132,9 +131,9 @@ class DeltaDeltaTimestampCompressionTest {
 
         Assertions.assertEquals(50, decompressedTimestamps.get(0));
         Assertions.assertEquals(100, decompressedTimestamps.get(1));
-        Assertions.assertEquals(146, decompressedTimestamps.get(2)); // We are not allowed to approxmiate negative Delta-of-Delta values
-        Assertions.assertEquals(192, decompressedTimestamps.get(3)); // We can keep 46 as DELTA so we get 100 + 46 + 46 = 192
-        Assertions.assertEquals(238, decompressedTimestamps.get(4)); // 100 + 46 * 3 = 238 which is within the orignal value of 242
+        Assertions.assertEquals(150, decompressedTimestamps.get(2));
+        Assertions.assertEquals(200, decompressedTimestamps.get(3));
+        Assertions.assertEquals(250, decompressedTimestamps.get(4));
         Assertions.assertEquals(330, decompressedTimestamps.get(5));
     }
 
@@ -195,7 +194,7 @@ class DeltaDeltaTimestampCompressionTest {
     }
 
     @Test
-    void testNegativeDeltaDeltaNotPushed() {
+    void testDeltaDeltaDoesNotBreakOrdering() {
         int threshold = 100;
         deltaDeltaTimestampCompressionModel = new DeltaDeltaTimestampCompressionModel(threshold, Integer.MAX_VALUE);
         List<Long> timestamps = List.of(0L, 200L, 300L, 350L);

@@ -26,7 +26,6 @@ CREATE TABLE Segment(
     timestamp_model_blob bytea not null,
     minValue real,
     maxValue real,
-    amtDataPoints int,
     CONSTRAINT fk_time_series
                     FOREIGN KEY(time_series_id)
                     REFERENCES TimeSeries(id)

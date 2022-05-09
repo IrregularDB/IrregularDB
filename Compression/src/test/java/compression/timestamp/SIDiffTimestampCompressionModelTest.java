@@ -170,6 +170,33 @@ class SIDiffTimestampCompressionModelTest {
     }
 
     @Test
+    void testProblematicNegativeDifferences2() {
+        int threshold = 50;
+        TimestampCompressionModel siDiffTimestampModelType = new SIDiffTimestampCompressionModel(threshold, Integer.MAX_VALUE);
+        List<Long> timestamps = List.of(0L, 50L, 75L, 300L);
+        List<DataPoint> dataPoints = createDataPointsFromTimestamps(timestamps);
+        boolean success = siDiffTimestampModelType.resetAndAppendAll(dataPoints);
+        Assertions.assertTrue(success);
+
+        List<Long> decompressedTimestamps = BlobDecompressor.decompressTimestamps(siDiffTimestampModelType.getTimestampCompressionModelType(),
+                siDiffTimestampModelType.getBlobRepresentation(),
+                timestamps.get(0),
+                timestamps.get(timestamps.size() - 1)
+        );
+
+
+        for (int i = 0; i < decompressedTimestamps.size(); i++) {
+            if (i != 0) {
+                // Current timestamp should be larger than previous
+                Assertions.assertTrue(decompressedTimestamps.get(i) > decompressedTimestamps.get(i -1));
+            }
+            long diff = timestamps.get(i) - decompressedTimestamps.get(i);
+            Assertions.assertTrue(diff < threshold);
+        }
+    }
+
+
+    @Test
     void testProblematicPositiveDifferences() {
         int threshold = 50;
         TimestampCompressionModel siDiffTimestampModelType = new SIDiffTimestampCompressionModel(threshold, Integer.MAX_VALUE);

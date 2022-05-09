@@ -73,8 +73,8 @@ public class SIDiffTimestampCompressionModel extends TimestampCompressionModel {
 
     private Long getNextTimestamp(int i) {
         long nextTimestamp;
-        if (i != timestamps.size() - 1) {
-            nextTimestamp = timestamps.get(i);
+        if (i < (timestamps.size() - 1)) {
+            nextTimestamp = timestamps.get(i+1);
         } else {
             nextTimestamp = Long.MAX_VALUE; // last time stamp gets next value is LONG.MAX_VALUE
         }

@@ -102,7 +102,7 @@ public class DeltaDeltaTimestampCompressionModel extends TimestampCompressionMod
     private Integer tryApplyThreshold(int deltaOfDelta, long previousDelta, long previousTimestamp, long nextTimestamp) {
         int absoluteValue = Math.abs(deltaOfDelta);
         for (Integer maxValue : maxBucketValues) {
-            if (maxValue < absoluteValue && (absoluteValue - getThreshold()) <= maxValue) {
+            if (maxValue < absoluteValue && absoluteValue <= (maxValue + getThreshold())) {
                 boolean isNegativeNumber = deltaOfDelta < 0;
                 int pushedDeltaOfDelta = isNegativeNumber ? -maxValue : maxValue;
                 long approximationOfCurrentTime = previousTimestamp + (previousDelta + pushedDeltaOfDelta);

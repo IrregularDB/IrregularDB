@@ -120,6 +120,28 @@ class SIDiffTimestampCompressionModelTest {
         }
     }
 
+    @Test
+    void testApproximation() {
+        int threshold = 25;
+        TimestampCompressionModel siDiffTimestampModelType = new SIDiffTimestampCompressionModel(threshold, Integer.MAX_VALUE);
+        List<Long> timestamps = List.of(0L, 225L, 500L, 775L, 1000L);
+        List<DataPoint> dataPoints = createDataPointsFromTimestamps(timestamps);
+        boolean success = siDiffTimestampModelType.resetAndAppendAll(dataPoints);
+        Assertions.assertTrue(success);
+
+        List<Long> decompressedTimestamps = BlobDecompressor.decompressTimestamps(siDiffTimestampModelType.getTimestampCompressionModelType(),
+                siDiffTimestampModelType.getBlobRepresentation(),
+                timestamps.get(0),
+                timestamps.get(timestamps.size() - 1)
+        );
+
+        Assertions.assertEquals(0L, decompressedTimestamps.get(0));
+        Assertions.assertEquals(250L, decompressedTimestamps.get(1));
+        Assertions.assertEquals(500L, decompressedTimestamps.get(2));
+        Assertions.assertEquals(750L, decompressedTimestamps.get(3));
+        Assertions.assertEquals(1000L, decompressedTimestamps.get(4));
+    }
+
 
     @Test
     void testProblematicNegativeDifferences() {
@@ -171,6 +193,7 @@ class SIDiffTimestampCompressionModelTest {
             Assertions.assertTrue(dataPoints.get(i).timestamp() - decompressedTimestamps.get(i) < threshold);
         }
     }
+
 
     private List<DataPoint> createDataPointsFromTimestamps(List<Long> timestamps) {
         List<DataPoint> dataPoints = new ArrayList<>();

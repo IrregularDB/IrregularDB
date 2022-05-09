@@ -30,7 +30,12 @@ public class ConfigProperties extends Properties {
         }
 
         if (!isTest) {
-            INSTANCE = new ConfigProperties("irregulardb-core/src/main/resources/config.properties");
+            File configProperties = new File("./config.properties");
+            if (configProperties.exists()) {
+                INSTANCE = new ConfigProperties(configProperties.getAbsolutePath());
+            } else {
+                INSTANCE = new ConfigProperties("irregulardb-core/src/main/resources/config.properties");
+            }
         } else {
             File configProperties = new File("./config.properties");
             if (configProperties.exists()) {

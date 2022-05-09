@@ -45,11 +45,9 @@ public class PostgresConnection implements DatabaseConnection {
         if (segmentSummary != null) {
             preparedStatement.setFloat(7, segmentSummary.getMinValue());
             preparedStatement.setFloat(8, segmentSummary.getMaxValue());
-            preparedStatement.setInt(9, segmentSummary.getAmtDataPoints());
         } else {
             preparedStatement.setNull(7, Types.FLOAT);
             preparedStatement.setNull(8, Types.FLOAT);
-            preparedStatement.setNull(9, Types.INTEGER);
         }
     }
 
@@ -96,7 +94,7 @@ public class PostgresConnection implements DatabaseConnection {
     @Override
     public void flushBatchToDB() {
         try {
-            final String INSERT_SEGMENT_STATEMENT = "INSERT INTO Segment(time_series_id, start_time, end_time, value_timestamp_model_type, value_model_blob, timestamp_model_blob, minValue, maxvalue, amtDataPoints) VALUES (?,?,?,?,?,?,?,?,?)";
+            final String INSERT_SEGMENT_STATEMENT = "INSERT INTO Segment(time_series_id, start_time, end_time, value_timestamp_model_type, value_model_blob, timestamp_model_blob, minValue, maxvalue) VALUES (?,?,?,?,?,?,?,?)";
             PreparedStatement insertSegmentStatement = connection.prepareStatement(INSERT_SEGMENT_STATEMENT, Statement.RETURN_GENERATED_KEYS);
 
             for (Pair<Segment, SegmentSummary> segmentSegmentSummaryPair : insertBuffer) {

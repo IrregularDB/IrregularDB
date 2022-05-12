@@ -14,7 +14,6 @@ public class RegularTimestampCompressionModel extends TimestampCompressionModel 
     private boolean earlierAppendFailed;
     private List<Long> timestamps;
     private long nextExpectedTimestamp;
-    private Long theNextTimestamp;
 
     public RegularTimestampCompressionModel(Integer threshold) {
         super(threshold,
@@ -31,7 +30,6 @@ public class RegularTimestampCompressionModel extends TimestampCompressionModel 
         this.earlierAppendFailed = false;
         this.timestamps = new ArrayList<>();
         this.nextExpectedTimestamp = Long.MIN_VALUE;
-        this.theNextTimestamp = null;
     }
 
     @Override

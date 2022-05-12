@@ -1,5 +1,6 @@
 package compression.timestamp;
 
+import compression.BlobDecompressor;
 import compression.encoding.SingleIntEncoding;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -198,4 +199,118 @@ class RegularTimestampCompressionModelTest {
         Assertions.assertEquals(1, regularModel.getLength());
         Assertions.assertFalse(regularModel.canCreateByteBuffer());
     }
+
+    @Test
+    void dataPointsSurpassFollowingEndTime() {
+        int threshold = 1000;
+        regularModel = new RegularTimestampCompressionModel(threshold);
+
+        List<Long> timestamps = getTimestampsForSurpassTest();
+
+        boolean success = regularModel.resetAndAppendAll(createDataPointsFromTimestamps(timestamps));
+
+        // We don't expect regular to be able to fit all the data points.
+        Assertions.assertFalse(success);
+
+        List<Long> decompressedTimestamps = BlobDecompressor.decompressTimestampsUsingAmtDataPoints(regularModel.getTimestampCompressionModelType(),
+                regularModel.getBlobRepresentation(),
+                timestamps.get(0),
+                regularModel.getLength()
+        );
+
+        // This is the interesting assertion where we check that the final decompressed time stamp should be smaller
+        // than the following timestamp.
+
+        long lastTimestamp = timestamps.get(timestamps.size() - 1);
+        long endTimeOfRegularModel = decompressedTimestamps.get(decompressedTimestamps.size() - 1);
+        Assertions.assertTrue(endTimeOfRegularModel < lastTimestamp);
+    }
+
+    private List<Long> getTimestampsForSurpassTest() {
+        return List.of(
+                93000L,
+                94000L,
+                95000L,
+                96000L,
+                97000L,
+                98000L,
+                100000L,
+                101000L,
+                102000L,
+                103000L,
+                104000L,
+                105000L,
+                106000L,
+                107000L,
+                108000L,
+                109000L,
+                110000L,
+                111000L,
+                112000L,
+                113000L,
+                115000L,
+                116000L,
+                117000L,
+                118000L,
+                119000L,
+                120000L,
+                121000L,
+                122000L,
+                124000L,
+                125000L,
+                126000L,
+                127000L,
+                129000L,
+                130000L,
+                131000L,
+                132000L,
+                133000L,
+                134000L,
+                135000L,
+                136000L,
+                138000L,
+                139000L,
+                140000L,
+                141000L,
+                142000L,
+                143000L,
+                144000L,
+                145000L,
+                146000L,
+                147000L,
+                148000L,
+                149000L,
+                151000L,
+                152000L,
+                153000L,
+                154000L,
+                155000L,
+                156000L,
+                157000L,
+                158000L,
+                159000L,
+                160000L,
+                161000L,
+                162000L,
+                163000L,
+                164000L,
+                166000L,
+                167000L,
+                168000L,
+                169000L,
+                170000L,
+                171000L,
+                172000L,
+                173000L,
+                174000L,
+                175000L,
+                176000L,
+                177000L,
+                178000L,
+                179000L,
+                180000L,
+                181000L);
+    }
+
+
 }

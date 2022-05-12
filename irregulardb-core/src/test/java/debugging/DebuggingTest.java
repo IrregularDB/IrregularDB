@@ -31,6 +31,7 @@ public class DebuggingTest {
     public static void beforeAll() {
         ConfigProperties.isTest = true;
         ConfigProperties.getInstance().setProperty("model.length_bound", "200");
+        ConfigProperties.getInstance().setProperty("model.timestamp.threshold", "1000");
     }
 
 
@@ -58,11 +59,10 @@ public class DebuggingTest {
         List<DataPoint> dataPoints = getdataPointsFromReadings(timeSeriesReadings);
 
         int threshold = 1000;
-
         ModelPicker modelPicker = ModelPickerFactory.createModelPickerFromConfig();
         CompressionModelManager compressionModelManager = new CompressionModelManager(
                 CompressionModelFactory.getValueCompressionModels(""),
-                CompressionModelFactory.getTimestampCompressionModels(""),
+                List.of(new RegularTimestampCompressionModel(threshold)),
                 modelPicker);
         SegmentGenerator segmentGenerator = new SegmentGenerator(compressionModelManager, 1);
 

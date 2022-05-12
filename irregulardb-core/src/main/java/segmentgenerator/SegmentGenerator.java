@@ -69,7 +69,7 @@ public class SegmentGenerator {
 
             segments.add(segment);
             amtDataPointsUsed = bestCompressionModel.length();
-            endTimeOfSegment = segment.segmentKey().startTime() + segment.endTime();
+            endTimeOfSegment = segment.endTime();
         } while (!prepareForNextSegment(amtDataPointsUsed, endTimeOfSegment));
 
         return segments;
@@ -91,6 +91,8 @@ public class SegmentGenerator {
                 break;
             }
         }
+        // We get the last timestamp from the buffer (which should have been moved if necessary)
+        this.previousAppendedTimestamp = notYetEmitted.get(notYetEmitted.size() -1).timestamp();
         return compressionModelManager.resetAndTryAppendBuffer(notYetEmitted);
     }
 

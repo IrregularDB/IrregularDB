@@ -92,7 +92,11 @@ public class SegmentGenerator {
             }
         }
         // We get the last timestamp from the buffer (which should have been moved if necessary)
-        this.previousAppendedTimestamp = notYetEmitted.get(notYetEmitted.size() -1).timestamp();
+        if (notYetEmitted.isEmpty()) {
+            this.previousAppendedTimestamp = endTimeOfSegment;
+        } else {
+            this.previousAppendedTimestamp = notYetEmitted.get(notYetEmitted.size() -1).timestamp();
+        }
         return compressionModelManager.resetAndTryAppendBuffer(notYetEmitted);
     }
 

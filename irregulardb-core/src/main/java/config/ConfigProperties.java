@@ -178,7 +178,7 @@ public class ConfigProperties extends Properties {
     }
 
     public int getReceiverCSVThrottleSleepTime(){
-        return Integer.parseInt(getProperty("receiver.csv.throttle_sleep_time", "50"));
+        return Integer.parseInt(getProperty("receiver.throttle_sleep_time", "50"));
     }
 
     public boolean getModelValueErrorBoundStrict(){

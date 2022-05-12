@@ -33,6 +33,7 @@ public class Stopwatch {
         if (startTimesByTag.isEmpty()) {
             double runTime = endTime - initialStartTime;
             System.out.println("Total ingestion time: " + runTime/1000 + "sec");
+            System.exit(0);
         }
     }
 }

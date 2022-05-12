@@ -5,6 +5,7 @@ import compression.BlobDecompressor;
 import compression.CompressionModelFactory;
 import compression.timestamp.DeltaDeltaTimestampCompressionModel;
 import compression.timestamp.RegularTimestampCompressionModel;
+import compression.timestamp.SIDiffTimestampCompressionModel;
 import compression.timestamp.TimestampCompressionModel;
 import config.ConfigProperties;
 import org.junit.jupiter.api.Assertions;
@@ -36,6 +37,7 @@ public class DebuggingTest {
 
 
     @Test
+
     void debugTest() throws IOException {
         List<TimeSeriesReading> timeSeriesReadings = extractAllReadings("./src/test/java/debugging/data1.csv");
         List<DataPoint> dataPoints = getdataPointsFromReadings(timeSeriesReadings);
@@ -47,10 +49,84 @@ public class DebuggingTest {
 
         List<Long> decompressedTimestamps = decompressTimestampsForTimestampModel(dataPoints, timestampCompressionModel);
 
+        long previousTime = Long.MIN_VALUE;
+
         for (int i = 0; i < decompressedTimestamps.size(); i++) {
+
+            Assertions.assertTrue(previousTime < decompressedTimestamps.get(i));
+
             long diff = Math.abs(dataPoints.get(i).timestamp() - decompressedTimestamps.get(i));
             Assertions.assertTrue(diff <= threshold);
+            previousTime = decompressedTimestamps.get(i);
         }
+    }
+
+    @Test
+    void debugTestSIDiff() throws IOException {
+        List<TimeSeriesReading> timeSeriesReadings = extractAllReadings("./src/test/java/debugging/data.csv");
+        List<DataPoint> dataPoints = getdataPointsFromReadings(timeSeriesReadings);
+
+        int threshold = 1000;
+
+        SIDiffTimestampCompressionModel siDiffTimestampCompressionModel = new SIDiffTimestampCompressionModel(threshold, 200);
+        boolean b = siDiffTimestampCompressionModel.resetAndAppendAll(dataPoints);
+
+        List<Long> decompressedTimestamps = decompressTimestampsForTimestampModel(dataPoints, siDiffTimestampCompressionModel);
+
+        long previousTime = Long.MIN_VALUE;
+
+        for (int i = 0; i < decompressedTimestamps.size(); i++) {
+
+            Assertions.assertTrue(previousTime < decompressedTimestamps.get(i));
+
+            long diff = Math.abs(dataPoints.get(i).timestamp() - decompressedTimestamps.get(i));
+            Assertions.assertTrue(diff <= threshold);
+            previousTime = decompressedTimestamps.get(i);
+        }
+    }
+
+    @Test
+    void debugTestSIDiffMultipleSegments() throws IOException {
+        List<TimeSeriesReading> timeSeriesReadings = extractAllReadings("./src/test/java/debugging/data.csv");
+        List<DataPoint> dataPoints = getdataPointsFromReadings(timeSeriesReadings);
+        int threshold = 1000;
+        SIDiffTimestampCompressionModel siDiffTimestampCompressionModel = new SIDiffTimestampCompressionModel(threshold, 200);
+
+        boolean b = siDiffTimestampCompressionModel.resetAndAppendAll(dataPoints);
+
+        List<Long> decompressedTimestamps = decompressTimestampsForTimestampModel(dataPoints, siDiffTimestampCompressionModel);
+
+        long previousTime = Long.MIN_VALUE;
+
+        for (int i = 0; i < decompressedTimestamps.size(); i++) {
+
+            Assertions.assertTrue(previousTime < decompressedTimestamps.get(i));
+
+            long diff = Math.abs(dataPoints.get(i).timestamp() - decompressedTimestamps.get(i));
+            Assertions.assertTrue(diff <= threshold);
+            previousTime = decompressedTimestamps.get(i);
+        }
+
+        List<TimeSeriesReading> timeSeriesReadingsSegment2 = extractAllReadings("./src/test/java/debugging/data2.csv");
+        List<DataPoint> dataPointsSegment2 = getdataPointsFromReadings(timeSeriesReadings);
+        SIDiffTimestampCompressionModel siDiffTimestampCompressionModelSegment2 = new SIDiffTimestampCompressionModel(threshold, 200);
+
+        boolean b1 = siDiffTimestampCompressionModelSegment2.resetAndAppendAll(dataPointsSegment2);
+
+        List<Long> decompressedTimestampsSegment2 = decompressTimestampsForTimestampModel(dataPoints, siDiffTimestampCompressionModelSegment2);
+
+        previousTime = Long.MIN_VALUE;
+
+        for (int i = 0; i < decompressedTimestampsSegment2.size(); i++) {
+
+            Assertions.assertTrue(previousTime < decompressedTimestampsSegment2.get(i));
+
+            long diff = Math.abs(dataPointsSegment2.get(i).timestamp() - decompressedTimestampsSegment2.get(i));
+            Assertions.assertTrue(diff <= threshold);
+            previousTime = decompressedTimestamps.get(i);
+        }
+
+        Assertions.assertNotSame(decompressedTimestamps.get(decompressedTimestamps.size() - 1), decompressedTimestampsSegment2.get(0));
     }
 
     @Test

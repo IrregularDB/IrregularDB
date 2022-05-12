@@ -4,6 +4,7 @@ import compression.BlobDecompressor;
 import compression.encoding.SingleIntEncoding;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import records.DataPoint;
 
@@ -200,6 +201,8 @@ class RegularTimestampCompressionModelTest {
         Assertions.assertFalse(regularModel.canCreateByteBuffer());
     }
 
+    // We disable this test as the fix for it was moved to the segment generator
+    @Disabled
     @Test
     void dataPointsSurpassFollowingEndTime() {
         int threshold = 1000;

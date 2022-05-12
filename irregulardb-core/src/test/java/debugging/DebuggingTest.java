@@ -2,13 +2,21 @@ package debugging;
 
 
 import compression.BlobDecompressor;
+import compression.CompressionModelFactory;
 import compression.timestamp.DeltaDeltaTimestampCompressionModel;
 import compression.timestamp.RegularTimestampCompressionModel;
 import compression.timestamp.TimestampCompressionModel;
+import config.ConfigProperties;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import records.DataPoint;
+import records.Segment;
 import records.TimeSeriesReading;
+import segmentgenerator.CompressionModelManager;
+import segmentgenerator.ModelPicker;
+import segmentgenerator.ModelPickerFactory;
+import segmentgenerator.SegmentGenerator;
 import sources.CSVTimeSeriesReader;
 
 import java.io.File;
@@ -19,28 +27,54 @@ import java.util.Objects;
 
 public class DebuggingTest {
 
-    @Test
-    void test(){
-        System.out.println((double)10F);
+    @BeforeAll
+    public static void beforeAll() {
+        ConfigProperties.isTest = true;
+        ConfigProperties.getInstance().setProperty("model.length_bound", "200");
     }
 
 
     @Test
     void debugTest() throws IOException {
-        List<TimeSeriesReading> timeSeriesReadings = extractAllReadings("./src/test/java/debugging/data.csv");
+        List<TimeSeriesReading> timeSeriesReadings = extractAllReadings("./src/test/java/debugging/data1.csv");
         List<DataPoint> dataPoints = getdataPointsFromReadings(timeSeriesReadings);
 
         int threshold = 1000;
 
-        DeltaDeltaTimestampCompressionModel deltaDeltaTimestampCompressionModel = new DeltaDeltaTimestampCompressionModel(threshold, 200);
-        boolean b = deltaDeltaTimestampCompressionModel.resetAndAppendAll(dataPoints);
+        TimestampCompressionModel timestampCompressionModel = new RegularTimestampCompressionModel(threshold);
+        boolean b = timestampCompressionModel.resetAndAppendAll(dataPoints);
 
-        List<Long> decompressedTimestamps = decompressTimestampsForTimestampModel(dataPoints, deltaDeltaTimestampCompressionModel);
+        List<Long> decompressedTimestamps = decompressTimestampsForTimestampModel(dataPoints, timestampCompressionModel);
 
         for (int i = 0; i < decompressedTimestamps.size(); i++) {
             long diff = Math.abs(dataPoints.get(i).timestamp() - decompressedTimestamps.get(i));
             Assertions.assertTrue(diff <= threshold);
         }
+    }
+
+    @Test
+    void SegmentGeneratorDebugTest() throws IOException {
+        List<TimeSeriesReading> timeSeriesReadings = extractAllReadings("./src/test/java/debugging/data1.csv");
+        List<DataPoint> dataPoints = getdataPointsFromReadings(timeSeriesReadings);
+
+        int threshold = 1000;
+
+        ModelPicker modelPicker = ModelPickerFactory.createModelPickerFromConfig();
+        CompressionModelManager compressionModelManager = new CompressionModelManager(
+                CompressionModelFactory.getValueCompressionModels(""),
+                CompressionModelFactory.getTimestampCompressionModels(""),
+                modelPicker);
+        SegmentGenerator segmentGenerator = new SegmentGenerator(compressionModelManager, 1);
+
+        List<Segment> segments = new ArrayList<>();
+        for (DataPoint dataPoint : dataPoints) {
+            boolean accepted = segmentGenerator.acceptDataPoint(dataPoint);
+            if (!accepted) {
+                segments.addAll(segmentGenerator.constructSegmentsFromBuffer());
+            }
+        }
+
+        int a = 0;
     }
 
     @Test

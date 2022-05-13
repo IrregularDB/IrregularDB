@@ -10,14 +10,16 @@ import java.util.List;
 public class SegmentGenerator {
     private final CompressionModelManager compressionModelManager;
     private final int timeSeriesId;
-    private final List<DataPoint> notYetEmitted;
+    private final ArrayList<DataPoint> notYetEmitted;
     private static final boolean usesSegmentSummary = ConfigProperties.getInstance().populateSegmentSummary();
+    private long previousAppendedTimestamp;
 
 
     public SegmentGenerator(CompressionModelManager compressionModelManager, int timeSeriesId) {
         this.compressionModelManager = compressionModelManager;
         this.timeSeriesId = timeSeriesId;
         this.notYetEmitted = new ArrayList<>();
+        this.previousAppendedTimestamp = Long.MIN_VALUE;
     }
 
     /**
@@ -26,8 +28,24 @@ public class SegmentGenerator {
      * @return on false as the return value, generateSegment must be the next method invoked by the caller
      */
     public boolean acceptDataPoint(DataPoint dataPoint) {
-        notYetEmitted.add(dataPoint);
-        return compressionModelManager.tryAppendDataPointToAllModels(dataPoint);
+        DataPoint movedDataPoint = checkAndMoveDataPoint(dataPoint, this.previousAppendedTimestamp);
+        DataPoint temp;
+        if (movedDataPoint != null) {
+            temp = movedDataPoint;
+            this.previousAppendedTimestamp = movedDataPoint.timestamp();
+        } else {
+            temp = dataPoint;
+        }
+        notYetEmitted.add(temp);
+        return compressionModelManager.tryAppendDataPointToAllModels(temp);
+    }
+
+    private DataPoint checkAndMoveDataPoint(DataPoint dataPoint, Long previousAppendedTimestamp) {
+        DataPoint temp = null;
+        if (dataPoint.timestamp() <= previousAppendedTimestamp) {
+            temp = new DataPoint(previousAppendedTimestamp + 1, dataPoint.value());
+        }
+        return temp;
     }
 
     public List<Segment> constructSegmentsFromBuffer() {
@@ -36,29 +54,23 @@ public class SegmentGenerator {
         }
         List<Segment> segments = new ArrayList<>();
         int amtDataPointsUsed;
+        long endTimeOfSegment;
 
         do {
             CompressionModel bestCompressionModel;
-            if (notYetEmitted.size() == 1) {
+            if (compressionModelManager.canCreateCompressionModel()) {
+                bestCompressionModel = this.compressionModelManager.getBestCompressionModel();
+            } else {
                 DataPoint dataPoint = notYetEmitted.get(0);
                 bestCompressionModel = ModelPicker.createFallBackCompressionModel(dataPoint);
-            } else {
-                bestCompressionModel = this.compressionModelManager.getBestCompressionModel();
             }
 
-            //find size of each model and reduce the largest down to the size of the smallest
-            if (bestCompressionModel.length() == 0) {
-                throw new RuntimeException("Segment generated with size 0");
-            }
+            Segment segment = generateSegment(bestCompressionModel, notYetEmitted.get(0).timestamp());
 
-            Segment segment = generateSegment(
-                    bestCompressionModel,
-                    notYetEmitted.get(0).timestamp(),
-                    notYetEmitted.get(bestCompressionModel.length()- 1).timestamp()
-            );
             segments.add(segment);
             amtDataPointsUsed = bestCompressionModel.length();
-        } while (!prepareForNextSegment(amtDataPointsUsed));
+            endTimeOfSegment = segment.endTime();
+        } while (!prepareForNextSegment(amtDataPointsUsed, endTimeOfSegment));
 
         return segments;
     }
@@ -67,8 +79,24 @@ public class SegmentGenerator {
     /**
      * @return if this method returns false then another segment must be generated.
      */
-    private boolean prepareForNextSegment(int amountOfDataPointsUsedInSegment) {
+    private boolean prepareForNextSegment(int amountOfDataPointsUsedInSegment, long endTimeOfSegment) {
         removeNOldestFromBuffer(amountOfDataPointsUsedInSegment);
+        long previousTimestamp = endTimeOfSegment;
+        for (int i = 0; i < notYetEmitted.size(); i++) {
+            DataPoint movedDataPoint = checkAndMoveDataPoint(notYetEmitted.get(i), previousTimestamp);
+            if (movedDataPoint != null) {
+                notYetEmitted.set(i, movedDataPoint);
+                previousTimestamp = movedDataPoint.timestamp();
+            } else {
+                break;
+            }
+        }
+        // We get the last timestamp from the buffer (which should have been moved if necessary)
+        if (notYetEmitted.isEmpty()) {
+            this.previousAppendedTimestamp = endTimeOfSegment;
+        } else {
+            this.previousAppendedTimestamp = notYetEmitted.get(notYetEmitted.size() -1).timestamp();
+        }
         return compressionModelManager.resetAndTryAppendBuffer(notYetEmitted);
     }
 
@@ -76,19 +104,29 @@ public class SegmentGenerator {
         notYetEmitted.subList(0, dataPointsUsedForPrevSegment).clear();
     }
 
-    private Segment generateSegment(CompressionModel compressionModel, long startTime, long endTime) {
+    private Segment generateSegment(CompressionModel compressionModel, long startTime) {
         SegmentKey segmentKey = new SegmentKey(this.timeSeriesId, startTime);
         SegmentSummary segmentSummary = null;
+
+        List<Long> decompressedTimestamp = BlobDecompressor.decompressTimestampsUsingAmtDataPoints(
+                compressionModel.timestampType(),
+                compressionModel.timestampCompressionModel(),
+                startTime,
+                compressionModel.length()
+        );
+
         if (usesSegmentSummary) {
-            List<DataPoint> decompressedDataPoints = BlobDecompressor.decompressBlobs(compressionModel.timestampType(),
-                    compressionModel.timestampCompressionModel(), compressionModel.valueType(),
-                    compressionModel.valueCompressionModel(), startTime, endTime);
+            List<DataPoint> decompressedDataPoints = BlobDecompressor.createDataPointsByDecompressingValues(
+                    compressionModel.valueType(),
+                    compressionModel.valueCompressionModel(),
+                    decompressedTimestamp
+            );
             segmentSummary = new SegmentSummary(decompressedDataPoints, segmentKey);
         }
 
         return new Segment(
                 segmentKey,
-                endTime,
+                decompressedTimestamp.get(decompressedTimestamp.size() -1),
                 (byte) compressionModel.valueType().ordinal(),
                 compressionModel.valueCompressionModel(),
                 (byte) compressionModel.timestampType().ordinal(),

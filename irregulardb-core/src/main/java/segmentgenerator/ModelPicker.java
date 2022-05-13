@@ -47,7 +47,6 @@ public abstract class ModelPicker {
             //start_time = 8 bytes
             //min_value = 4 byte
             //max_value = 4 byte
-            // TODO: if we keep amount data points on the summary then add it here
             overhead += 4 + 8 + 4 + 4;
         }
         return overhead / 2; // there are two models to share the overhead

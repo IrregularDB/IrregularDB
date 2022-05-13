@@ -29,6 +29,30 @@ public class CompressionModelManager {
         this.modelPicker = modelPicker;
     }
 
+    public boolean canCreateCompressionModel(){
+        boolean canCreateTimestampModel = false;
+        List<TimestampCompressionModel> timestampModels = Stream.concat(activeTimestampModels.stream(), inactiveTimestampModels.stream()).toList();
+        for (TimestampCompressionModel timestampModel : timestampModels) {
+            if (timestampModel.canCreateByteBuffer()) {
+                canCreateTimestampModel = true;
+                break;
+            }
+        }
+        if (!canCreateTimestampModel) {
+            return false; // Short-circuit as there is no need to check value models
+        }
+
+        boolean canCreateValueModel = false;
+        List<ValueCompressionModel> valueModels = Stream.concat(activeValueModels.stream(), inactiveValueModels.stream()).toList();
+        for (ValueCompressionModel valueModel : valueModels) {
+            if (valueModel.canCreateByteBuffer()) {
+                canCreateValueModel = true;
+                break;
+            }
+        }
+        return canCreateValueModel;
+    }
+
     public boolean tryAppendDataPointToAllModels(DataPoint dataPoint) {
         // Partition models by append success
         List<ValueCompressionModel> valueModelsNowInactive = new ArrayList<>();

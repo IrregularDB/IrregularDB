@@ -31,7 +31,7 @@ class CSVDataReceiverTest {
         WorkingSet workingSet = new WorkingSet(buffer, new TimeSeriesFactory(), new TestDatabaseConnectionFactory());
 
         File file = new File("src/test/resources/testFolder/test1.csv");
-        CSVDataReceiver csvDataReceiver = new CSVDataReceiver(file, workingSet, ",");
+        CSVDataReceiver csvDataReceiver = new CSVDataReceiver(file,"", workingSet, ",");
 
         csvDataReceiver.receiveData();
 

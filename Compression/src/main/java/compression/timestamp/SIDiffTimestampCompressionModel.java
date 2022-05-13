@@ -57,15 +57,28 @@ public class SIDiffTimestampCompressionModel extends TimestampCompressionModel {
         int allowedDerivation = getThreshold();
         List<Integer> maxValuesOfBuckets = BucketEncoding.getMaxAbsoluteValuesOfResizeableBuckets();
 
-        long approximation = firstTimestamp + (long) si;
+        long approximationOfCurrentTimestamp = firstTimestamp + (long) si;
+        long previousTimestamp = firstTimestamp;
         // We skip the first timestamp as it is stored on the segment
         for (int i = 1; i < timestamps.size(); i++) {
-            int difference = calculateDifference(timestamps.get(i), approximation, maxValuesOfBuckets, allowedDerivation);
+            Long nextTimestamp = getNextTimestamp(i);
+            int difference = calculateDifference(timestamps.get(i), nextTimestamp, previousTimestamp, approximationOfCurrentTimestamp, maxValuesOfBuckets, allowedDerivation);
             readings.add(difference);
-            approximation += si;
+            previousTimestamp = approximationOfCurrentTimestamp + difference;
+            approximationOfCurrentTimestamp += si;
         }
 
         return BucketEncoding.encode(readings, true);
+    }
+
+    private Long getNextTimestamp(int i) {
+        long nextTimestamp;
+        if (i < (timestamps.size() - 1)) {
+            nextTimestamp = timestamps.get(i+1);
+        } else {
+            nextTimestamp = Long.MAX_VALUE; // last time stamp gets next value is LONG.MAX_VALUE
+        }
+        return nextTimestamp;
     }
 
     @Override
@@ -82,17 +95,19 @@ public class SIDiffTimestampCompressionModel extends TimestampCompressionModel {
         return Math.round((float) duration / (timestamps.size() - 1));
     }
 
-    private int calculateDifference(long currentTimestamp, long approximation, List<Integer> maxValuesOfBuckets, int allowedDerivation) {
-        // TODO: fix the problem of if these differences are too large to be stored in an integer then we cannot append/store the timestamp (happens when gaps occur)
-        int difference = Math.toIntExact(currentTimestamp - approximation);
+    private int calculateDifference(long currentTimestamp, long nextTimestamp, long previousTimestamp, long approximationOfCurrentTime, List<Integer> maxValuesOfBuckets, int allowedDerivation) {
+        int difference = Math.toIntExact(currentTimestamp - approximationOfCurrentTime);
         int absoluteDifference = Math.abs(difference);
 
         // We look for values that are between max value and max value + allowed derivation
         for (int maxValue : maxValuesOfBuckets) {
             if (maxValue <= absoluteDifference && absoluteDifference <= (maxValue + allowedDerivation)) {
                 boolean isNegativeNumber = difference < 0;
-                difference = isNegativeNumber ? -1 * maxValue : maxValue;
-                break;
+                int pushedDifference = isNegativeNumber ? -1 * maxValue : maxValue;
+                long pushedApproximationOfCurrentTime = approximationOfCurrentTime + pushedDifference;
+                if (previousTimestamp < pushedApproximationOfCurrentTime && pushedApproximationOfCurrentTime < nextTimestamp) {
+                    return pushedDifference; // We only use the pushed difference if it is between the previous and next time stamp
+                }
             }
         }
         return difference;

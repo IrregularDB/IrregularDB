@@ -1,5 +1,5 @@
 SET pljava.libjvm_location TO '/home/student.aau.dk/knorho20/jdk-16/lib/server/libjvm.so';
-ALTER DATABASE master SET pljava.libjvm_location FROM CURRENT;
+ALTER DATABASE irregulardb_irregular_summary SET pljava.libjvm_location FROM CURRENT;
 
 CREATE EXTENSION pljava;
 
@@ -14,20 +14,29 @@ select sqlj.set_classpath(
 select sqlj.get_classpath('public');
 
 
-DROP TYPE sqlDataPoint;
-CREATE TYPE sqlDataPoint AS(timeSeriesId integer, timestamp BigInt, value float);
+part 1 done, part 2 done, part 3 ongoing
+select min(id) from timeseries; 197 -> 225 -> 255 -> 285 -> 312
+select max(id) from timeseries; 312
+drop materialized view datapointsview;
+create materialized view datapointsview as
+select tag, timestamp, value
+from (
+         select (decompressSegment(segment)).*
+         from segment --where time_series_id >= 285 and time_series_id < 999
+     ) dp join timeseries t
+               on dp.timeseriesid = t.id
+order by tag, timestamp
+;
 
 
-DROP FUNCTION decompressSegment(segment);
-CREATE FUNCTION decompressSegment(segment)
-    RETURNS Setof sqlDataPoint
-AS 'SegmentDecompressor.decompressSegment'
-    IMMUTABLE LANGUAGE java;
+
 
 select * from timeseries;
-
-
-561
+--find segment with timestamp
+select * from segment
+select (decompressSegment(segment)).* from segment where start_time <= 1304728429000 and (end_time + segment.start_time) >= 1304728429000 and time_series_id =427;
+select start_time + end_time, * from segment where start_time <= 1304728429000 and (end_time + segment.start_time) >= 1304728429000 and time_series_id =427;
+select distinct value_timestamp_model_type from segment;
 
 select * from (
                   select (decompressSegment(s)).*
@@ -38,3 +47,6 @@ select * from (
               ) t where t.timestamp = 1304136472000
 ;
 select count(*) from datapointview;
+
+select minvalue, maxvalue, amtdatapoints, start_time + end_time, * from segment where start_time = 1303132933000 and time_series_id = 39;
+select (decompresssegment(segment)).* from segment where start_time = 1303132933000 and time_series_id = 39;

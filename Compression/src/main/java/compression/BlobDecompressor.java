@@ -33,6 +33,16 @@ public class BlobDecompressor {
             default -> throw new IllegalArgumentException("No decompression method has been implemented for the given Time Stamp Model Type");
         };
     }
+    public static List<Long> decompressTimestampsUsingAmtDataPoints(TimestampCompressionModelType timestampModelType, ByteBuffer timestampBlob,
+                                                  Long startTime, int amtDataPoints) {
+        return switch (timestampModelType) {
+            case REGULAR -> decompressRegularUsingAmtDataPoints(timestampBlob, startTime, amtDataPoints);
+            case DELTADELTA -> decompressDeltaDelta(timestampBlob, startTime);
+            case SIDIFF -> decompressSIDiff(timestampBlob, startTime);
+            case FALLBACK -> List.of(startTime);
+            default -> throw new IllegalArgumentException("No decompression method has been implemented for the given Time Stamp Model Type");
+        };
+    }
 
     private static List<Long> decompressRegular(ByteBuffer timestampBlob, Long startTime, Long endTime) {
         int si = SingleIntEncoding.decode(timestampBlob);
@@ -42,6 +52,19 @@ public class BlobDecompressor {
         while (currTime <= endTime) {
             timestamps.add(currTime);
             currTime += si;
+        }
+        return timestamps;
+    }
+
+    private static List<Long> decompressRegularUsingAmtDataPoints(ByteBuffer timestampBlob, Long startTime, int amtDataPoints) {
+        int si = SingleIntEncoding.decode(timestampBlob);
+        int amtGenerated = 0;
+        Long currTime = startTime;
+        List<Long> timestamps = new ArrayList<>();
+        while (amtGenerated < amtDataPoints) {
+            timestamps.add(currTime);
+            currTime += si;
+            amtGenerated++;
         }
         return timestamps;
     }
@@ -124,7 +147,7 @@ public class BlobDecompressor {
         List<Float> decodedValues = GorillaValueEncoding.decode(bitStream);
         int amtValues = decodedValues.size();
         if (amtValues != timeStamps.size()) {
-            throw new RuntimeException("The amount of values and time stamps did not match up");
+            throw new RuntimeException("The amount of values and time stamps did not match up for decompress gorilla");
         }
         List<DataPoint> dataPoints = new ArrayList<>();
         for (int i = 0; i < amtValues; i++) {
@@ -135,7 +158,7 @@ public class BlobDecompressor {
 
     private static List<DataPoint> decompressFallbackValue(ByteBuffer valueBlob, List<Long> timestamps) {
         if (timestamps.size() != 1) {
-            throw new RuntimeException("The amount of values and time stamps did not match up");
+            throw new RuntimeException("Not exactly 1 timestamp for fallback value model");
         }
         float value = valueBlob.getFloat(0);
         return List.of(new DataPoint(timestamps.get(0), value));

@@ -3,6 +3,7 @@ package compression.timestamp;
 import compression.encoding.SingleIntEncoding;
 import compression.utility.LongToInt;
 import records.DataPoint;
+import records.Pair;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -41,7 +42,7 @@ public class RegularTimestampCompressionModel extends TimestampCompressionModel 
         return appendTimestamp(dataPoint.timestamp());
     }
 
-    private boolean appendTimestamp(long timeStamp) {
+    private boolean appendTimestamp(long timestamp) {
         if (earlierAppendFailed) { // Security added so that if you try to append after an earlier append failed
             throw new IllegalArgumentException("You tried to append to a model that had failed an earlier append");
         }
@@ -49,9 +50,12 @@ public class RegularTimestampCompressionModel extends TimestampCompressionModel 
 
         // Special handling for first two time stamps:
         if (this.getLength() < 2) {
-            withinThreshold = handleFirstTwoDataPoints(timeStamp);
+            withinThreshold = handleFirstTwoDataPoints(timestamp);
+            if (si != null) {
+                nextExpectedTimestamp = timestamp + si;
+            }
         } else {
-            withinThreshold = handleOtherDataPoints(timeStamp);
+            withinThreshold = handleOtherDataPoints(timestamp);
             this.nextExpectedTimestamp += si;
         }
         if (!withinThreshold)
@@ -69,7 +73,6 @@ public class RegularTimestampCompressionModel extends TimestampCompressionModel 
                 return false;
             } else {
                 timestamps.add(timestamp);
-                nextExpectedTimestamp = timestamp + si;
                 return true;
             }
         }
@@ -89,17 +92,17 @@ public class RegularTimestampCompressionModel extends TimestampCompressionModel 
     }
 
     private boolean testNewCandidateSI(long timestamp) {
-        boolean fitNewSI = false;
         ArrayList<Long> allTimestamps = new ArrayList<>(this.timestamps);
         allTimestamps.add(timestamp);
 
         Integer candidateSI = calculateCandidateSI(allTimestamps);
-
-        if (doesCandidateSIFit(allTimestamps, candidateSI)) {
+        Pair<Boolean, Long> candidateSIResult = doesCandidateSIFit(allTimestamps, candidateSI);
+        if (candidateSIResult.f0()) {
             this.si = candidateSI;
-            fitNewSI = true;
+            this.nextExpectedTimestamp = candidateSIResult.f1();
+            return true;
         }
-        return fitNewSI;
+        return false;
     }
 
     private Integer calculateCandidateSI(List<Long> timestamps) {
@@ -107,18 +110,18 @@ public class RegularTimestampCompressionModel extends TimestampCompressionModel 
         return Math.round((float)duration / (timestamps.size() - 1));
     }
 
-    private boolean doesCandidateSIFit(ArrayList<Long> allTimestamps, int candidateSI) {
-        long startTime = allTimestamps.get(0);
-        long localNextExpectedTimestamp = startTime + candidateSI;
+    private Pair<Boolean, Long> doesCandidateSIFit(ArrayList<Long> allTimestamps, int candidateSI) {
+        long localNextExpectedTimestamp = allTimestamps.get(0);
+        Integer threshold = getThreshold();
 
         for (int i = 1; i < allTimestamps.size(); i++) {
-            boolean timestampWithinThreshold = isTimestampWithinThreshold(allTimestamps.get(i), localNextExpectedTimestamp, getThreshold());
-            if (!timestampWithinThreshold) {
-                return false;
-            }
             localNextExpectedTimestamp += candidateSI;
+            boolean timestampWithinThreshold = isTimestampWithinThreshold(allTimestamps.get(i), localNextExpectedTimestamp,threshold);
+            if (!timestampWithinThreshold) {
+                return new Pair<>(false, null);
+            }
         }
-        return true;
+        return new Pair<>(true, localNextExpectedTimestamp);
     }
 
     private boolean isTimestampWithinThreshold(long timestamp, long nextExpectedTimestamp, Integer threshold) {

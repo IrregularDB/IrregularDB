@@ -2,7 +2,9 @@ package config;
 
 import compression.timestamp.TimestampCompressionModelType;
 import compression.value.ValueCompressionModelType;
+import records.Pair;
 import segmentgenerator.ModelPickerFactory;
+import utility.CSVFileGetter;
 
 import java.io.File;
 import java.io.FileReader;
@@ -28,7 +30,12 @@ public class ConfigProperties extends Properties {
         }
 
         if (!isTest) {
-            INSTANCE = new ConfigProperties("irregulardb-core/src/main/resources/config.properties");
+            File configProperties = new File("./config.properties");
+            if (configProperties.exists()) {
+                INSTANCE = new ConfigProperties(configProperties.getAbsolutePath());
+            } else {
+                INSTANCE = new ConfigProperties("irregulardb-core/src/main/resources/config.properties");
+            }
         } else {
             File configProperties = new File("./config.properties");
             if (configProperties.exists()) {
@@ -58,37 +65,20 @@ public class ConfigProperties extends Properties {
         return Integer.parseInt(workingsets);
     }
 
-    public Set<File> getCsvSources() {
+    public List<Pair<File, String>> getCsvSourceFilesWithFileNameTag() {
         String csvSource = getProperty("source.csv");
         if (csvSource == null) {
             // no sources -> return empty list
-            return Collections.emptySet();
+            return Collections.emptyList();
         }
 
-        List<String> listOfSources = Arrays.stream(csvSource.trim().split(","))
+         return Arrays.stream(csvSource.trim().split(","))
                 .map(String::trim)
+                .map(File::new)
+                .map(CSVFileGetter::getCsvFilesWithTag)
+                .flatMap(map -> map.entrySet().stream())
+                .map(entry -> new Pair<>(entry.getKey(), entry.getValue()))
                 .toList();
-
-        Set<File> output = new HashSet<>();
-
-        for (String source : listOfSources) {
-            File f = new File(source);
-            if (f.isFile()) {
-                output.add(f);
-            }
-            else if (f.isDirectory()) {
-                File[] files = f.listFiles();
-                if (files != null) {
-                    for (File file : files){
-                        if (file.isFile()){
-                            output.add(file);
-                        }
-                    }
-                }
-            }
-        }
-
-        return output;
     }
 
     /**
@@ -173,7 +163,7 @@ public class ConfigProperties extends Properties {
     public ModelPickerFactory.ModelPickerType getModelPickerType(){
         String modelPickerType = getProperty("model.picker");
         if (modelPickerType == null) {
-            return ModelPickerFactory.ModelPickerType.GREEDY;
+            return ModelPickerFactory.ModelPickerType.BRUTE_FORCE;
         }
         return ModelPickerFactory.ModelPickerType.valueOf(modelPickerType);
     }
@@ -188,7 +178,11 @@ public class ConfigProperties extends Properties {
     }
 
     public int getReceiverCSVThrottleSleepTime(){
-        return Integer.parseInt(getProperty("receiver.csv.throttle_sleep_time", "50"));
+        return Integer.parseInt(getProperty("receiver.throttle_sleep_time", "50"));
+    }
+
+    public boolean getModelValueErrorBoundStrict(){
+        return Boolean.parseBoolean(getProperty("model.value.error_bound.strict", "true"));
     }
 
     /* Private methods */
@@ -212,6 +206,7 @@ public class ConfigProperties extends Properties {
             }
         }
     }
+
 
 
 }

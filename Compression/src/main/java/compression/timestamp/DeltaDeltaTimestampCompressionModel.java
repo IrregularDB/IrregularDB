@@ -9,93 +9,120 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class DeltaDeltaTimestampCompressionModel extends TimestampCompressionModel {
-    private final List<Integer> maxBucketValues;
-    private List<Integer> deltaDeltaTimestamps;
-    private Long previousTimestamp = null;
-    private Integer previousDelta;
+    private final static List<Integer> maxBucketValues = BucketEncoding.getMaxAbsoluteValuesOfResizeableBuckets();
+    private List<Long> timestamps;
+    private Long firstTimestamp;
 
     public DeltaDeltaTimestampCompressionModel(Integer threshold, int lengthBound) {
         super(threshold,
                 "DeltaDelta time stamp model needs at least one data point before you are able to get the time stamp blob",
                 true,
                 lengthBound
-                );
+        );
         // We make this a field so that we don't have to allocate a new signed bucket encoder each time get byte buffer is called
-        this.maxBucketValues = BucketEncoding.getMaxAbsoluteValuesOfResizeableBuckets();
         resetModel();
     }
 
     @Override
     protected void resetModel() {
-        this.deltaDeltaTimestamps = new ArrayList<>();
-        this.previousTimestamp = null;
-        this.previousDelta = null;
+        this.timestamps = new ArrayList<>();
+        this.firstTimestamp = null;
     }
 
     @Override
     public int getLength() {
         // The first time stamp is not included in the list
-        return 1 + this.deltaDeltaTimestamps.size();
+        return timestamps.size();
     }
 
     @Override
     protected boolean appendDataPoint(DataPoint dataPoint) {
-        if (this.deltaDeltaTimestamps.size() == 0 && previousTimestamp == null){
-            // Don't store anything for first timestamp but remember it for next time
-            previousTimestamp = dataPoint.timestamp();
-        } else if (this.deltaDeltaTimestamps.size() == 0 && previousDelta == null) {
-            // Handle second data point by storing its delta
-            long delta = calculateDelta(dataPoint.timestamp(), previousTimestamp);
-            Integer intRepresentationOfDelta = LongToInt.castToInt(delta);
-            if (intRepresentationOfDelta == null) { // Delta was too large.
-                return false;
-            }
-            int approximatedDelta = tryApplyThreshold(intRepresentationOfDelta);
-            previousDelta = approximatedDelta;
-            previousTimestamp = previousTimestamp + previousDelta;
-            deltaDeltaTimestamps.add(approximatedDelta);
+        if (firstTimestamp == null) {
+            firstTimestamp = dataPoint.timestamp();
+        }
+
+        long difference = dataPoint.timestamp() - firstTimestamp;
+        if (difference < Integer.MAX_VALUE) {
+            timestamps.add(dataPoint.timestamp());
+            return true;
         } else {
-            long delta = calculateDelta(dataPoint.timestamp(), previousTimestamp);
-            Integer deltaOfDelta = LongToInt.calculateDifference(delta, previousDelta);
-            if (deltaOfDelta == null) { // Delta-of-delta was too large.
-                return false;
-            }
-            int approximatedDeltaOfDelta = tryApplyThreshold(deltaOfDelta);
-            previousDelta = previousDelta + approximatedDeltaOfDelta;
-            previousTimestamp = previousTimestamp + previousDelta;
-            deltaDeltaTimestamps.add(approximatedDeltaOfDelta);
+            // Safety added, which should make it so that DeltaDelta does not try to store values bigger than INT_MAX
+            return false;
         }
-        return true;
-    }
-
-    private long calculateDelta(long currTimestamp, long previousTimestamp) {
-        return currTimestamp - previousTimestamp;
-    }
-
-    private Integer tryApplyThreshold(int value) {
-        int absoluteValue = Math.abs(value);
-        for (Integer maxValue : maxBucketValues) {
-            if (maxValue < absoluteValue && (absoluteValue - getThreshold()) <= maxValue) {
-               return value < 0 ? -maxValue : maxValue;
-            }
-        }
-        return value;
     }
 
     @Override
     protected ByteBuffer createByteBuffer() {
-        return BucketEncoding.encode(this.deltaDeltaTimestamps, true);
+        List<Integer> deltaDeltaTimestamps = new ArrayList<>();
+        long firstTimestamp = timestamps.get(0);
+        long secondTimestamp = timestamps.get(1);
+
+        // Storing initial delta
+        int previousDelta = calculateDelta(secondTimestamp, firstTimestamp);
+        deltaDeltaTimestamps.add(previousDelta);
+        long previousTimestamp = secondTimestamp;
+
+
+        for (int i = 2; i < timestamps.size(); i++) {
+            long currTimestamp = timestamps.get(i);
+
+            int delta = calculateDelta(currTimestamp, previousTimestamp);
+            int deltaOfDelta = LongToInt.calculateDifference(delta, previousDelta);
+
+            long nextTimestamp = getNextTimestamp(i);
+            int approximatedDeltaOfDelta = tryApplyThreshold(deltaOfDelta, previousDelta, previousTimestamp, nextTimestamp);
+
+            // Update state and store delta-delta value
+            int currDelta = previousDelta + approximatedDeltaOfDelta;
+            previousDelta = currDelta;
+            previousTimestamp += currDelta;
+            deltaDeltaTimestamps.add(approximatedDeltaOfDelta);
+        }
+
+        return BucketEncoding.encode(deltaDeltaTimestamps, true);
+    }
+
+    private int calculateDelta(long currTimestamp, long previousTimestamp) {
+        Integer delta = LongToInt.calculateDifference(currTimestamp, previousTimestamp);
+        if (delta == null) {
+            throw new IllegalStateException("Some how you got a delta that could not be represented by an integer. Should not be possible as we doing append data point check for this");
+        }
+        return delta;
+    }
+
+    private Long getNextTimestamp(int i) {
+        long nextTimestamp;
+        if (i < (timestamps.size() - 1)) {
+            nextTimestamp = timestamps.get(i+1);
+        } else {
+            nextTimestamp = Long.MAX_VALUE; // last time stamp gets next value is LONG.MAX_VALUE
+        }
+        return nextTimestamp;
+    }
+
+    private Integer tryApplyThreshold(int deltaOfDelta, long previousDelta, long previousTimestamp, long nextTimestamp) {
+        int absoluteValue = Math.abs(deltaOfDelta);
+        for (Integer maxValue : maxBucketValues) {
+            if (maxValue < absoluteValue && absoluteValue <= (maxValue + getThreshold())) {
+                boolean isNegativeNumber = deltaOfDelta < 0;
+                int pushedDeltaOfDelta = isNegativeNumber ? -maxValue : maxValue;
+                long approximationOfCurrentTime = previousTimestamp + (previousDelta + pushedDeltaOfDelta);
+                if (previousTimestamp < approximationOfCurrentTime && approximationOfCurrentTime < nextTimestamp) {
+                    return pushedDeltaOfDelta; // We only use the pushed DeltaOfDelta if it creates timestamps between previous and current timestamp
+                }
+            }
+        }
+        return deltaOfDelta;
     }
 
     @Override
     public boolean canCreateByteBuffer() {
-        return deltaDeltaTimestamps.size() != 0;
+        return this.getLength() >= 2;
     }
 
     @Override
     protected void reduceToSize(int n) {
-        // We have to cut the list down to size n-1 as the first time stamp is not in the list
-        this.deltaDeltaTimestamps.subList(n - 1, deltaDeltaTimestamps.size()).clear();
+        this.timestamps.subList(n, timestamps.size()).clear();
     }
 
     @Override

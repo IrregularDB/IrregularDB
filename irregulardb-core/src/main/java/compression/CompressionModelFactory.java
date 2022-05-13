@@ -7,6 +7,7 @@ import segmentgenerator.CompressionModelManager;
 import segmentgenerator.ModelPicker;
 import segmentgenerator.ModelPickerFactory;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -17,6 +18,7 @@ public class CompressionModelFactory {
     private static final int lengthBound = config.getModelLengthBound();
     private static final List<TimestampCompressionModelType> timestampModelTypes =  config.getTimestampModels();
     private static final List<ValueCompressionModelType> valueModelTypes =  config.getValueModels();
+    private static final boolean errorBoundStrict = config.getModelValueErrorBoundStrict();
 
     public static List<TimestampCompressionModel> getTimestampCompressionModels(String tag){
         final Integer timestampModelThreshold = config.getTimeStampThresholdForTimeSeriesTag(tag);
@@ -25,7 +27,17 @@ public class CompressionModelFactory {
 
     public static List<ValueCompressionModel> getValueCompressionModels(String tag) {
         final Float valueModelErrorBound = config.getValueErrorBoundForTimeSeriesTag(tag);
-        return getCompressionModels(valueModelTypes, (modelType) -> CompressionModelFactory.getValueCompressionModelByType(modelType, valueModelErrorBound));
+        final Integer threshold = config.getTimeStampThresholdForTimeSeriesTag(tag);
+        List<ValueCompressionModelType> modelTypes = new ArrayList<>(valueModelTypes);
+
+        if (threshold > 0 && errorBoundStrict) {
+            boolean wasSwingRemoved = modelTypes.remove(ValueCompressionModelType.SWING);
+            if (wasSwingRemoved) {
+                System.out.println("Disabled SWING value model for the tag: " + tag + ", because its threshold is greater than zero, and model.value.error_bound.strict = true");
+            }
+        }
+
+        return getCompressionModels(modelTypes, (modelType) -> CompressionModelFactory.getValueCompressionModelByType(modelType, valueModelErrorBound));
     }
 
 

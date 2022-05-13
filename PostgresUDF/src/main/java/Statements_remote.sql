@@ -3,6 +3,7 @@ ALTER DATABASE irregulardb_irregular_summary SET pljava.libjvm_location FROM CUR
 
 CREATE EXTENSION pljava;
 
+SELECT sqlj.remove_jar('DecompressUDF', true);
 
 SELECT sqlj.install_jar(
                'file:/home/student.aau.dk/knorho20/PostgresUDF.jar', 'DecompressUDF', true

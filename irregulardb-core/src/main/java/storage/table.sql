@@ -18,19 +18,19 @@ CREATE TABLE TimeSeries(
 );
 
 CREATE TABLE Segment(
-    time_series_id int not null,
-    start_time bigint not null,
-    end_time int not null,
-    value_timestamp_model_type int2 not null,
-    value_model_blob bytea not null,
-    timestamp_model_blob bytea not null,
-    minValue real,
-    maxValue real,
-    CONSTRAINT fk_time_series
-                    FOREIGN KEY(time_series_id)
-                    REFERENCES TimeSeries(id)
-                    ON DELETE CASCADE,
-    CONSTRAINT pk_segment_timeId_startTime primary key(time_series_id, start_time)
+                        start_time bigint not null,
+                        time_series_id int not null,
+                        end_time int not null,
+                        minValue real,
+                        maxValue real,
+                        value_timestamp_model_type int2 not null,
+                        value_model_blob bytea not null,
+                        timestamp_model_blob bytea not null,
+                        CONSTRAINT fk_time_series
+                            FOREIGN KEY(time_series_id)
+                                REFERENCES TimeSeries(id)
+                                ON DELETE CASCADE,
+                        CONSTRAINT pk_segment_timeId_startTime primary key(time_series_id, start_time)
 );
 
 CREATE TABLE TimestampValueModelTypes(

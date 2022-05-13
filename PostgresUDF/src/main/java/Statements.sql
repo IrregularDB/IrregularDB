@@ -93,6 +93,7 @@ SELECT pg_database.datname as "database_name", pg_database_size(pg_database.datn
 
 SELECT pg_total_relation_size('timeseries');
 SELECT pg_total_relation_size('segment');
+select pg_column_size(segment.*);
 SELECT pg_total_relation_size('timestampvaluemodeltypes');
 SELECT pg_total_relation_size('segmentsummary');
 

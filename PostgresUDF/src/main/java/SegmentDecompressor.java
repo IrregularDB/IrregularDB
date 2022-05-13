@@ -48,13 +48,17 @@ public class SegmentDecompressor implements ResultSetProvider {
     public void close() throws SQLException {
         this.readings = null;
     }
+    //start_time bigint not null,
+    //time_series_id int not null,
+    //end_time int not null,
+    //minValue real,
+    //maxValue real,
+    //value_timestamp_model_type int2 not null,
+    //value_model_blob bytea not null,
+    //timestamp_model_blob bytea not null
 
-    public static ResultSetProvider decompressSegment(
-            ResultSet resultSet
-//            int timeSeriesId, long startTime, int endTime, short valueTimestampModelType,
-//                                                    byte[] valueModelBlob, byte[] timestampModelBlob
-    ) throws SQLException
+    public static ResultSetProvider decompressSegment(ResultSet resultSet) throws SQLException
     {
-        return new SegmentDecompressor(resultSet.getInt(1), resultSet.getLong(2), resultSet.getInt(3), resultSet.getShort(4), resultSet.getBytes(5), resultSet.getBytes(6));
+        return new SegmentDecompressor(resultSet.getInt(2), resultSet.getLong(1), resultSet.getInt(3), resultSet.getShort(6), resultSet.getBytes(7), resultSet.getBytes(8));
     }
 }

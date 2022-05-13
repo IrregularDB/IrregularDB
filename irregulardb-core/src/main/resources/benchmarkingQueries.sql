@@ -35,25 +35,7 @@ BEGIN
 end;
 $$ LANGUAGE plpgsql;
 
-
---MOSTLY COPY FROM NO1
---No2 simple aggregate AVG for 1 time series every 5 minutes for 12 hours
---given start and end time, tid and interval time
-drop function no2_1_12_avg(theTimeSeriesId INTEGER, theStartTime bigint, theEndtime bigint, theIntervalSize INTEGER)
-create or replace function no2_1_12_avg(theTimeSeriesId INTEGER, theStartTime bigint, theEndtime bigint, theIntervalSize INTEGER)
-    returns table(startTime bigint, endTime bigint,maxValue real) as $$
-BEGIN
-    return query select ((bucketNumber * theIntervalSize) + theStartTime) as startTime,
-                        (bucketNumber * theIntervalSize + theStartTime + theIntervalSize) as endTime,
-                        cast(avg(value) as real) as avgValue
-                 from datapoints_in_buckets(theTimeSeriesId, theStartTime, theEndtime, theIntervalSize)
-                 group by bucketNumber
-    ;
-end;
-$$ LANGUAGE plpgsql;
-
-
---NO3 Simple aggregate for 5 timeseries every 5 minutes for 12 hours
+--NO2 Simple aggregate for 5 timeseries every 5 minutes for 12 hours
 --NOT SURE If THiS Is OK
 select ((bucketNumber * 5000) + 1303163035000)      as startTime,
        (bucketNumber * 5000 + 1303163035000 + 5000) as endTime,
@@ -71,29 +53,28 @@ from (
      ) dpWithBucketNumber group by bucketNumber;
 
 
---NO4 Last datapoint for every timeseries
-select latestDp.* from (
-                           select timeseriesid, max(timestamp) as maxTimestamp from (select (decompresssegment(s)).* from segment s
-                                                                                                                              join (select time_series_id, max(start_time) as start_time from segment group by time_series_id) maxStartTime
-                                                                                                                                   on s.time_series_id = maxStartTime.time_series_id and s.start_time = maxStartTime.start_time
-                                                                                    ) dataPoints group by timeseriesid) latestDpTime
-
-                           join (select (decompresssegment(s)).* from segment s
-                                                                          join (select time_series_id, max(start_time) as start_time from segment group by time_series_id) maxStartTime
-                                                                               on s.time_series_id = maxStartTime.time_series_id and s.start_time = maxStartTime.start_time
-) latestDp
-                                on latestDpTime.timeseriesid = latestDp.timeseriesid and latestDpTime.maxTimestamp = latestDp.timestamp
+--NO3 Last datapoint for every timeseries
+---------------------- NO 3 --------------------
+select res.timeseriesid, res.timestamp,res.value  from (
+    select s.start_time + s.end_time as latestTimestamp, (decompresssegment(s)).*
+        from (
+            select time_series_id, max(start_time) as start_time from segment group by time_series_id
+        ) lastSegmentTime
+        join segment s on s.start_time = lastSegmentTime.start_time and
+            s.time_series_id = lastSegmentTime.time_series_id
+) res where res.latestTimestamp = res.timestamp
 ;
 
 
 
---NO5 HighValue - simply use ValueRange query
+
+--NO4 HighValue - simply use ValueRange query
 select * from valueRangeQuery(28, 62, 63, 0.1, TRUE);
---NO6 value point - simply use ValuePoint query
+--NO5 value point - simply use ValuePoint query
 select * from valuePointQuery(28, 64, 0.0, TRUE);
---NO7 timestamp point - simply use already created UDF
+--NO6 timestamp point - simply use already created UDF
 select * from timestampPointQuery(28, 1303132953000, 4000);
---NO8
+--NO7
 select (decompresssegment(segment)).* from segment;
 
 

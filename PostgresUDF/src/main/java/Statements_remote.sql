@@ -1,5 +1,5 @@
 SET pljava.libjvm_location TO '/home/student.aau.dk/knorho20/jdk-16/lib/server/libjvm.so';
-ALTER DATABASE master SET pljava.libjvm_location FROM CURRENT;
+ALTER DATABASE irregulardb_irregular_summary SET pljava.libjvm_location FROM CURRENT;
 
 CREATE EXTENSION pljava;
 

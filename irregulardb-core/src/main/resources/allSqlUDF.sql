@@ -69,18 +69,6 @@ select * from timestampRangeQuery(timeSeriesId, theTimestamp, theTimestamp, thre
 END;
 $$ LANGUAGE plpgsql;
 
-
-
-
-
-
-
-
-
-
-
-
-
 -- helper functions
 create or replace function datapoints_in_buckets(theTimeSeriesId INTEGER, theStartTime bigint, theEndTime bigint,
                                                  theBucketSize integer)

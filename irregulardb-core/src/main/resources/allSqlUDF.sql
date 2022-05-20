@@ -11,13 +11,10 @@ allowableErrorMinValue constant real := ABS(theMinValue * errorBound);
 BEGIN
     IF useSegmentSummary THEN
         return query
-select * from (
+            select * from (
                   select (decompresssegment(segment)).* from segment
-                  where time_series_id = timeSeriesId and (
-                      (segment.minvalue <= lowerBound and lowerBound <= segment.maxvalue)
-                     OR (segment.minvalue >= lowerBound and segment.maxvalue <= upperBound)
-                     OR (segment.minvalue <= upperBound and upperBound <= segment.maxvalue)
-                      )
+                  where segment.time_series_id = timeSeriesId
+                    and segment.minvalue <= upperBound AND lowerBound <= segment.maxvalue
                   order by start_time
               ) dp where lowerBound <= dp.value and dp.value <= upperBound;
 ELSE
@@ -55,11 +52,9 @@ lowerBound constant BIGINT := theLowerBound - threshold;
     upperBound constant BIGINT := theUpperBound + threshold;
 BEGIN
 return query
-select * from (
-                  select (decompresssegment(segment)).* from segment
-                  where time_series_id = timeSeriesId
-                    and ((segment.start_time <= lowerBound and lowerBound <= (segment.start_time + segment.end_time))
-                     OR (lowerBound <= segment.start_time and segment.start_time <= upperBound))
+select * from (   select (decompresssegment(segment)).* from segment
+                  where segment.time_series_id = timeSeriesId
+                    and segment.start_time <= upperBound AND lowerBound <= (segment.start_time + segment.end_time)
                   order by start_time
               ) dp where lowerBound <= dp.timestamp and dp.timestamp <= upperBound;
 END;

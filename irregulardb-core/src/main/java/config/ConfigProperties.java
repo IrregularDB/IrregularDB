@@ -137,7 +137,7 @@ public class ConfigProperties extends Properties {
     }
 
     public int getModelLengthBound() {
-        return Integer.parseInt(getProperty("model.length_bound", "50"));
+        return Integer.parseInt(getProperty("model.length_bound", "400"));
     }
 
     public Integer getTimeStampThresholdForTimeSeriesTag(String tag) {

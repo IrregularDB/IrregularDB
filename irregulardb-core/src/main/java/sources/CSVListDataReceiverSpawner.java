@@ -15,13 +15,13 @@ public class CSVListDataReceiverSpawner extends DataReceiverSpawner {
 
     public CSVListDataReceiverSpawner(Partitioner partitioner, List<Pair<File, String>> fileAndTag, String csvDelimiter) {
         super(partitioner);
-        this.fileAndTag = fileAndTag;
+        this.fileAndTag = new ArrayList<>(fileAndTag);
         this.csvDelimiter = csvDelimiter;
     }
 
     @Override
     public void spawn() {
-        int amtFilesPerListReceiver = fileAndTag.size() / AMT_WORKING_SETS;
+        int amtFilesPerListReceiver = (int)Math.ceil(fileAndTag.size() / (double) AMT_WORKING_SETS);
         while (!fileAndTag.isEmpty()) {
             List<Pair<File, String>> pairs;
             if (fileAndTag.size() > amtFilesPerListReceiver) {
@@ -30,7 +30,7 @@ public class CSVListDataReceiverSpawner extends DataReceiverSpawner {
                 pairs = fileAndTag.subList(0, fileAndTag.size());
             }
             ArrayList<Pair<File, String>> pairsForDataReceiver = new ArrayList<>(pairs);
-            pairs.clear();
+            pairs.clear(); // this removes from fileandTag list
 
             CSVListDataReceiver csvListDataReceiver = new CSVListDataReceiver(pairsForDataReceiver, super.partitioner.workingSetToSpawnReceiverFor(), csvDelimiter);
 

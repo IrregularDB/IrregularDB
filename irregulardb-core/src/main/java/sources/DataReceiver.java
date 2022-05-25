@@ -42,5 +42,6 @@ public abstract class DataReceiver {
         for (String tag : timeSeriesTagsEmitted) {
             this.workingSet.accept(new FinalizeTimeSeriesReading(tag));
         }
+        this.timeSeriesTagsEmitted.clear();
     }
 }

@@ -7,10 +7,11 @@ import scheduling.WorkingSet;
 import java.io.*;
 
 public class CSVDataReceiver extends DataReceiver {
+    private static final int AMT_TIME_TO_SLEEP = ConfigProperties.getInstance().getReceiverCSVThrottleSleepTime();
+
     private final String csvDelimiter;
     private final File csvFile;
     private final String fileBasedTag;
-    private static final int AMT_TIME_TO_SLEEP = ConfigProperties.getInstance().getReceiverCSVThrottleSleepTime();
 
     public CSVDataReceiver(File csvFile, String fileTag, WorkingSet workingSet, String csvDelimiter) {
         super(workingSet);

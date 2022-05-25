@@ -5,6 +5,7 @@ import scheduling.IncrementPartitioner;
 import scheduling.Partitioner;
 import scheduling.WorkingSetFactory;
 import sources.CSVDataReceiverSpawner;
+import sources.CSVListDataReceiverSpawner;
 import sources.DataReceiverSpawner;
 import sources.SocketDataReceiverSpawner;
 import storage.PostgresConnection;
@@ -13,7 +14,6 @@ import utility.Stopwatch;
 import java.io.File;
 import java.sql.SQLException;
 import java.util.List;
-import java.util.Set;
 
 public class Main {
 
@@ -24,9 +24,22 @@ public class Main {
         // TODO: Should be configurable which partitioner should be used
         Partitioner partitioner = new IncrementPartitioner(new WorkingSetFactory(), ConfigProperties.getInstance().getConfiguredNumberOfWorkingSets());
 
-        initializeCSVDataReceiverSpawner(partitioner);
+        initializeCSVListDataReceiverSpawner(partitioner);
+//        initializeCSVDataReceiverSpawner(partitioner);
 //        initializeSocketData(partitioner);
         Stopwatch.setInitialStartTime();
+    }
+
+    private static void initializeCSVListDataReceiverSpawner(Partitioner partitioner) {
+        List<Pair<File,String>> csvSources = ConfigProperties.getInstance().getCsvSourceFilesWithFileNameTag();
+
+        if (!csvSources.isEmpty()) {
+            String csvDelimiter = ConfigProperties.getInstance().getCsvDelimiter();
+            DataReceiverSpawner dataReceiverSpawner = new CSVListDataReceiverSpawner(partitioner, csvSources, csvDelimiter);
+            dataReceiverSpawner.spawn();
+        } else {
+            System.out.println("None of the provided CSV files could be found");
+        }
     }
 
     private static void initializeCSVDataReceiverSpawner(Partitioner partitioner) {

@@ -185,6 +185,10 @@ public class ConfigProperties extends Properties {
         return Boolean.parseBoolean(getProperty("model.value.error_bound.strict", "true"));
     }
 
+    public int getMaxSegmentLength(){
+        return Integer.parseInt(getProperty("segment.max_length", String.valueOf(Integer.MAX_VALUE)));
+    }
+
     /* Private methods */
     private void parseAllTimestampThresholds() {
         for (Enumeration<?> e = propertyNames(); e.hasMoreElements(); ) {

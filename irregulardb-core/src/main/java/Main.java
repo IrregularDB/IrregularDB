@@ -18,6 +18,7 @@ import java.util.Set;
 public class Main {
 
     public static void main(String[] args) throws SQLException, InterruptedException {
+        System.out.println(ConfigProperties.getInstance());
         PostgresConnection.resetTables();
 
         // TODO: Should be configurable which partitioner should be used

@@ -12,6 +12,7 @@ public class SegmentGenerator {
     private final int timeSeriesId;
     private final ArrayList<DataPoint> notYetEmitted;
     private static final boolean usesSegmentSummary = ConfigProperties.getInstance().populateSegmentSummary();
+    private static final int MAX_SEGMENT_LENGTH = ConfigProperties.getInstance().getMaxSegmentLength();
     private long previousAppendedTimestamp;
 
 
@@ -37,7 +38,7 @@ public class SegmentGenerator {
             temp = dataPoint;
         }
         notYetEmitted.add(temp);
-        return compressionModelManager.tryAppendDataPointToAllModels(temp);
+        return compressionModelManager.tryAppendDataPointToAllModels(temp) && notYetEmitted.size() < MAX_SEGMENT_LENGTH;
     }
 
     private DataPoint checkAndMoveDataPoint(DataPoint dataPoint, Long previousAppendedTimestamp) {

@@ -1,12 +1,21 @@
 SET pljava.libjvm_location TO '/home/student.aau.dk/knorho20/jdk-16/lib/server/libjvm.so';
+
+ALTER DATABASE irregulardb_irregular_no_summary SET pljava.libjvm_location FROM CURRENT;
 ALTER DATABASE irregulardb_irregular_summary SET pljava.libjvm_location FROM CURRENT;
+ALTER DATABASE irregulardb_regular_no_summary SET pljava.libjvm_location FROM CURRENT;
+ALTER DATABASE irregulardb_regular_summary SET pljava.libjvm_location FROM CURRENT;
+ALTER DATABASE irregulardb_tsbs_error_1_no_sum SET pljava.libjvm_location FROM CURRENT;
+ALTER DATABASE irregulardb_tsbs_error_1_sum SET pljava.libjvm_location FROM CURRENT;
+ALTER DATABASE irregulardb_tsbs_no_sum SET pljava.libjvm_location FROM CURRENT;
+ALTER DATABASE irregulardb_tsbs_sum SET pljava.libjvm_location FROM CURRENT;
+
 
 CREATE EXTENSION pljava;
 
 SELECT sqlj.remove_jar('DecompressUDF', true);
 
 SELECT sqlj.install_jar(
-               'file:/home/student.aau.dk/knorho20/PostgresUDF.jar', 'DecompressUDF', true
+               'file:/home/student.aau.dk/knorho20/PostgresUDF16.jar', 'DecompressUDF', true
            );
 
 select sqlj.set_classpath(

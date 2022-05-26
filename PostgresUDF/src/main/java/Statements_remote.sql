@@ -6,7 +6,7 @@ CREATE EXTENSION pljava;
 SELECT sqlj.remove_jar('DecompressUDF', true);
 
 SELECT sqlj.install_jar(
-               'file:/home/student.aau.dk/knorho20/PostgresUDF.jar', 'DecompressUDF', true
+               'file:/home/student.aau.dk/knorho20/PostgresUDF16.jar', 'DecompressUDF', true
            );
 
 select sqlj.set_classpath(

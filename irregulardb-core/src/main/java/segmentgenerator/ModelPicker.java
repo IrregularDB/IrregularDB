@@ -43,11 +43,9 @@ public abstract class ModelPicker {
 
         boolean populateSummaryTable = ConfigProperties.getInstance().populateSegmentSummary();
         if (populateSummaryTable) { //TODO if we join the summary information onto the segment table this needs adjustment
-            //time_series_id = 4 bytes
-            //start_time = 8 bytes
             //min_value = 4 byte
             //max_value = 4 byte
-            overhead += 4 + 8 + 4 + 4;
+            overhead += 4 + 4;
         }
         return overhead / 2; // there are two models to share the overhead
     }

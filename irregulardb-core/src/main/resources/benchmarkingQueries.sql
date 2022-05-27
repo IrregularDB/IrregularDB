@@ -1,13 +1,15 @@
 -- helper functions
+drop function datapoints_in_buckets(theTimeSeriesId INTEGER, theStartTime bigint, theEndTime bigint,
+                                    theBucketSize integer);
 create or replace function datapoints_in_buckets(theTimeSeriesId INTEGER, theStartTime bigint, theEndTime bigint,
                                                  theBucketSize integer)
-    returns table(timeSeriesId integer,epochTime bigint,value real,bucketNumber integer)
+    returns table(timeSeriesId integer,epochTime bigint,value real,bucketNumber bigint)
 as
 $$
 begin
     return query select res.id, res.epochtime, cast(res.value as real), res.bucketId
                  from (
-                          select *, CAST((timestampRangeQuery.epochTime - theStartTime) / theBucketSize as INTEGER) as bucketId
+                          select *, CAST(((timestampRangeQuery.epochTime - theStartTime) / theBucketSize) as BIGINT) as bucketId
                           from timestampRangeQuery(theTimeSeriesId, theStartTime, theEndtime, 0)
                       ) res;
 end;

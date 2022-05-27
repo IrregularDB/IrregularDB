@@ -17,7 +17,7 @@ select sqlj.set_classpath(
 select sqlj.get_classpath('public');
 
 DROP TYPE sqlDataPoint;
-CREATE TYPE sqlDataPoint AS(timeSeriesId integer, timestamp BigInt, value float);
+CREATE TYPE sqlDataPoint AS(timeSeriesId integer, timestamp BigInt, value real);
 
 
 DROP FUNCTION decompressSegment(segment);

@@ -38,7 +38,7 @@ $$ LANGUAGE plpgsql;
 
 drop FUNCTION IF EXISTS timestampRangeQuery(timeSeriesId INTEGER, theLowerBound BIGINT, theUpperBound BIGINT, threshold INTEGER);
 CREATE OR REPLACE FUNCTION timestamprangequery(timeseriesid integer, thelowerbound bigint, theupperbound bigint, threshold integer)
-    returns TABLE(id integer, epochtime bigint, value double precision)
+    returns TABLE(id integer, epochtime bigint, value real)
     language plpgsql
 as
 $$

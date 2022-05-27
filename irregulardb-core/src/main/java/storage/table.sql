@@ -58,7 +58,8 @@ INSERT INTO TimestampValueModelTypes(timestampValueModelShort, valuemodel, times
 INSERT INTO TimestampValueModelTypes(timestampValueModelShort, valuemodel, timestampmodel) VALUES
     (771, 'Fallback', 'Fallback');
 
-CREATE TYPE sqlDataPoint AS(timeSeriesId integer, timestamp BigInt, value float);
+drop type sqlDataPoint cascade ;
+CREATE TYPE sqlDataPoint AS(timeSeriesId integer, timestamp BigInt, value real);
 
 CREATE FUNCTION decompressSegment(segment)
     RETURNS Setof sqlDataPoint AS 'SegmentDecompressor.decompressSegment'

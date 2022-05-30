@@ -1,3 +1,4 @@
+\timing
 --value := 40000
 --error_bound:= 0.01 => 1%
 --lowerBound := 39600

@@ -1,3 +1,4 @@
+\timing
 --timestamp:= 1454075479700
 --thres:= 500
 --lowerBound := 1454075479200

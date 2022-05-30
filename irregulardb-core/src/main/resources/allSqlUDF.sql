@@ -1,19 +1,21 @@
 -- RANGE AND POINT QUERIES
 drop FUNCTION IF EXISTS valueRangeQuery(timeSeriesId INTEGER, theMinValue real, theMaxValue real, errorBound real, useSegmentSummary boolean);
 CREATE OR REPLACE FUNCTION valueRangeQuery(timeSeriesId INTEGER, theMinValue real, theMaxValue real, errorBound real, useSegmentSummary boolean)
-    RETURNS TABLE(id INTEGER, epochTime BIGINT, value float) AS $$
+    RETURNS TABLE(id INTEGER, epochTime BIGINT, value real)
+   AS $$
 DECLARE
     allowableErrorMinValue constant real := ABS(theMinValue * errorBound);
     allowableErrorMaxValue constant real := ABS(theMaxValue * errorBound);
-    lowerBound constant real := theMinValue - allowableErrorMinValue;
-    upperBound constant real := theMaxValue + allowableErrorMaxValue;
+    lowerBound real := theMinValue - allowableErrorMinValue;
+    upperBound real := theMaxValue + allowableErrorMaxValue;
 BEGIN
     IF useSegmentSummary THEN
         return query
             select * from (
                               select (decompresssegment(segment)).* from segment
                               where segment.time_series_id = timeSeriesId
-                                and segment.minvalue <= upperBound AND lowerBound <= segment.maxvalue
+                                and segment.minvalue <= upperBound
+                                AND segment.maxvalue >= lowerBound
                           ) dp where lowerBound <= dp.value and dp.value <= upperBound;
     ELSE
         return query
@@ -26,7 +28,7 @@ $$ LANGUAGE plpgsql;
 
 drop FUNCTION IF EXISTS valuePointQuery(timeSeriesId INTEGER, theValue real, errorBound real, useSegmentSummary boolean);
 CREATE OR REPLACE FUNCTION valuePointQuery(timeSeriesId INTEGER, theValue real, errorBound real, useSegmentSummary boolean)
-    RETURNS TABLE(id INTEGER, epochTime BIGINT, value float) AS $$
+    RETURNS TABLE(id INTEGER, epochTime BIGINT, value real) AS $$
 BEGIN
     return query
         select * from valueRangeQuery(timeSeriesId, theValue, theValue, errorBound, useSegmentSummary);
@@ -56,7 +58,7 @@ $$;
 
 drop FUNCTION IF EXISTS timestampPointQuery(timeSeriesId INTEGER, theTimestamp BIGINT, threshold INTEGER);
 CREATE OR REPLACE FUNCTION timestampPointQuery(timeSeriesId INTEGER, theTimestamp BIGINT, threshold INTEGER)
-    RETURNS TABLE(id INTEGER, epochTime BIGINT, value float) AS $$
+    RETURNS TABLE(id INTEGER, epochTime BIGINT, value real) AS $$
 BEGIN
     return query
         select * from timestampRangeQuery(timeSeriesId, theTimestamp, theTimestamp, threshold);

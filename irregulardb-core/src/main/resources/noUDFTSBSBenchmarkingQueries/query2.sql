@@ -1,3 +1,4 @@
+\timing
 --startTime:= 1451606400000
 --endTime := 1451649600000
 -- bucketSize := 300000
@@ -18,23 +19,3 @@ from (
            and dp.timestamp <= 1451649600000
      ) dpWithBucket group by dpWithBucket.bucketId
 ;
-
-
-
-
-
-
-select ((bucketNumber * 300000) + 1303132933000)      as startTime,
-       (bucketNumber * 300000 + 1303132933000 + 300000) as endTime,
-       max(value)
-from (
-         select id,
-                epochTime,
-                value,
-                CAST((epochTime - 1303132933000) / 300000 as BIGINT) as bucketNumber
-         from (
-                  select (timestampRangeQuery(id, 0, 1451649600000, 0)).*
-                  from timeseries
-                  where id in (161,162,163,164,165)
-              ) res
-     ) dpWithBucketNumber group by bucketNumber;

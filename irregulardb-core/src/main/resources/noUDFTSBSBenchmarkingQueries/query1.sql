@@ -1,3 +1,4 @@
+\timing
 --startTime:= 1451606400000
 --endTime := 1451649600000
 -- bucketSize := 300000

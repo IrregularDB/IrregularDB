@@ -71,3 +71,34 @@ SELECT pg_total_relation_size('timestampvaluemodeltypes');
 SELECT pg_total_relation_size('segmentsummary');
 
 SELECT pg_size_pretty( pg_total_relation_size('timeseries'));
+
+
+
+-- EVALUATION QUERIES:
+select m.timestampmodel, m.valuemodel, amt_of_model
+from (
+         select count(*) as amt_of_model, segment.value_timestamp_model_type as mtid
+         from segment
+         where segment.end_time < 399 * 100
+         group by segment.value_timestamp_model_type) t
+     join public.timestampvaluemodeltypes m on t.mtid = m.timestampvaluemodelshort;
+
+-- Get total amount of segments below half of lenght
+select count(*)
+from segment
+where segment.end_time < (200-1) * 100;
+
+-- Get total amount of segments above length bound:
+select count(*)
+from segment
+where segment.end_time > (400-1) * 100;
+
+-- MODELARDB QUERIES:
+-- GETS AMOUNT OF SEGMENTS OF EACH TYPE WITH LENGHT LESS THAN 400
+select model_type.name, t.amt_of_model
+from (
+         select count(*) as amt_of_model, segment.mtid
+         from segment
+         where (segment.end_time - segment.start_time) < 399 * 100
+         group by segment.mtid) t
+    join model_type on t.mtid = model_type.mtid;

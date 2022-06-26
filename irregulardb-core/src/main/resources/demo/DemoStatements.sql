@@ -1,8 +1,33 @@
--- RANGE AND POINT QUERIES
+-- Get all data points for key 2
+select (decompressSegment(segment)).* from segment
+    JOIN timeseries t on segment.time_series_id = t.id
+    WHERe t.tag = 'key2';
+
+select t.id from timeseries t where tag = 'key2';
+
+select * from valuePointQuery(tid, 2, 0.0001, TRUE);
+
+select * from timestampRangeQuery(tid, 3000, 5000, 0);
+
+
+-- Gets amount of segments of each type of model
+select count(*), t.valuemodel, t.timestampmodel from segment s
+    join timestampvaluemodeltypes t on s.value_timestamp_model_type = t.timestampvaluemodelshort
+    group by t.valuemodel, t.timestampmodel;
+
+
+
+
+
+
+
+
+
+-- UDFS:
 drop FUNCTION IF EXISTS valueRangeQuery(timeSeriesId INTEGER, theMinValue real, theMaxValue real, errorBound real, useSegmentSummary boolean);
 CREATE OR REPLACE FUNCTION valueRangeQuery(timeSeriesId INTEGER, theMinValue real, theMaxValue real, errorBound real, useSegmentSummary boolean)
     RETURNS TABLE(id INTEGER, epochTime BIGINT, value real)
-   AS $$
+AS $$
 DECLARE
     allowableErrorMinValue constant real := ABS(theMinValue * errorBound);
     allowableErrorMaxValue constant real := ABS(theMaxValue * errorBound);
@@ -62,33 +87,4 @@ BEGIN
     return query
         select * from timestampRangeQuery(timeSeriesId, theTimestamp, theTimestamp, threshold);
 END;
-$$ LANGUAGE plpgsql;
-
-
-
-create or replace function datapoints_in_buckets(theTimeSeriesId INTEGER, theStartTime bigint, theEndTime bigint,
-                                                 theBucketSize integer)
-    returns table(timeSeriesId integer,epochTime bigint,value real,bucketNumber bigint)
-as
-$$
-begin
-return query select res.id, res.epochtime, cast(res.value as real), res.bucketId
-                 from (
-                          select *, CAST(((timestampRangeQuery.epochTime - theStartTime) / theBucketSize) as BIGINT) as bucketId
-                          from timestampRangeQuery(theTimeSeriesId, theStartTime, theEndtime, 0)
-                      ) res;
-end;
-$$ language plpgsql;
-
-
-create or replace function no1_1_12_avg(theTimeSeriesId INTEGER, theStartTime bigint, theEndtime bigint, theIntervalSize INTEGER)
-    returns table(startTime bigint, endTime bigint,maxValue real) as $$
-BEGIN
-return query select ((bucketNumber * theIntervalSize) + theStartTime) as startTime,
-                        (bucketNumber * theIntervalSize + theStartTime + theIntervalSize) as endTime,
-                        cast(avg(value) as real) as maxValue
-                 from datapoints_in_buckets(theTimeSeriesId, theStartTime, theEndtime, theIntervalSize)
-                 group by bucketNumber
-;
-end;
 $$ LANGUAGE plpgsql;

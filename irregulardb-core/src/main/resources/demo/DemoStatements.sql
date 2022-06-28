@@ -1,26 +1,23 @@
+select * from segment;
+select * from timeseries;
+
+-- Gets amount of segments of each type of model
+SELECT count(*), t.valuemodel, t.timestampmodel FROM segment s
+    JOIN timestampvaluemodeltypes t ON s.value_timestamp_model_type = t.timestampvaluemodelshort
+    GROUP BY t.valuemodel, t.timestampmodel;
+
 -- Get all data points for key 2
-select (decompressSegment(segment)).* from segment
-    JOIN timeseries t on segment.time_series_id = t.id
-    WHERe t.tag = 'key2';
+SELECT (decompressSegment(segment)).* FROM segment
+    JOIN timeseries t ON segment.time_series_id = t.id
+    WHERE t.tag = 'key2';
 
 select t.id from timeseries t where tag = 'key2';
 
-select * from valuePointQuery(tid, 2, 0.0001, TRUE);
+select * from valuePointQuery(208811, 2, 0.0001, TRUE);
 
-select * from timestampRangeQuery(tid, 3000, 5000, 0);
+select * from timestampRangeQuery(208811, 3000, 5000, 0);
 
-
--- Gets amount of segments of each type of model
-select count(*), t.valuemodel, t.timestampmodel from segment s
-    join timestampvaluemodeltypes t on s.value_timestamp_model_type = t.timestampvaluemodelshort
-    group by t.valuemodel, t.timestampmodel;
-
-
-
-
-
-
-
+truncate timeseries cascade;
 
 
 -- UDFS:

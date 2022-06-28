@@ -88,6 +88,8 @@ select count(*)
 from segment
 where segment.end_time < (200-1) * 100;
 
+vacuum full analyse;
+
 -- Get total amount of segments above length bound:
 select count(*)
 from segment
